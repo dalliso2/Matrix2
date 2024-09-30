@@ -1,0 +1,123 @@
+.toplayoutbox
+{
+}
+
+.textfieldbox
+{
+    display: flex;
+    flex-direction: column;
+    flex-basis: 1;
+    flex-direction: row;
+}
+
+.textfieldcolumn
+{
+    width: 32;
+}
+
+.profileimagebox
+{
+    flex-basis: 1;
+}
+
+.label-file-upload 
+{
+    position:relative;
+    height: 300px;
+    width: 300px;
+    max-height: 300px;
+    max-width: 300px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    border-width: 2px;
+    border-radius: 1rem;
+    border-style: dashed;
+    border-color: grey;
+    background-color: white;
+    color:grey;
+  }
+
+#profile_image_container
+{
+    position:relative;
+    height: 300px;
+    width: 300px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 1rem;
+  }
+
+  #profile_image
+  {
+    max-height: 300px;
+    max-width: 300px;
+    border-radius: 1rem;
+  }
+
+  
+.image_array_container
+{
+    position:relative;
+    display: flex;  
+  }
+
+  .image_array_image_container
+  {
+    position:relative;
+    height: 150px;
+    width: 150px;
+    max-height: 150px;
+    max-width: 150px;
+    border-radius: 1rem;
+    margin:2px;
+  }
+
+  .image_array_image
+  {
+    max-height: 150px;
+    max-width: 150px;
+    border-radius: 1rem;
+    margin:2px;
+  }
+
+.image-array-label-file-upload 
+{
+    position:relative;
+    height: 150px;
+    width: 150px;
+    max-height: 150px;
+    max-width: 150px;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: center;
+    border-width: 2px;
+    border-radius: 1rem;
+    border-style: dashed;
+    border-color: grey;
+    background-color: white;
+    color:grey;
+    text-align: center;
+  }
+
+  .image-array-label-file-upload-error
+  {
+    position:relative;
+    height: 150px;
+    width: 150px;
+    max-height: 150px;
+    max-width: 150px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    border-width: 5px;
+    border-radius: 1rem;
+    border-style: solid;
+    border-color: red;
+    background-color: white;
+    color:grey;
+  }

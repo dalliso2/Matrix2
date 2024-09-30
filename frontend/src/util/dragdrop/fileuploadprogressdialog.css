@@ -1,0 +1,11 @@
+.file_upload_progress_dialog--upload_container
+{
+    padding-top: 15px;
+    padding-bottom: 15px;
+}
+
+.file_upload_progress_dialog--message_container
+{
+    display: flex;
+    justify-content: space-between;
+}

@@ -1,0 +1,48 @@
+.drag_drop_target
+{
+    position:absolute;
+    height:100%;
+    width:100%;
+    z-index: 10001;
+}
+
+.drag_drop_target2
+{
+    height:100%;
+    width:100%;
+}
+
+.drag_drop_target--drop_area
+{
+    height:100%;
+    width:100%;
+}
+
+.drag_drop_target--drop_area2
+{
+    height:100%;
+    width:100%;
+}
+
+drag_drop_target--form-file-upload 
+{
+    height: 100%;
+    width: 100%;    
+    text-align: center;
+    position: relative;
+}
+  
+.drag_drop_target--input-file_upload 
+{
+    display: none;
+}
+
+.cursor--not_allowed
+{
+    cursor: no-drop;
+}
+
+.drag-active {
+    background-color: #CCC;
+    color:white;
+  }

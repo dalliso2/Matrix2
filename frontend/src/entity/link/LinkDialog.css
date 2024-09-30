@@ -1,0 +1,56 @@
+
+.arrow-box
+{
+	display:flex; 
+	flex-direction: column;
+	justify-content:space-evenly;
+	padding:20px;
+}
+
+.arrow-container
+{
+	display: flex;
+	flex-direction: row;
+	align-items: center;
+}
+
+.arrow-container
+{
+	display: flex;
+	flex-direction: row;
+	align-items: center;
+}
+
+.right-arrow-body
+{
+	display: flex;
+	flex-direction: row;
+  	padding: 10px 0 10px 10px;
+	height: 40px;
+}
+
+.right-head
+{
+	width: 0; 
+	height: 0; 
+	border-top: 30px solid transparent;
+	border-bottom: 30px solid transparent;
+	border-left: 60px solid green;
+}
+
+.left-arrow-body
+{
+	display: flex;
+	flex-direction: row;
+  	padding: 10px 10px 10px 0;
+	height: 40px;
+}
+
+.left-head
+{
+	width: 0; 
+	height: 0; 
+	border-top: 30px solid transparent;
+	border-bottom: 30px solid transparent;
+	border-right: 60px solid green;
+}

@@ -1,0 +1,10 @@
+#form-file-upload {
+    height: 100%;
+    width: 100%;    
+    text-align: center;
+    position: relative;
+  }
+  
+  #input-file-upload {
+    display: none;
+  }

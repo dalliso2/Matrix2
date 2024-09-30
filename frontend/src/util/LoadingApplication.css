@@ -1,0 +1,62 @@
+.FullScreenCover
+{
+  position: fixed;
+  top: 0;
+  left: 0;
+  height: 100%;
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  z-index: 100000;
+}
+
+.backgroundCover
+{
+  position: fixed;
+  top: 0;
+  left: 0;
+  height:'100%';
+  width:'100%';
+}
+
+.FadeInBackground 
+{ 
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 100001;
+  opacity: 0.8;
+  background-color: black;
+  animation: fadeInBackground 3s; 
+}
+
+@keyframes fadeInBackground 
+{
+  0% { opacity: 0; }
+  70% { opacity: 0; }
+  100% { opacity: .8; }
+}
+
+.FadeInProgress
+{
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  z-index: 100002;
+  align-items: center;
+  animation: fadeInProgress 3s;
+}
+
+@keyframes fadeInProgress 
+{
+  0% { opacity: 0; }
+  70% { opacity: 0; }
+  100% { opacity: 1; }
+}
