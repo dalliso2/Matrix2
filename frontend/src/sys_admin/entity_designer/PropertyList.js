@@ -65,7 +65,7 @@ export default function PropertyList({properties, setProperties})
         const newProperties = properties.filter(prop=>prop.id !== propertyId).map((prop) => ({...prop}));
         // add the deleted property back to the list
         newProperties.push(newProp);
-        console.log(newProperties); 
+        
         setProperties(newProperties);
     }
 

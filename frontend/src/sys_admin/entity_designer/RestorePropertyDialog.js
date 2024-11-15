@@ -11,7 +11,7 @@ export default function RestorePropertyDialog({properties, updatePropertiesFn, c
     {
         const newProps = properties.map((prop,index) => ({...prop}));
         newProps.filter((prop)=>prop.deleted).forEach((prop,index) => prop.deleted = !selected[index]);
-        console.log(newProps);
+
         updatePropertiesFn(newProps);
         closeFn();
     }
@@ -25,9 +25,9 @@ export default function RestorePropertyDialog({properties, updatePropertiesFn, c
                         selected = {selected[index]}
                         onClick={(event)=>setSelected(oldSelected=>{
                             const newSelected = [...oldSelected];
-                            console.log(newSelected);
+                            
                             newSelected[index] = !newSelected[index];
-                            console.log(newSelected);
+                            
                             return newSelected;
                         })}
                     >

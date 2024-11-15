@@ -12,6 +12,7 @@ import { validate } from "../validation/validation";
 import { useDispatch } from "react-redux";
 import { useStoreCaseMutation } from "../api/CaseApi";
 import { handleMutationResults } from "../api/ApiUtils";
+import { useNavigate } from "react-router-dom";
 
 const fields = [
     {   name: 'id', label: 'id', type: 'hidden', required: false },
@@ -22,11 +23,13 @@ const fields = [
 
 export default function AddEditCaseDialog({caseObj, closeFn}) 
 { 
-    const theme = useTheme();    
+    const theme = useTheme();
+    const dispatch = useDispatch();
+    const navigate = useNavigate();    
     const [caseData, setCaseData] = useState(caseObj);
 
     const [storeCase, mutationState] = useStoreCaseMutation();
-    handleMutationResults(mutationState, useDispatch(), true, "Updating case...", "Error Updating Case", ()=>closeFn());
+    handleMutationResults(mutationState, dispatch, navigate, true, "Updating case...", "Error Updating Case", ()=>closeFn());
 
     async function onSave()
     {

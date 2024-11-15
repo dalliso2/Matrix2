@@ -16,26 +16,27 @@ import RefreshIcon from '@mui/icons-material/Refresh';
 import { Table, TableBody } from "@mui/material";
 import { useTheme } from "@mui/material/styles";
 import { useGetAllEntityDefinitionsQuery } from "../api/EntityDefinitionApi";
+import { useNavigate } from "react-router-dom";
 
-export default function Entity( {entityId } )
+export default function Entity( {entityId, entityUpdatedCallback } )
 {
     const theme = useTheme();
+    const navigate = useNavigate(); 
     const dispatch = useDispatch(); 
     const [editEntityDialogOpen, setEditEntityDialogOpen] = React.useState(false);
 
     const { data:entityDefsEnvelope, refetch, ...entityDefinitionQueryStatus } = useGetAllEntityDefinitionsQuery();
-    useEffect(() => {
-        if (entityDefinitionQueryStatus.isError) 
-            handleQueryError(entityDefinitionQueryStatus, dispatch);
-    }, [entityDefinitionQueryStatus.isError]);
     const entityDefinitions = entityDefsEnvelope?entityDefsEnvelope.payload:[];
 
     const {currentData:envelope, refetch:refetchEntity, ...getEntityStatus} = useGetEntityQuery(entityId);
+    const entity = envelope?.payload;    
+
     useEffect(() => {
         if (getEntityStatus.isError) 
-            handleQueryError(getEntityStatus, dispatch);
-    }, [getEntityStatus.isError]);
-    const entity = envelope?.payload;    
+            handleQueryError(getEntityStatus, dispatch, navigate);
+        if (entityDefinitionQueryStatus.isError) 
+            handleQueryError(entityDefinitionQueryStatus, dispatch, navigate);
+    }, [getEntityStatus.isError,entityDefinitionQueryStatus.isError]);
 
     const entityPropValues = entity && consolidatePropValues(entity);
     const entityDefinition = entity && entityDefinitions.find((def) => def.id === entity.entityDefinition);
@@ -51,7 +52,7 @@ export default function Entity( {entityId } )
                         <EditTwoToneIcon/>
                     </IconButton> 
                 </Box>    
-                <Box sx={{ position:'relative', display:'flex', width:'100%', justifyContent:'space-around', overflow:'hidden'}}>
+                <Box sx={{ position:'relative', display:'flex', width:'100%', gap:'30px', justifyContent:'space-around', overflow:'hidden'}}>
                 {
                     getEntityStatus.isFetching &&
                         <Box sx={{position:entity?'absolute':'relative', 
@@ -64,17 +65,17 @@ export default function Entity( {entityId } )
                         </Box>
                 }
                     <Box sx={{maxWidth:'50%'}}>
-                    <Table>
-                        <TableBody>
-                        {
-                            nonImageDefinitions?.map((defProp, index) => {
-                                const prop = entityPropValues.find((prop) => defProp.id === prop.propertyDefinition);
-                                return getFieldDisplay(defProp, prop, index);
-                            })
-                        }
-                        </TableBody>
-                    </Table>
-                </Box>
+                        <Table>
+                            <TableBody>
+                            {
+                                nonImageDefinitions?.map((defProp, index) => {
+                                    const prop = entityPropValues.find((prop) => defProp.id === prop.propertyDefinition);
+                                    return getFieldDisplay(defProp, prop, index);
+                                })
+                            }
+                            </TableBody>
+                        </Table>
+                    </Box>
                     <Box sx={{maxWidth:'50%',p:1}}>
                     {
                         imageDefinitions?.map((defProp, index) => {
@@ -85,7 +86,10 @@ export default function Entity( {entityId } )
                     </Box>
                 </Box>
             </Box>
-            { editEntityDialogOpen && <AddEditEntityDialog entity={entity} entityDefinitions={entityDefinitions} closeFn={()=>setEditEntityDialogOpen(false)}/> }
+            { editEntityDialogOpen && <AddEditEntityDialog entity={entity} 
+                                                entityDefinitions={entityDefinitions} 
+                                                closeFn={()=>setEditEntityDialogOpen(false)} 
+                                                entityUpdatedCallback={entityUpdatedCallback} /> }
         </Box>
     );
 }

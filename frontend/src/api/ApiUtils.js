@@ -1,8 +1,7 @@
-import { setMessageBoxData, setWaitMessage, removeWaitMessage, setSystemInErrorState } from "../state/AppSlice";
+import { setMessageBoxData, setWaitMessage, removeWaitMessage, setSystemInErrorState, setCurrentUser, setAuthToken } from "../state/AppSlice";
 
-function handleQueryError(queryResults, dispatch, errorFn)
+function handleQueryError(queryResults, dispatch, navigate, errorFn)
 {
-    //console.log(queryResults);
     if (!queryResults)
         return;
     if (queryResults.error)
@@ -21,14 +20,14 @@ function handleQueryError(queryResults, dispatch, errorFn)
                                         queryResults.error.data.error + " " + 
                                         queryResults.error.data.message)); 
         }
+        else if (queryResults.error?.status === 401)
+        {
+            dispatch(setCurrentUser(undefined));
+            dispatch(setAuthToken(undefined));
+            navigate("/login");
+        }
         else
         {
-            console.log("==============================");
-            console.log("==============================");
-            console.log(queryResults);
-            console.log("==============================");
-            console.log("==============================");
-            //dispatch(setMessageBoxData(queryResults.requestId, "Unexpected Error", queryResults?.error?.data || "An unexpected error occurred"));
             dispatch(setSystemInErrorState(true));
         }
 
@@ -41,6 +40,7 @@ function handleQueryError(queryResults, dispatch, errorFn)
 
 function handleMutationResults(mutationResults, 
                                 dispatch, 
+                                navigate,
                                 waitForResults=false, 
                                 waitMessage = "Please wait...", 
                                 errorMsgBoxTitle = "Error ", 
@@ -49,6 +49,11 @@ function handleMutationResults(mutationResults,
 {
     if (mutationResults.error)
     {
+        dispatch(removeWaitMessage(mutationResults.requestId));
+        if (failureFn)
+            failureFn();
+        mutationResults.reset();        
+        
         if (mutationResults.error?.data?.api_error)
         {
             const errorList = (mutationResults.error.data?.errors?.length)?("\n\n" + mutationResults.error.data.errors.join("\n")):"";
@@ -61,18 +66,14 @@ function handleMutationResults(mutationResults,
         {
             dispatch(setMessageBoxData(mutationResults.requestId, mutationResults.error.data.error, mutationResults.error.data.message)); 
         }
-        else
+        else if (mutationResults.error?.status === 401)
         {
-            dispatch(setMessageBoxData(mutationResults.requestId, "Unexpected Error", mutationResults?.error?.data || "An unexpected error occurred"));
+            dispatch(setCurrentUser(undefined));
+            dispatch(setAuthToken(undefined));
+            navigate("/login");
         }
-
-        dispatch(removeWaitMessage(mutationResults.requestId));
-        if (failureFn)
-            failureFn();
-        mutationResults.reset();
     }
-
-    if (mutationResults.isLoading && mutationResults.requestId && waitForResults)
+    else if (mutationResults.isLoading && mutationResults.requestId && waitForResults)
     {
         dispatch(setWaitMessage(mutationResults.requestId, waitMessage));
     }
@@ -85,10 +86,8 @@ function handleMutationResults(mutationResults,
     }
 }
 
-function handleQueryResultsWithWaitMessage(queryResults, dispatch, waitMessage = "Please wait...", successFn)
+function handleQueryResultsWithWaitMessage(queryResults, dispatch, navigate, waitMessage = "Please wait...", successFn)
 {
-    // console.log("Query state: ");
-    // console.log(queryResults);
     if (queryResults.error)
     {
         if (queryResults.error?.data?.api_error)
@@ -102,6 +101,12 @@ function handleQueryResultsWithWaitMessage(queryResults, dispatch, waitMessage =
         {
             dispatch(setMessageBoxData(queryResults.requestId, queryResults.error.data.error, queryResults.error.data.message)); 
         }
+        else if (queryResults.error?.status === 401)
+        {
+            dispatch(setCurrentUser(undefined));
+            dispatch(setAuthToken(undefined));
+            navigate("/login");
+        }
         else
         {
             dispatch(setMessageBoxData(queryResults.requestId, "Unexpected Error", queryResults?.error?.data || "An unexpected error occurred"));
@@ -109,8 +114,7 @@ function handleQueryResultsWithWaitMessage(queryResults, dispatch, waitMessage =
 
         dispatch(removeWaitMessage(queryResults.requestId));
     }
-
-    if (queryResults.isLoading && queryResults.requestId)
+    else if (queryResults.isLoading && queryResults.requestId)
         dispatch(setWaitMessage(queryResults.requestId, waitMessage));
     else if (queryResults.isSuccess && queryResults.requestId)
     {
@@ -122,6 +126,7 @@ function handleQueryResultsWithWaitMessage(queryResults, dispatch, waitMessage =
 
 function showApiErrorMessageBox(queryStatus, dispatch)
 {
+    console.log("showApiErrorMessageBox");
     const error = queryStatus.error;
     if (error.data)
     {

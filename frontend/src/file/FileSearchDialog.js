@@ -16,10 +16,12 @@ import { useEffect } from "react";
 import { handleMutationResults } from "../api/ApiUtils";
 import { useDispatch } from "react-redux";
 import { enqueueSnackbar } from "notistack";
+import { useNavigate } from "react-router-dom";
 
 export default function FileSearchDialog({entityId, closeFn})
 {
     const dispatch = useDispatch(); 
+    const navigate = useNavigate();
     const [filterString, setFilterString] = useState('');
     const [searchResults, setSearchResults] = useState([]);
 
@@ -31,7 +33,7 @@ export default function FileSearchDialog({entityId, closeFn})
 
 
     const [addFilesToEntityFn, addFilesToEntityMutationState] = useAddFilesToEntityMutation();
-    handleMutationResults(addFilesToEntityMutationState, dispatch, true, "Linking file to entity..",
+    handleMutationResults(addFilesToEntityMutationState, dispatch, navigate, true, "Linking file to entity..",
         "Error linking file to entity", 
         ()=>addFilesToEntityMutationState.data.payload.forEach(entityFile=>enqueueSnackbar("Added link to file: " + entityFile.mfile.name, {variant:'success'})),
         ()=>{ searchFilesFn({entityId:entityId, searchString:filterString});});

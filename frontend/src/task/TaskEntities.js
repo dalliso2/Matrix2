@@ -44,28 +44,27 @@ export default function TaskEntities({taskId})
 
     // load entity definitions
     const { data:envelope, refetch, ...entityDefinitionQueryStatus } = useGetAllEntityDefinitionsQuery();
-    useEffect(() => {
-        if (entityDefinitionQueryStatus.isError) 
-            handleQueryError(entityDefinitionQueryStatus, dispatch);
-    }, [entityDefinitionQueryStatus.isError]);
     const entityDefinitions = envelope?envelope.payload:[];
     
     // load task entities
     const { currentData:taskEntitiesEnvelope, refetch:refetchTaskEntities, ...getTaskEntitesQueryStatus } = useGetEntitiesForTaskQuery(taskId);
-    useEffect(() => {  
-        if (getTaskEntitesQueryStatus.isError)
-            handleQueryError(getTaskEntitesQueryStatus, dispatch);
-    } ,[getTaskEntitesQueryStatus.isError]);
     const taskEntities = taskEntitiesEnvelope?.payload;
 
+    useEffect(() => {  
+        if (getTaskEntitesQueryStatus.isError)
+            handleQueryError(getTaskEntitesQueryStatus, dispatch, navigate);
+        if (entityDefinitionQueryStatus.isError) 
+            handleQueryError(entityDefinitionQueryStatus, dispatch, navigate);
+    }, [getTaskEntitesQueryStatus.isError, entityDefinitionQueryStatus.isError]);
+    
     //
     // Save task-entity api function
     //
     const [storeTaskEntity, storeTaskEntityMutationState] = useStoreTaskEntityMutation();
-    handleMutationResults(storeTaskEntityMutationState, dispatch, false, "","Error linking task and entity",
+    handleMutationResults(storeTaskEntityMutationState, dispatch, navigate, false, "","Error linking task and entity",
         ()=>enqueueSnackbar(storeTaskEntityMutationState.originalArgs.successDescription, {variant:'success'}),
         ()=>{});
-    console.log(storeTaskEntityMutationState);
+        
     //
     // code to re-link task/entity that has just been deleted
     //
@@ -86,6 +85,7 @@ export default function TaskEntities({taskId})
     const [deleteTaskEntity, deleteTaskEntityMutationState] = useDeleteTaskEntityMutation();
     handleMutationResults(deleteTaskEntityMutationState, 
                             dispatch, 
+                            navigate,
                             true, 
                             "",
                             "Error removing link",

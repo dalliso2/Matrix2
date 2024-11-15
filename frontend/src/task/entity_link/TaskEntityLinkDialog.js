@@ -15,11 +15,10 @@ import { useStoreTaskEntityMutation } from "../../api/TaskApi";
 import { handleMutationResults } from "../../api/ApiUtils";
 //import { apiLinkEntities } from "../../api/entity";
 //import { setReRender } from "../../state/EntityTabsSlice";
+import { useNavigate } from "react-router-dom";
 
 function getImageId(entityDefinitions, entityOne)
 {
-    console.log(entityDefinitions);
-    console.log(entityOne);
     if (!entityDefinitions || !entityOne)
         return undefined;
 
@@ -33,8 +32,6 @@ function getImageId(entityDefinitions, entityOne)
     // if no imageId found for PROFILE IMAGE use 
     if (!imageId)
     {
-        console.log(entityDefinition);
-        console.log(entityOne);
         defProp = entityDefinition.props.find((def) => def.type === IMAGE_ARRAY);
         if (defProp)
             imageId = entityOne.propertyValues.find((val) => val.propertyDefinition === defProp.id)?.value;
@@ -46,9 +43,9 @@ function getImageId(entityDefinitions, entityOne)
 export default function TaskEntityLinkDialog({entity, description, saveFn, closeFn})
 {
     console.log("TaskEntityLinkDialog");
-    console.log(entity);
     const theme = useTheme();
     const dispatch = useDispatch();
+    const navigate = useNavigate();
 
     const [referenceDescription, setReferenceDescription] = React.useState(description);
 
@@ -58,7 +55,7 @@ export default function TaskEntityLinkDialog({entity, description, saveFn, close
     const { data:envelope, refetch, ...entityDefinitionQueryStatus } = useGetAllEntityDefinitionsQuery();
     useEffect(() => {
         if (entityDefinitionQueryStatus.isError) 
-            handleQueryError(entityDefinitionQueryStatus, dispatch);
+            handleQueryError(entityDefinitionQueryStatus, dispatch, navigate);
     }, [entityDefinitionQueryStatus.isError]);
     const entityDefinitions = envelope?envelope.payload:[];
 
@@ -69,7 +66,7 @@ export default function TaskEntityLinkDialog({entity, description, saveFn, close
     // Save task-entity api function
     //
     const [storeTaskEntity, storeTaskEntityMutationState] = useStoreTaskEntityMutation();
-    handleMutationResults(storeTaskEntityMutationState, dispatch, false, "","Error linking task and entity",
+    handleMutationResults(storeTaskEntityMutationState, dispatch, navigate, false, "","Error linking task and entity",
         ()=>enqueueSnackbar("Successfully linked task to " + getTitle(entityDefinitions,storeTaskEntityMutationState.data.payload.matrixEntity), 
             {variant:'success'}),
         ()=>{});

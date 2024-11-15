@@ -42,6 +42,11 @@ import lombok.Setter;
 //@JsonIdentityInfo(generator=ObjectIdGenerators.PropertyGenerator.class, property="id", scope = MatrixEntity.class)
 public class MatrixEntity extends EntityBase
 {	
+	public MatrixEntity(Long id)
+	{
+		this.id = id;
+	}
+	
 	@ManyToOne
 	@JoinColumn(name = "ENTITY_DEFINITION_ID")
 	//@JsonIdentityReference(alwaysAsId = true)

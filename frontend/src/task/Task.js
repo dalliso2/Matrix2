@@ -20,7 +20,7 @@ import { api } from "../api/BaseApi";
 import { useTheme } from "@mui/material/styles";
 import TaskFiles from "./TaskFiles";
 import RefreshIcon from '@mui/icons-material/Refresh';
-
+import { useNavigate } from "react-router-dom";
 
 export const TaskStatus = ["NOT_STARTED", "IN_PROGRESS", "COMPLETED", "CLOSED", "DISCONTINUED"];
 
@@ -31,6 +31,7 @@ export const tableCellBoldStyle ={...tableCellStyle, fontWeight:'bold', p:0, pr:
 export default function Task({taskId}) 
 {
     const theme = useTheme();
+    const navigate = useNavigate();
     const dispatch = useDispatch();
     const [editTaskData, setEditTaskData] = useState();
 
@@ -40,14 +41,14 @@ export default function Task({taskId})
     // load case users
     //
     const { data:currentCaseUsers, ...currentCaseUsersQueryStatus } = useGetCaseUsersQuery(activeCase.id);
-    handleQueryResultsWithWaitMessage(currentCaseUsersQueryStatus, dispatch, "Loading case users...", ()=>{});
+    handleQueryResultsWithWaitMessage(currentCaseUsersQueryStatus, dispatch, navigate, "Loading case users...", ()=>{});
 
     const { refetch:refetchTaskData, data:taskEnvelope, ...getTaskQueryStatus } = useGetTaskQuery(taskId);
+    const task = taskEnvelope?.payload;
     useEffect(() => {  
         if (getTaskQueryStatus.isError)
-            handleQueryError(getTaskQueryStatus, dispatch);
+            handleQueryError(getTaskQueryStatus, dispatch, navigate);
     } ,[getTaskQueryStatus.isError]);
-    const task = taskEnvelope?.payload;
 
     function optimisticTaskUpdate(taskData)
     {

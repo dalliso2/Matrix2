@@ -18,26 +18,27 @@ import { useLazySearchFilesNotLinkedToTaskQuery } from "../api/TaskApi";
 import { handleQueryError } from "../api/ApiUtils";
 import { api } from "../api/BaseApi";
 import { useAddTaskFilesMutation } from "../api/TaskApi";
+import { useNavigate } from "react-router-dom";
 
 export default function TaskFileSearchDialog({taskId, closeFn})
 {
     const dispatch = useDispatch(); 
+    const navigate = useNavigate();
     const [filterString, setFilterString] = useState('');
 
     const [searchFilesFn, searchTaskFilesQueryStatus] = useLazySearchFilesNotLinkedToTaskQuery();
     const searchResults = searchTaskFilesQueryStatus?.currentData?.payload;
     useEffect(() => {  
         if (searchTaskFilesQueryStatus.isError)
-            handleQueryError(searchTaskFilesQueryStatus, dispatch);
+            handleQueryError(searchTaskFilesQueryStatus, dispatch, navigate);
     } ,[searchTaskFilesQueryStatus.isError]);
 
     const [addTaskFiles, addFilesToTaskMutationState] = useAddTaskFilesMutation();
-    console.log(addFilesToTaskMutationState);
-    handleMutationResults(addFilesToTaskMutationState, dispatch, false, "Saving link to file..",
+    
+    handleMutationResults(addFilesToTaskMutationState, dispatch, navigate, false, "Saving link to file..",
         "Error linking file to task", 
         ()=>addFilesToTaskMutationState.data.payload.forEach(taskFile=>enqueueSnackbar("Added link to file: " + taskFile.matrixFile.name, {variant:'success'})),
         ()=>{ });
-    console.log(addFilesToTaskMutationState);
 
     function onClickLink(fileId)
     {

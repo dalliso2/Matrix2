@@ -23,7 +23,6 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
 @RestController
-@PreAuthorize("isAuthenticated()")
 @RequestMapping(path="/api/user",produces="application/json")
 @RequiredArgsConstructor
 @Slf4j
@@ -32,6 +31,20 @@ public class MatrixUserController
 	private final MatrixUserService userService;
 	private final AuthenticationService authService;
 	
+	@PostMapping("/login")
+	public ResponseEntity<ApiResponse<MatrixUserDTO>> login(@PathVariable("username") String username, @PathVariable("password") String password)
+	{
+		log.debug("*****************************");
+		log.debug("*****************************");
+		log.debug("*****************************");
+		log.debug("*****************************");
+		log.debug("*****************************");
+		MatrixUser user = this.userService.findByUsername(username);
+
+		return new ResponseEntity<>(ApiResponseUtil.success(this.createDTO(user), "Login Successful", "/api/login"), HttpStatus.OK);
+	}
+	
+	@PreAuthorize("isAuthenticated()")
 	@GetMapping("/all")
 	@ResponseStatus(HttpStatus.OK)
 	public List<MatrixUserDTO> getAll()
@@ -39,6 +52,7 @@ public class MatrixUserController
 		return this.userService.findAll().stream().map(user->this.createDTO(user)).toList();
 	}
 	
+	@PreAuthorize("isAuthenticated()")
 	@GetMapping("/current")
 	public ResponseEntity<ApiResponse<MatrixUserDTO>> getCurrentUser(HttpServletRequest request) throws Exception
 	{
@@ -48,6 +62,7 @@ public class MatrixUserController
 									HttpStatus.OK);
 	}
 	
+	@PreAuthorize("isAuthenticated()")
 	@GetMapping( "/{id}")
 	@ResponseStatus(HttpStatus.OK)
 	public MatrixUserDTO loadUser(@PathVariable("id") Long id)
@@ -60,6 +75,7 @@ public class MatrixUserController
 		return new MatrixUserDTO(user);
 	}
 	
+	@PreAuthorize("isAuthenticated()")
 	@GetMapping("/search/{q}")
 	@ResponseStatus(HttpStatus.OK)
 	public ResponseEntity<ApiResponse<List<MatrixUserDTO>>> searchUsers(@PathVariable("q") String searchString, HttpServletRequest request) throws Exception
@@ -73,6 +89,7 @@ public class MatrixUserController
 								HttpStatus.OK);
 	}
 	
+	@PreAuthorize("isAuthenticated()")
 	@GetMapping("/case_list")
 	@ResponseStatus(HttpStatus.OK)
 	public ResponseEntity<ApiResponse<List<UserCaseRecord>>> getUserCaseList(HttpServletRequest request) throws Exception
@@ -85,6 +102,7 @@ public class MatrixUserController
 //////////////////////////////////////////////////////////////////////
 //			POST MAPPTINGS
 //////////////////////////////////////////////////////////////////////
+	
 	
 	@PostMapping(path="/store", consumes="application/json")
 	@ResponseStatus(HttpStatus.OK)
@@ -101,6 +119,7 @@ public class MatrixUserController
 //PUT MAPPTINGS
 //////////////////////////////////////////////////////////////////////
 	
+	@PreAuthorize("isAuthenticated()")
 	@PatchMapping(path="/password", consumes="application/json")
 	@ResponseStatus(HttpStatus.OK)
 	public MatrixUserDTO updatePassword(@RequestBody ChangePasswordMessage msg)
@@ -108,6 +127,7 @@ public class MatrixUserController
 		return this.createDTO(this.userService.updatePassword(msg));
 	}
 	
+	@PreAuthorize("isAuthenticated()")
 	@PatchMapping(path="/theme", consumes="application/json")
 	@ResponseStatus(HttpStatus.OK)
 	public MatrixUserDTO setTheme(@RequestBody SetThemeMessage msg)

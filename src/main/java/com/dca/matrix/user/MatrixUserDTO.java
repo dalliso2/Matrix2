@@ -14,7 +14,7 @@ public record MatrixUserDTO(Long id,
 							Boolean darkTheme,
 							Long profileImage)
 {
-	MatrixUserDTO(MatrixUser user)
+	public MatrixUserDTO(MatrixUser user)
 	{
 		this(user.getId(), user.getUsername(), MatrixUser.EMPTY_PASSWORD, user.getLastName(), user.getFirstName(), user.getEmail(),
 				user.getWorkNumber(), user.getCellNumber(), user.getAgency().getId(), user.getIsAdmin(),

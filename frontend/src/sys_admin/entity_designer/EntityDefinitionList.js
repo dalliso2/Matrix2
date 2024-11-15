@@ -12,16 +12,18 @@ import { useSelector } from 'react-redux';
 import { setSelectedEntityDefinitionId, selectSelectedEntityDefinitionId } from '../../state/AppSlice';
 import { useDispatch } from 'react-redux';
 import { handleQueryError } from '../../api/ApiUtils';
+import { useNavigate } from 'react-router-dom';
 
 export default function EntityDefinitionList({setSelectedEntityDefinition})
 {
     const dispatch = useDispatch();
+    const navigate = useNavigate();
     const selectedEntityDefinitionId = useSelector(selectSelectedEntityDefinitionId);
 
     const { data:envelope, ...entityDefinitionQueryStatus } = useGetAllEntityDefinitionsQuery();
     useEffect(() => {
         if (entityDefinitionQueryStatus.isError) 
-            handleQueryError(entityDefinitionQueryStatus, dispatch);
+            handleQueryError(entityDefinitionQueryStatus, dispatch, navigate);
     }, [entityDefinitionQueryStatus.isError]);
 
     const entityDefinitions = envelope?.payload;

@@ -11,7 +11,6 @@ export async function apiCall({method, dispatchFn, waitMessage, successMessage, 
     {
         let response = await method();
 
-        console.log(response);
         if (response.redirected)
             window.location.href = '/';
 

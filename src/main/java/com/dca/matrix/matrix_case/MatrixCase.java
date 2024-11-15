@@ -29,6 +29,11 @@ import lombok.Setter;
 @NoArgsConstructor
 public class MatrixCase extends EntityBase
 {
+	public MatrixCase(Long id)
+	{
+		this.id = id;
+	}
+	
 	// table name
 	public static final String TABLE = "matrix_case";
 	// column names

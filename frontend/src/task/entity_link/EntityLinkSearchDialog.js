@@ -32,11 +32,13 @@ import { handleMutationResults } from "../../api/ApiUtils";
 import { enqueueSnackbar } from "notistack";
 import { api } from "../../api/BaseApi";
 import { getTitle } from "../../util/utils";
+import { useNavigate } from "react-router-dom";
 
 export default function EntityLinkSearchDialog({ taskId, closeFn})
 {
     const theme = useTheme();
     const dispatch = useDispatch();
+    const navigate = useNavigate();
     const [selectedEntityDefIdArray, setSelectedEntityDefIdArray] = useState([]);
     const [searchText, setSearchText] = useState('');
     const [editTaskEntity, setEditTaskEntity] = useState(undefined);    
@@ -47,27 +49,26 @@ export default function EntityLinkSearchDialog({ taskId, closeFn})
     // load entity definitions
     //
     const { data:envelope, refetch, ...entityDefinitionQueryStatus } = useGetAllEntityDefinitionsQuery();
-    useEffect(() => {
-        if (entityDefinitionQueryStatus.isError) 
-            handleQueryError(entityDefinitionQueryStatus, dispatch);
-    }, [entityDefinitionQueryStatus.isError]);
     const entityDefinitions = envelope?envelope.payload:[];
 
     //
     // Task Search function
     //
     const [searchUnlinkedEntitiesFn, {data:unlinkedEntitiesData, isFetching, isSuccess, ...unlinkedEntitiesSearchResults}] = useLazySearchUnlinkedEntitiesForTaskQuery();
+    const unlinkedEntities = unlinkedEntitiesData?.payload || [];
+
     useEffect(() => {
+        if (entityDefinitionQueryStatus.isError) 
+            handleQueryError(entityDefinitionQueryStatus, dispatch);
         if (unlinkedEntitiesSearchResults.isError) 
             handleQueryError(unlinkedEntitiesSearchResults, dispatch);
-    }, [unlinkedEntitiesSearchResults.isError]);
-    const unlinkedEntities = unlinkedEntitiesData?.payload || [];
+    }, [entityDefinitionQueryStatus.isError,unlinkedEntitiesSearchResults.isError]);
 
     //
     // Save task-entity api function
     //
     const [storeTaskEntity, storeTaskEntityMutationState] = useStoreTaskEntityMutation();
-    handleMutationResults(storeTaskEntityMutationState, dispatch, false, "","Error linking task and entity",
+    handleMutationResults(storeTaskEntityMutationState, dispatch, navigate, false, "","Error linking task and entity",
         ()=>enqueueSnackbar("Successfully linked task to " + getTitle(entityDefinitions,storeTaskEntityMutationState.data.payload.matrixEntity), 
             {variant:'success'}),
         ()=>{});
@@ -138,7 +139,6 @@ export default function EntityLinkSearchDialog({ taskId, closeFn})
                                             (cache)=>{cache.length=0;}));
     }
 
-    console.log(relatedEntityGroupsRows);
     return (
         <>
         <Dialog open={true} fullWidth={true} maxWidth={'md'} 

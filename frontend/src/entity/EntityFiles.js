@@ -15,12 +15,14 @@ import { handleMutationResults } from "../api/ApiUtils";
 import { enqueueSnackbar } from "notistack";
 import RefreshIcon from '@mui/icons-material/Refresh';
 import { api } from "../api/BaseApi";
+import { useNavigate } from "react-router-dom";
 
 const headers = ["File name", "Description", "Download", "Unlink"];
 
 export default function EntityFiles({entityId, unlink=true, sx={}})
 {
     //const theme = useTheme();   
+    const navigate = useNavigate();
     const dispatch = useDispatch();
     const [showFileSearchDialog, setShowFileSearchDialog] = React.useState(false);
 
@@ -31,14 +33,14 @@ export default function EntityFiles({entityId, unlink=true, sx={}})
     const entityFiles = entityFilesQueryResults?.currentData?.payload;
     useEffect(() => {
         if (entityFilesQueryResults.isError) 
-            handleQueryError(entityFilesQueryResults, dispatch);
+            handleQueryError(entityFilesQueryResults, dispatch, navigate);
     }, [entityFilesQueryResults.isError]);
 
     //
     // code to unlink a file
     //
     const [removeEntityFile, removeEntityFileMutationState] = useRemoveEntityFileMutation();
-    handleMutationResults(removeEntityFileMutationState, dispatch, false, "Removing file link...",
+    handleMutationResults(removeEntityFileMutationState, dispatch, navigate, false, "Removing file link...",
         "Error removing file link", 
         ()=>enqueueSnackbar("Removed link to file " + removeEntityFileMutationState.data.payload.mfile.name, {variant:'success'}),
         ()=>refetchEntityFiles()); 

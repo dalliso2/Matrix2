@@ -6,8 +6,6 @@ const taskApi = api.enhanceEndpoints({addTagTypes:['Task','TaskUnlinkedEntity']}
             query: (body) => ({url:`/task/search`, method: 'POST', body}),
             transformResponse: (response, meta, arg) => 
             {
-                console.log("transformResponse");
-                console.log(response);
                 return response || [];
             },
             providesTags: (result, error, filter) => Array.isArray(result)?[...result.map(({id}) => ({type: 'Task', id}))]:[],

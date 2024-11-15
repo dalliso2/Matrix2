@@ -9,21 +9,27 @@ import UserManagement from '../sys_admin/user_management/UserManagement';
 import EntityDesigner from '../sys_admin/entity_designer/EntityDesigner';
 import CaseTabs from '../case/CaseTabs';
 import EntityTabs from '../entity/EntityTabs';
-import Timeline from '../timeline/Timeline';
 import TaskTabs from '../task/TaskTabs';
-import LinkChart from '../link_chart/LinkChart';
+import LinkChartTabs from '../link_chart/LinkChartTabs';
+import TimelineTabs from '../timeline/TimelineTabs';
+import Login from '../main/Login';
 
 const router = createBrowserRouter([ 
+    {
+        path: "/login",
+        element: <Login/>,
+    },
     {
         path: "/",
         element: <Main />,
         children: [
+            { path: "login", element: <Login/> },
             { path: "home", element: <Home/> },
             { path: "cases", element: <CaseTabs/> },
             { path: "entities", element: <EntityTabs/> },
             { path: "tasks", element: <TaskTabs/> },    
-            { path: "link_chart", element: <LinkChart/> },
-            { path: "timeline", element: <Timeline/> },
+            { path: "link_chart", element: <LinkChartTabs/>, },
+            { path: "timeline", element: <TimelineTabs/> },
             { 
                 path: "systemadmin", 
                 element: <SysAdminTabs/>,

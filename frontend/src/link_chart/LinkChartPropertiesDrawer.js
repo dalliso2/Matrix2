@@ -70,7 +70,6 @@ export default function LinkChartPropertiesDrawer({cy})
         cy.current.nodes().style('shape',shapes[chartProperties.shape].shape);
         //cy.current.nodes().style('width',120);
         cy.current.edges().style('curve-style',edgeStyles[chartProperties.edgeStyle].style);
-        console.log(cy.current.json());
     }
 
     return (

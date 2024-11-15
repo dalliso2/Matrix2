@@ -22,6 +22,7 @@ import { useStoreAgencyMutation } from '../../api/AgencyApi';
 import { useDispatch } from 'react-redux';
 import { handleMutationResults } from '../../api/ApiUtils';
 import { enqueueSnackbar } from 'notistack';
+import { useNavigate } from 'react-router-dom';
 
 const newAgency = { 
     id: undefined,
@@ -41,6 +42,7 @@ export default function AddEditAgencyDialog({ agency = {...newAgency, modified:f
 {
     const theme = useTheme();  
     const dispatch = useDispatch();
+    const navigate = useNavigate();
     const [agencyData, setAgencyData] = useState(agency);
 
     fields.forEach((field, index) => {
@@ -49,7 +51,7 @@ export default function AddEditAgencyDialog({ agency = {...newAgency, modified:f
     });
 
     const [storeAgency,mutationState] = useStoreAgencyMutation();
-    handleMutationResults(mutationState, dispatch, true, "Creating/updating agency...",
+    handleMutationResults(mutationState, dispatch, navigate, true, "Creating/updating agency...",
                             "Error creating/updating agency", 
                             ()=>{ enqueueSnackbar("Created/updated agency: " + agency.name, {variant:'success'}); closeFn();});
 

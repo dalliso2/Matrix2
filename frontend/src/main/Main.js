@@ -31,12 +31,8 @@ import UnexpectedError from './UnexpectedError';
 import { useSelector } from 'react-redux';
 import { selectSystemInErrorState } from '../state/AppSlice';
 import { selectDarkTheme } from '../state/AppSlice';
-import { useGetCurrentUserQuery } from '../api/UserApi';
-import { useEffect } from 'react';
 import { useDispatch } from 'react-redux';
-import { setWaitMessage, removeWaitMessage } from '../state/AppSlice';
-import { handleQueryError } from '../api/ApiUtils';
-import LoadingApplication from '../util/LoadingApplication';
+import { selectCurrentUser } from '../state/AppSlice';
 
 const drawerWidth = 240;
 
@@ -82,23 +78,20 @@ const CURRENT_USER_MESSAGE_KEY = "CURRENT_USER_KEY";
 
 export default function Main() 
 {
-    console.log("Main.js");
     const navigate = useNavigate();
     const dispatch = useDispatch();
-    const [open, setOpen] = useState(false); 
-    const systemInErrorState = useSelector(selectSystemInErrorState);
 
-    const { data:envelope, ...getCurrentUserQueryStatus } = useGetCurrentUserQuery();
-    
-    if (getCurrentUserQueryStatus.isFetching && getCurrentUserQueryStatus.requestId)
-        dispatch(setWaitMessage(getCurrentUserQueryStatus.requestId, "Loading current user data..."));
-    if (getCurrentUserQueryStatus.isSuccess)
-        dispatch(removeWaitMessage(getCurrentUserQueryStatus.requestId));
-    useEffect(() => {
-        if (getCurrentUserQueryStatus.isError) 
-            handleQueryError(getCurrentUserQueryStatus, dispatch);
-    }, [getCurrentUserQueryStatus.isError]);
-    const currentUser = envelope?.payload;
+    // application state
+    const systemInErrorState = useSelector(selectSystemInErrorState);
+    const currentUser = useSelector(selectCurrentUser);
+
+    React.useEffect(() => {
+        if (!currentUser)
+            navigate('/login');
+    }, [currentUser]);
+
+    // local state
+    const [open, setOpen] = useState(false); 
 
     var links = [];
 
@@ -129,12 +122,10 @@ export default function Main()
 
     //const theme = (currentUser && currentUser.darkTheme) ? darkTheme : lightTheme;
     const theme =  useSelector(selectDarkTheme) ? darkTheme : lightTheme;
-console.log(theme);
+
     return (
         <ThemeProvider theme={theme}>
             {systemInErrorState && <UnexpectedError/>}
-            {getCurrentUserQueryStatus.isSuccess?
-            (
                 <Box sx={{ display: 'flex' }}>
                 <AppBar theme={theme} position="absolute" open={open} sx={{}}>
                     <Box sx={{ display: 'flex', alignContent: 'center', position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', }}>
@@ -208,11 +199,7 @@ console.log(theme);
                         <Outlet />
                     </Box>
                 </Box>
-            </Box>)
-            :
-            (
-                <LoadingApplication/>
-            )}
+            </Box>
             <MainMessageBox />
             <CenteredCircularProgress />
         </ThemeProvider>

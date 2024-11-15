@@ -68,8 +68,6 @@ export default function EntityTabs()
                             title: getTabTitle(entityObj), 
                             component: <EntityTabContent entityObj={entityObj}/>}; }));
 
-    console.log("11111111111111111111111111");
-    console.log(tabData); 
     return (
       <TabbedContentArea>
         <TabWrapper>

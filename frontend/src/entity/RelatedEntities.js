@@ -27,10 +27,12 @@ import { Button } from "@mui/material";
 import { useLinkEntitiesMutation } from "../api/EntityApi";
 import RefreshIcon from '@mui/icons-material/Refresh';
 import { api } from "../api/BaseApi";
+import { useNavigate } from "react-router-dom";
 
 export default function RelatedEntities({unlink=true, entityDefinitions, entityId})
 {
     const theme = useTheme();   
+    const navigate = useNavigate();
     const dispatch = useDispatch();
     // the related entity that is being linked to the current entity
     const [linkDialogRelatedEntity, setLinkDialogRelatedEntity] = React.useState(undefined);
@@ -42,10 +44,6 @@ export default function RelatedEntities({unlink=true, entityDefinitions, entityI
     // retrieve the entity from store/server
     //
     const {data:envelope, refetch:refetchEntity, ...getEntityStatus} = useGetEntityQuery(entityId);
-    useEffect(() => {
-        if (getEntityStatus.isError) 
-            handleQueryError(getEntityStatus, dispatch);
-    }, [getEntityStatus.isError]);
     const entity = envelope?.payload;   
 
     //
@@ -53,10 +51,13 @@ export default function RelatedEntities({unlink=true, entityDefinitions, entityI
     //
     const {refetch:refetchRelatedEntities, ...relatedEntitiesQueryResults} = useGetRelatedEntitiesQuery(entityId);
     const relatedEntities = relatedEntitiesQueryResults?.currentData?.payload || [];
+
     useEffect(() => {
+        if (getEntityStatus.isError) 
+            handleQueryError(getEntityStatus, dispatch, navigate);
         if (relatedEntitiesQueryResults.isError)
-            handleQueryError(relatedEntitiesQueryResults, dispatch);
-    }, [relatedEntitiesQueryResults.isError]);
+            handleQueryError(relatedEntitiesQueryResults, dispatch, navigate);
+    }, [getEntityStatus.isError,relatedEntitiesQueryResults.isError]);
 
     const entityObjName = getTitle(entityDefinitions, entity);
     const entityToLinkName = linkDialogRelatedEntity && getTitle(entityDefinitions, linkDialogRelatedEntity.child);
@@ -65,7 +66,7 @@ export default function RelatedEntities({unlink=true, entityDefinitions, entityI
     // code to link entities
     //
     const [linkEntities, linkEntitiesMutationStatus] = useLinkEntitiesMutation();
-    handleMutationResults(linkEntitiesMutationStatus, dispatch, false, "Linking entities...",
+    handleMutationResults(linkEntitiesMutationStatus, dispatch, navigate, false, "Linking entities...",
         "Error creating link between entities", 
         ()=> enqueueSnackbar("Successfully linked " 
                                 + entityObjName 
@@ -104,6 +105,7 @@ export default function RelatedEntities({unlink=true, entityDefinitions, entityI
     const [deleteEntityLink, deleteEntityLinkMutationState] = useUnlinkEntitiesMutation();
     handleMutationResults(deleteEntityLinkMutationState, 
                             dispatch, 
+                            navigate,
                             false, 
                             "Removing link...", 
                             "Error removing link",
@@ -116,7 +118,7 @@ export default function RelatedEntities({unlink=true, entityDefinitions, entityI
     function unlinkEntity(event, relationship)
     {
         event.stopPropagation();
-        console.log(relationship);
+        
         //optimistcally remove the linked entity from the task entities
         dispatch(api.util.updateQueryData('getRelatedEntities',
             relatedEntitiesQueryResults.originalArgs,

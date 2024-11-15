@@ -24,11 +24,21 @@ public class LinkChart extends EntityBase
 {
 	private String name;
 	
+	private String description;
+	
+	private String pan;
+	
+	private Float zoom;
+	
 	@ManyToOne
 	@JoinColumn(name = "MATRIX_CASE_ID", nullable = false)
 	@JsonDeserialize(using = MatrixCaseDeserializer.class)
 	@JsonSerialize(using = MatrixCaseSerializer.class)
 	private MatrixCase matrixCase;
 	
-	private String json;
+	@JsonDeserialize(using = StringDeserializer.class)
+	private String entities;
+	
+	@JsonDeserialize(using = StringDeserializer.class)
+	private String styleSheet;
 }

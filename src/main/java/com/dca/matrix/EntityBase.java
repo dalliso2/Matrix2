@@ -36,7 +36,6 @@ import lombok.extern.slf4j.Slf4j;
 @Setter
 @MappedSuperclass
 @Slf4j
-//@JsonIdentityInfo(generator=ObjectIdGenerators.PropertyGenerator.class, property="id")
 public class EntityBase
 {	
 	public static final String ID = "ID";

@@ -1,5 +1,4 @@
 import { createSelector, createSlice } from '@reduxjs/toolkit';
-import { current } from '@reduxjs/toolkit';
 
 export const TAB_TYPE_SEARCH = 0;
 export const TAB_TYPE_TASK = 1;
@@ -22,6 +21,8 @@ export const taskDataTemplate = {
 
 const initialState = 
 {
+    authToken: undefined,
+    currentUser: undefined,
     systemInErrorState: false,
     messageBoxData: [],
     waitMessages: [],
@@ -45,21 +46,46 @@ const initialState =
     // task tabs
     currentTaskTabIndex: 0,
     taskTabData: [{...taskSearchDataTemplate, title: "Search Tasks"}],
-    // link chart state
-    currentLinkChartId:undefined,
-    chartEditsNotSaved: false,
+    // link chart tabs
+    currentLinkChartTabIndex: 0,
+    linkChartTabIsNew: false,
+    linkChartTabsData:[],
+    // timeline tabs
+    currentTimelineTabIndex: 0,
+    timelineTabIsNew: false,
+    timelineTabsData:[],
 };
 
 const appSlice = createSlice({
     name: "appReducer",
-    initialState,  
+    initialState:JSON.parse(JSON.stringify(initialState)), 
     reducers:
     {
+        resetState:
+        {
+            reducer(state, action)
+            {
+                return JSON.parse(JSON.stringify(initialState));
+            }
+        },
+        setAuthToken:
+        {
+            reducer(state, action)
+            {
+                state.authToken = action.payload;
+            },
+        },
+        setCurrentUser:
+        {
+            reducer(state, action)
+            {
+                state.currentUser = action.payload;
+            },
+        },
         setSystemInErrorState:
         {
             reducer(state, action)
             {
-                console.log(action);
                 state.systemInErrorState = action.payload;
             },
         },
@@ -200,7 +226,6 @@ const appSlice = createSlice({
         {
             reducer(state, action)
             {
-                console.log(current(state));
                 for (let entityType in state.entitySearchResults)
                 {
                     const entityIndex = state.entitySearchResults[entityType].findIndex(entityData => entityData.id === action.payload.id);
@@ -210,7 +235,6 @@ const appSlice = createSlice({
                         break;
                     }
                 }
-                console.log(current(state));
             }
         },
         addEntityTab:
@@ -245,8 +269,6 @@ const appSlice = createSlice({
         {
             reducer(state, action)
             {
-                console.log("setCurrentEntityTab")
-                console.log(action.payload);
                 state.currentEntityTabIndex = action.payload;
             }
         },
@@ -255,7 +277,9 @@ const appSlice = createSlice({
             reducer(state, action)
             {
                 // payload wll be {enityId, title}
-                state.entityTabEntityData.find(entityTabData => entityTabData.entityId === action.payload.entityId).title = action.payload.title;   
+                const tabData = state.entityTabEntityData.find(entityTabData => entityTabData.entityId === action.payload.entityId);
+                if (tabData)
+                    tabData.title = action.payload.title;   
             }
         },
         setSelectedEntityDefinitionId:
@@ -280,7 +304,6 @@ const appSlice = createSlice({
         {
             reducer(state, action)
             {
-                console.log(action);
                 const existingTabIndex = state.taskTabData.findIndex(tab=>tab.tabType===TAB_TYPE_TASK && tab.id === action.payload.taskId);
 
                 if (existingTabIndex < 0)
@@ -303,9 +326,6 @@ const appSlice = createSlice({
         {
             reducer(state, action)
             {
-                console.log('removeTaskTab');
-                console.log(current(state.taskTabData));
-                console.log(action.payload);
                 state.taskTabData = state.taskTabData.filter(tabData=>tabData.tabType===TAB_TYPE_SEARCH
                     || tabData.taskId !== action.payload);
                 state.currentTaskTabIndex = 0;  
@@ -319,8 +339,6 @@ const appSlice = createSlice({
         {
             reducer(state, action)
             {
-                console.log('updateTaskTabData');
-                console.log(action);
                 state.taskTabData[state.currentTaskTabIndex][action.payload.key] = action.payload.value;
             },
             prepare(tabId, key, value)
@@ -328,16 +346,128 @@ const appSlice = createSlice({
                 return { payload: {tabId, key, value} };
             }
         },
-        setChartEditsNotSaved:
+        addLinkChartTab:
+        {
+            // payload: {id: id, name: name, zoom:, pan:{x:,y:}}
+            reducer(state, action)
+            {
+                const linkChartIndex = state.linkChartTabsData.findIndex(tabData => tabData.id === action.payload.id);
+
+                if (linkChartIndex < 0)
+                {
+                    state.linkChartTabsData.push(action.payload);
+                    state.currentLinkChartTabIndex = state.linkChartTabsData.length;
+                    state.linkChartTabIsNew = true;
+                }
+                else
+                {
+                    state.linkChartTabsData[linkChartIndex] = action.payload;
+                    // set current tab index to entityIndex + 1 because the first tab
+                    // is always the link chart list
+                    state.currentLinkChartTabIndex = linkChartIndex + 1;
+                }
+            }
+        },
+        removeLinkChartTab:
+        {
+             // payload is the id of the link chart to remove
+             reducer(state, action)
+             {
+                 if (state.currentLinkChartTabIndex == state.linkChartTabsData.length)
+                     state.currentLinkChartTabIndex = state.currentLinkChartTabIndex - 1;
+                 state.linkChartTabsData = state.linkChartTabsData.filter(linkChartData => linkChartData.id !== action.payload);
+             }
+        },
+        setCurrentLinkChartTab:
         {
             reducer(state, action)
             {
-                state.chartEditsNotSaved = action.payload;
+                state.currentLinkChartTabIndex = action.payload;
             }
         },
+        setLinkChartTabIsNew:
+        {
+            reducer(state, action)
+            {
+                state.linkChartTabIsNew = action.payload;
+            }
+        },
+        updateLinkChartTabTitle:
+        {
+            reducer(state, action)
+            {
+                // payload: {id: id, name: name}
+                state.linkChartTabsData.forEach(linkChartTabData => 
+                    {
+                        if (linkChartTabData.id === action.payload.id)
+                            linkChartTabData.name = action.payload.name;   
+                    });
+            }
+        },
+        /////////////////////////////////////////////////////
+        addTimelineTab:
+        {
+            // payload: {id: id, name: name, zoom:, pan:{x:,y:}}
+            reducer(state, action)
+            {
+                const timelineIndex = state.timelineTabsData.findIndex(tabData => tabData.id === action.payload.id);
+
+                if (timelineIndex < 0)
+                {
+                    state.timelineTabsData.push(action.payload);
+                    state.currentTimelineTabIndex = state.timelineTabsData.length;
+                    state.timelineTabIsNew = true;
+                }
+                else
+                {
+                    state.timelineTabsData[timelineIndex] = action.payload;
+                    // set current tab index to timeline index + 1 because the first tab
+                    // is always the timeline list
+                    state.currentTimelineTabIndex = timelineIndex + 1;
+                }
+            }
+        },
+        removeTimelineTab:
+        {
+             // payload is the id of the timeline to remove
+             reducer(state, action)
+             {
+                 if (state.currentTimelineTabIndex == state.timelineTabsData.length)
+                     state.currentTimelineTabIndex = state.currentTimelineTabIndex - 1;
+                 state.timelineTabsData = state.timelineTabsData.filter(timelineData => timelineData.id !== action.payload);
+             }
+        },
+        setCurrentTimelineTab:
+        {
+            reducer(state, action)
+            {
+                state.currentTimelineTabIndex = action.payload;
+            }
+        },
+        setTimelineTabIsNew:
+        {
+            reducer(state, action)
+            {
+                state.timelineTabIsNew = action.payload;
+            }
+        },
+        updateTimelineTabTitle:
+        {
+            reducer(state, action)
+            {
+                // payload: {id: id, name: name}
+                state.timelineTabsData.forEach(timelineTabData => 
+                    {
+                        if (timelineTabData.id === action.payload.id)
+                            timelineTabData.name = action.payload.name;   
+                    });
+            }
+        },        
     },
 });
 
+export const selectAuthToken = state => state.app.authToken;    
+export const selectCurrentUser = state => state.app.currentUser;    
 export const selectSystemInErrorState = state => state.app.systemInErrorState;
 export const selectMessageBoxData = state => state.app.messageBoxData.values().next().value;
 export const selectDarkTheme = state => state.app.darkTheme;    
@@ -360,8 +490,13 @@ export const selectTabTaskData = state => state.app.taskTabData;
 export const selectCurrentTaskTabIndex = state => state.app.currentTaskTabIndex;
 export const selectCurrentTabData = state => state.app.taskTabData[state.app.currentTaskTabIndex];
 // link charts
-export const selectChartEditsNotSaved = state => state.app.chartEditsNotSaved;
-
+export const selectCurrentLinkChartTabIndex = state=>state.app.currentLinkChartTabIndex;
+export const selectLinkChartsTabData = state => state.app.linkChartTabsData;
+export const selectLinkChartTabIsNew = state => state.app.linkChartTabIsNew;
+// timelines
+export const selectCurrentTimelineTabIndex = state=>state.app.currentTimelineTabIndex;
+export const selectTimelinesTabData = state => state.app.timelineTabsData;
+export const selectTimelineTabIsNew = state => state.app.timelineTabIsNew;
 export const selectGetWaitMessage = state => 
 {
     const val = state.app.waitMessages.values().next().value;
@@ -372,6 +507,9 @@ export const selectGetWaitMessage = state =>
 }
 
 export const {  
+                resetState,
+                setAuthToken,
+                setCurrentUser,
                 setSystemInErrorState,    
                 setWaitMessage, 
                 removeWaitMessage, 
@@ -400,6 +538,16 @@ export const {
                 addTaskTab,
                 removeTaskTab,
                 updateTaskTabData,
+                addLinkChartTab,
+                removeLinkChartTab,
+                setCurrentLinkChartTab,
+                updateLinkChartTabTitle,
+                setLinkChartTabIsNew,
+                addTimelineTab,
+                removeTimelineTab,
+                setCurrentTimelineTab,
+                updateTimelineTabTitle,
+                setTimelineTabIsNew
             } = appSlice.actions;
 
 export default appSlice.reducer;

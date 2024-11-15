@@ -22,6 +22,7 @@ import {
 import { getDateString, getDateTimeString } from './utils';
 //import './Entity.css';
 import { TableCell, TableRow } from "@mui/material";
+import Image from "./Image";
 
 const RETRIEVE_FILE_URL = "/api/file/";
 
@@ -53,7 +54,7 @@ export function getFieldDisplay(propertyDefinition, prop, index)
                         {
                             prop?.values?.length && prop.values[0]?
                             (
-                                <img className="label-profile-image" key={prop.values[0]} src={RETRIEVE_FILE_URL + prop.values[0]} />
+                                <Image key={index} className={"label-profile-image"} id={prop.values[0]} />
                             ):
                             (
                                 <Box className="entity-profile-image-empty">
@@ -81,7 +82,7 @@ export function getFieldDisplay(propertyDefinition, prop, index)
                     <div key={index} style={{display:'flex', flexDirection:'column', alignItems:'center'}}>
                     {
                         (prop.values && prop.values.length)?
-                        prop.values.map((value,index2) => (<img key={index + index2} className="entity-array-image" src={RETRIEVE_FILE_URL + value} />))
+                        prop.values.map((value,index2) => (<Image key={index + index2} className={"entity-array-image"} id={value} />))
                         :(<Box className="entity-array-image-empty"><div>No Photo Uploaded</div></Box>)
                     }
                     </div>
@@ -113,7 +114,7 @@ export function getFieldDisplay(propertyDefinition, prop, index)
             case DATE_TIME_RANGE:
                 const startDateTime = prop.values[0]?dayjs(prop.values[0]).format(dateTimeFormat):'';
                 const endDateTime = prop.values[1]?dayjs(prop.values[1]).format(dateTimeFormat):'';
-                console.log(startDateTime);
+                
                 component = 
                 (<TableRow key={index}>
                     <TableCell colSpan="2" sx={tableCellStyle}>
@@ -149,7 +150,7 @@ export function getListComponent(type, values)
                 returnVal = values.length &&
                             (
                                 <Box style={{width:'100%', display:'flex', justifyContent:'center'}}>
-                                    <img key={values[0]} src={RETRIEVE_FILE_URL + values[0]} style={{maxWidth:'100px', maxHeight:'100px'}}/>
+                                    <Image key={undefined} className={"list-image"} id={values[0]} />
                                 </Box>
                             );
                 break;
@@ -157,7 +158,7 @@ export function getListComponent(type, values)
                 returnVal = !!values && values.length > 0 && 
                             (
                                 <Box style={{width:'100%', display:'flex', justifyContent:'center'}}>
-                                    <img key={values[0]} src={RETRIEVE_FILE_URL + values[0]} style={{maxWidth:'100px', maxHeight:'100px'}}/>
+                                    <Image key={undefined} className={"list-image"} id={values[0]} />
                                 </Box>
                             );
                 break;

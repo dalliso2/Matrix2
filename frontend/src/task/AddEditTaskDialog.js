@@ -19,6 +19,7 @@ import { useStoreTaskMutation } from "../api/TaskApi";
 import { handleMutationResults } from "../api/ApiUtils";
 import { useDispatch } from "react-redux";
 import { handleQueryResultsWithWaitMessage } from "../api/ApiUtils";
+import { useNavigate } from "react-router-dom";
 
 const dateFormat = 'M/D/YYYY HH:mm';
 
@@ -26,16 +27,16 @@ export default function AddEditTaskDialog({successFn, closeFn, taskDataProps})
 {    
     const theme = useTheme();
     const dispatch = useDispatch();
+    const navigate = useNavigate();
     const [task, setTask] = useState(undefined);
     const [render, setRender] = useState(false);
     const activeCase = useSelector(selectActiveCase);
 
-    console.log(task);
     const { data:currentCaseUsers, ...currentCaseUsersQueryStatus } = useGetCaseUsersQuery(activeCase.id);
-    handleQueryResultsWithWaitMessage(currentCaseUsersQueryStatus, dispatch, "Loading case users...", ()=>{});
+    handleQueryResultsWithWaitMessage(currentCaseUsersQueryStatus, dispatch, navigate, "Loading case users...", ()=>{});
 
     const [storeTask, mutationState] = useStoreTaskMutation();
-    handleMutationResults(mutationState, dispatch, true, "Saving task...", "Error saving task", ()=>successFn(mutationState.data.payload), ()=>{});
+    handleMutationResults(mutationState, dispatch, navigate, true, "Saving task...", "Error saving task", ()=>successFn(mutationState.data.payload), ()=>{});
 
     useEffect(() =>
     {
@@ -65,7 +66,6 @@ export default function AddEditTaskDialog({successFn, closeFn, taskDataProps})
                 else
                     next.assignedDateTime = dayjs();
 
-            console.log(event.target.value);
             if (event.target.name === "status")
                 if (event.target.value === "COMPLETED" || event.target.value === "CLOSED")
                     next.completedDateTime = dayjs();
@@ -120,7 +120,6 @@ export default function AddEditTaskDialog({successFn, closeFn, taskDataProps})
     else
         fields.find(field=>field.name === "completedDateTime").disabled = true;
 
-        console.log(fields);
     //Object.keys(task).forEach(key=>fields.find(field=>field.name === key).value = task[key]);
     task && fields.forEach(field=>field.value = task[field.name]);
 

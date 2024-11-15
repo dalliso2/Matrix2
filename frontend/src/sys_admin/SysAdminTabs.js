@@ -43,7 +43,6 @@ export default function AdminTabs()
         const locationIndex = tabData.findIndex((tab) => location.pathname.endsWith(tab.route));
         if (locationIndex !== tabIndex)
         {
-            console.log("navigating to tab: " + tabIndex + " route: " + tabData[tabIndex].route);
             navigate(tabData[tabIndex].route);
         }
     });

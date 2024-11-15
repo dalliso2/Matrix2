@@ -2,10 +2,10 @@ import React from "react";
 import { Dialog, DialogContent, DialogTitle, Box, DialogActions, Button, FormControl, TextField } from "@mui/material";
 import { getTitle } from "../../util/utils";
 import { IMAGE_ARRAY, PROFILE_IMAGE } from "../../util/PropertyType";
-import { RETRIEVE_FILE_URL } from "../../api/file";
 import './LinkDialog.css';
 import { useTheme } from "@mui/material";
 import { useDispatch } from "react-redux";
+import Image from "../../util/Image";
 //import { apiLinkEntities } from "../../api/entity";
 //import { setReRender } from "../../state/EntityTabsSlice";
 
@@ -25,14 +25,11 @@ function getImageId(entityDefinitions, entityOne)
     // if no imageId found for PROFILE IMAGE use 
     if (!imageId)
     {
-        console.log(entityDefinition);
-        console.log(entityOne);
         defProp = entityDefinition.props.find((def) => def.type === IMAGE_ARRAY);
         if (defProp)
             imageId = entityOne.propertyValues.find((val) => val.propertyDefinition === defProp.id)?.value;
     }
 
-    console.log(imageId);
     return imageId;
 }
 
@@ -59,8 +56,8 @@ export default function LinkDialog({entityOne, entityTwo, entity1Entity2Descript
                         <Box>                        
                         {
                             imageId1 && 
-                            <Box sx={{ display:'flex', alignItems:'center', justifyContent:'center', height:'200px', width:'200px', border: imageId1?undefined:'1px solid grey', borderRadius: 5 }}>
-                                <img className="label-profile-image" style={{maxWidth:'100%', maxHeight:'100%'}} src={RETRIEVE_FILE_URL + imageId1} />
+                            <Box sx={{ display:'flex', alignItems:'center', justifyContent:'center', border: imageId1?undefined:'1px solid grey', borderRadius: 5 }}>
+                                <Image className={"label-profile-image"} id={imageId1} />
                             </Box>
                         }
                         </Box>
@@ -106,7 +103,7 @@ export default function LinkDialog({entityOne, entityTwo, entity1Entity2Descript
                             {
                                 imageId2 && 
                                 <Box sx={{ display:'flex', alignItems:'center', justifyContent:'center', height:'200px', width:'200px', border: imageId2?undefined:'1px solid grey', borderRadius: 5 }}>
-                                    <img className="label-profile-image" style={{maxWidth:'100%', maxHeight:'100%'}} src={RETRIEVE_FILE_URL + imageId2} />
+                                    <Image className={"label-profile-image"} id={imageId2} />    
                                 </Box>
                             }
                         </Box>

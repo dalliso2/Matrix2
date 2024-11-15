@@ -10,10 +10,12 @@ import { handleMutationResults } from "../../api/ApiUtils";
 import { setSelectedEntityDefinitionId } from "../../state/AppSlice";
 import RestorePropertyDialog from "./RestorePropertyDialog";
 import { enqueueSnackbar } from 'notistack';
+import { useNavigate } from "react-router-dom";
 
 export default function EntityDefinition({selectedEntityDefinition})
 {
     const dispatch = useDispatch();
+    const navigate = useNavigate();
     const [entityDefinition, setEntityDefinition] = useState(selectedEntityDefinition && JSON.parse(JSON.stringify(selectedEntityDefinition))); 
 
     const [modified, setModified] = useState(false);
@@ -25,7 +27,8 @@ export default function EntityDefinition({selectedEntityDefinition})
 
     const [storeEntityDefinition, mutationState] = useStoreEntityDefinitionMutation();
     handleMutationResults(mutationState, 
-                            useDispatch(), 
+                            dispatch, 
+                            navigate,
                             true, 
                             updatingCreating + " entity definition...", 
                             "Error" +  updatingCreating + " entity definition",
@@ -62,7 +65,6 @@ export default function EntityDefinition({selectedEntityDefinition})
     // update a single first level property of the entity definition
     function updateProperty(name, value)
     {
-        console.log(name, value);
         setEntityDefinition(old=>({...old, [name]:value}));
         setModified(()=>true);
     }
@@ -87,8 +89,6 @@ export default function EntityDefinition({selectedEntityDefinition})
             setEntityDefinition(selectedEntityDefinition);
     }
     
-
-    console.log("EntityDefinition", entityDefinition);  
     return (
         <>            
             <Box sx={{flexGrow:1, display:'flex', flexDirection:'column'}}>

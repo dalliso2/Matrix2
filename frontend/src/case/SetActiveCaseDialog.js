@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import { useTheme } from "@mui/material/styles";
 import Dialog from "@mui/material/Dialog";
 import DialogTitle from "@mui/material/DialogTitle";
@@ -8,10 +8,11 @@ import Button from "@mui/material/Button";
 import Box from "@mui/material/Box";
 import { List, ListItemButton, ListItemText, ListItem } from "@mui/material";
 import { useSelector } from "react-redux";
-import { selectActiveCase, setActiveCase, setWaitMessage, removeWaitMessage } from "../state/AppSlice";
+import { selectActiveCase, setActiveCase } from "../state/AppSlice";
 import { useDispatch } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import { useGetUserCaseListQuery } from "../api/CaseApi";
+import { handleQueryResultsWithWaitMessage } from "../api/ApiUtils";
 
 export default function SetActiveCaseDialog()
 {
@@ -22,20 +23,15 @@ export default function SetActiveCaseDialog()
     const activeCase = useSelector(selectActiveCase);   
     const [selectedCase, setSelectedCase] = useState(null);
 
-    const { data:envelope, currentData, isFetching, isSuccess, ...userCaseListQueryStatus } = useGetUserCaseListQuery({},{pollingInterval:30000});
-    useEffect(() => {
-        console.log("useEffect: userCaseListQueryStatus");  
-        if (isFetching && !currentData)
-            dispatch(setWaitMessage("LOADING CASES", "Loading cases..."));
-        if (!isFetching && envelope)
-            dispatch(removeWaitMessage("LOADING CASES"));
-    }, [isFetching]);
-
+    const { data:envelope, currentData, ...userCaseListQueryStatus } = useGetUserCaseListQuery();
+    
+    console.log(userCaseListQueryStatus);
+    handleQueryResultsWithWaitMessage(userCaseListQueryStatus, dispatch, navigate, "Loading cases...");
     const caseList = envelope?.payload;
 
     return (
         <>
-        { isSuccess?
+        { userCaseListQueryStatus.isSuccess?
             <>
             <Dialog open={!caseList?.length}>
                 <DialogTitle sx={{backgroundColor:theme.palette.primary.main, color:theme.palette.primary.contrastText }}>No Cases Available</DialogTitle>

@@ -24,6 +24,7 @@ import { useLazySearchUsersQuery } from "../api/UserApi";
 import { useStoreUserCaseRoleMutation } from "../api/CaseApi";
 import { useDispatch } from "react-redux";
 import { handleMutationResults, handleQueryResultsWithWaitMessage } from "../api/ApiUtils";
+import { useNavigate } from "react-router-dom";
 
 const columnHeadings = ["Username", "Last Name", "First Name", "Picture", "Role"]
 const columnTypes = [TEXT,TEXT,TEXT,PROFILE_IMAGE,SELECT];
@@ -32,15 +33,16 @@ export default function AddUsersToCaseDialog({caseUsers, caseId, closeDialogFn }
 {
     const theme = useTheme();
     const dispatch = useDispatch();
+    const navigate = useNavigate();
     const [filterString, setFilterString] = React.useState('');
     const caseUserIds = caseUsers?caseUsers.map(user=>user.userId):[];
     
     const [storeUserCaseRole,storeMutationState] = useStoreUserCaseRoleMutation();    
-    handleMutationResults(storeMutationState, dispatch, "Updating user case role...");
+    handleMutationResults(storeMutationState, dispatch, navigate, "Updating user case role...");
 
     const [searchUsersFn, searchResults] = useLazySearchUsersQuery();
     useEffect(() => {
-        handleQueryResultsWithWaitMessage(searchResults, dispatch, "Searching users...");
+        handleQueryResultsWithWaitMessage(searchResults, dispatch, navigate, "Searching users...",);
     }, [searchResults.isSuccess, searchResults.isLoading, searchResults.isError]);
 
     const userData = searchResults.data && searchResults.data.filter(user=>!caseUserIds.includes(user.id))

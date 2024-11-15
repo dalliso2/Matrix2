@@ -235,7 +235,6 @@ export default function PropertyDialog({property, savePropertyFn, closeFn})
         field.value = localProperty[field.name];
         field.onChange = handleInputChange;
         // if the id of the property is a number then don't allow the property type to be changed
-        console.log(field);
         if (field.name === 'type')
             field.disabled = typeof property.id === 'number';
     });

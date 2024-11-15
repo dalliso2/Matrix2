@@ -16,6 +16,7 @@ import { useStoreUserMutation } from '../../api/UserApi';
 import { handleMutationResults, handleQueryResultsWithWaitMessage } from '../../api/ApiUtils';
 import { validate } from '../../validation/validation';
 import { enqueueSnackbar } from 'notistack';
+import { useNavigate } from 'react-router-dom';
 
 const EMPTY_PASSWORD = "        ";
 
@@ -39,11 +40,12 @@ const AddEditUserDialog = ({ user, closeFn }) =>
 {
     const theme = useTheme();
     const dispatch = useDispatch();
+    const navigate = useNavigate();
     const [userData, setUserData] = useState({...user, modified:false});
 
     const { data:envelope, ...allAgenciesQueryStatus } = useGetAllAgenciesQuery();
     useEffect(() => {
-        handleQueryResultsWithWaitMessage(allAgenciesQueryStatus, dispatch, "Loading agencies...");
+        handleQueryResultsWithWaitMessage(allAgenciesQueryStatus, dispatch, navigate, "Loading agencies...");
     }, [allAgenciesQueryStatus.isSuccess, allAgenciesQueryStatus.isFetching, allAgenciesQueryStatus.isError]);
     const allAgencies = envelope?.payload;
 

@@ -19,12 +19,14 @@ import { api } from "../api/BaseApi";
 import { enqueueSnackbar } from "notistack";
 import Button from "@mui/material/Button";
 import { closeSnackbar } from "notistack";
+import { useNavigate } from "react-router-dom";
 
 const headers = ["Task #", "Title", "Description", "Coverage Description", "Status", "Unlink"];
 
 export default function EntityTasks({entityId})
 {
     const theme = useTheme();   
+    const navigate = useNavigate();
     const dispatch = useDispatch();
 
     const [showTaskSearchDialog, setShowTaskSearchDilog] = React.useState(false);
@@ -36,14 +38,14 @@ export default function EntityTasks({entityId})
     const taskEntities = relatedTasksQueryResults?.currentData?.payload || [];
     useEffect(() => {
         if (relatedTasksQueryResults.isError)
-            handleQueryError(relatedTasksQueryResults, dispatch);
+            handleQueryError(relatedTasksQueryResults, dispatch, navigate);
     }, [relatedTasksQueryResults.isError]);
 
     //
     // Save task-entity api function
     //
     const [storeTaskEntity, storeTaskEntityMutationState] = useStoreTaskEntityMutation();
-    handleMutationResults(storeTaskEntityMutationState, dispatch, false, "","Error linking task and entity",
+    handleMutationResults(storeTaskEntityMutationState, dispatch, navigate, false, "","Error linking task and entity",
         ()=>enqueueSnackbar(storeTaskEntityMutationState.originalArgs.successDescription, {variant:'success'}),
         ()=>{});
 
@@ -53,6 +55,7 @@ export default function EntityTasks({entityId})
     const [deleteTaskEntity, deleteTaskEntityMutationState] = useDeleteTaskEntityMutation();
     handleMutationResults(deleteTaskEntityMutationState, 
                             dispatch, 
+                            navigate, 
                             true, 
                             "",
                             "Error removing link",

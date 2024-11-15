@@ -1,7 +1,7 @@
 import { api } from './BaseApi';
 
-const caseApi = api.injectEndpoints({
-    entityTypes: ['matrixCase', 'caseUsers','matrixCases'],
+const caseApi = api.enhanceEndpoints({addTagTypes:['matrixCase','caseUsers','matrixCases']})
+                    .injectEndpoints({
     endpoints: (builder) => ({
         storeCase: builder.mutation({
             query: (data) => ({url: '/case/store', method: 'POST', body: data}),
@@ -23,7 +23,7 @@ const caseApi = api.injectEndpoints({
                 return response;
             },
             providesTags: (result = [], error, id) => ['matrixCases'],
-            keepUnusedDataFor: 5
+            keepUnusedDataFor: 1200
         }),
         getCaseUsers: builder.query({
             query: (caseId) => ({url:`/case/users/${caseId}`, method: 'GET'}),
@@ -48,6 +48,7 @@ const caseApi = api.injectEndpoints({
 
 export const {  useStoreCaseMutation,
                 useGetUserCaseListQuery, 
+                useLazyGetUserCaseListQuery,
                 useGetCaseQuery,
                 useGetCaseUsersQuery,
                 useStoreUserCaseRoleMutation,

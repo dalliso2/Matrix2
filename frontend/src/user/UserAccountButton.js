@@ -1,42 +1,62 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import AccountCircle from "@mui/icons-material/AccountCircle";
 import IconButton from "@mui/material/IconButton";
 import Popover from "@mui/material/Popover";
 import Switch from "@mui/material/Switch";
 import Box from "@mui/system/Box";
 import { Button } from "@mui/material";
-import { useGetCurrentUserQuery, useSetUserDarkThemeMutation } from '../api/UserApi';
+import { useSetUserDarkThemeMutation, useLazyRefreshCredentialsQuery } from '../api/UserApi';
 import ChangePasswordDialog from "./ChangePasswordDialog";
 import { useDispatch } from 'react-redux';
-import { selectDarkTheme, setStateDarkTheme } from '../state/AppSlice';
+import { resetState, selectCurrentUser, selectDarkTheme, setStateDarkTheme, setAuthToken, selectAuthToken } from '../state/AppSlice';
 import { useSelector } from "react-redux";
 import { handleMutationResults } from "../api/ApiUtils";
 import { enqueueSnackbar } from "notistack";
+import { useNavigate } from "react-router-dom";
+import { handleQueryError } from "../api/ApiUtils";
 
 export default function UserAccountButton()
 {
     const dispatch = useDispatch();
+    const navigate = useNavigate();
     const [anchorElement, setAnchorElement] = useState(undefined);
     const [showChangePasswordDialog, setShowChangePasswordDialog] = useState(false);
 
+    const currentUser = useSelector(selectCurrentUser);  
+    const authToken = useSelector(selectAuthToken);
     const darkTheme = useSelector(selectDarkTheme);
-    const { data:envelope, isSuccess, isError, isFetching } = useGetCurrentUserQuery();
-    
+
     const [apiSetDarkTheme,mutationState] = useSetUserDarkThemeMutation();
     handleMutationResults(mutationState, 
                             dispatch, 
+                            navigate,
                             false, 
                             "",
                             "", 
                             ()=>{ enqueueSnackbar("Set theme to " + (darkTheme?"dark.":"light."), {variant:'success'});},
                             ()=>{ enqueueSnackbar("Failed to change theme.", {variant:'error'}); closeFn();});
 
-    const currentUser = envelope?.payload;
-    
+    const [refreshCredentials, { data:credentialsEnvelope, ...refreshCredentialsStatus }] = useLazyRefreshCredentialsQuery();
+    const credentials = credentialsEnvelope?.payload;
+    handleQueryError(refreshCredentialsStatus, 
+                        dispatch, 
+                        navigate,
+                        ()=>{
+                        });
+
+    useEffect(() => {
+        if (refreshCredentialsStatus?.isSuccess)
+        {
+            dispatch(setAuthToken(credentials.accessToken));
+        }
+    }, [refreshCredentialsStatus?.isFetching]);
+
+    // refresh token every 10 minutes
+    setTimeout(()=>refreshCredentials({token:authToken}), 10*60*1000);
+
     async function logout()
     {
-        await fetch('/logout');
-        window.location.href = '/';
+        dispatch(resetState());
     }
 
     function setDarkTheme(event)

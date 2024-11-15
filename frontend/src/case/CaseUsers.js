@@ -17,6 +17,7 @@ import { handleMutationResults } from "../api/ApiUtils";
 import RefreshIcon from '@mui/icons-material/Refresh';
 import { useEffect } from "react";
 import { setMessageBoxData } from "../state/AppSlice";
+import { useNavigate } from "react-router-dom";
 
 const REMOVE = -1;
 
@@ -29,6 +30,7 @@ export default function CaseUsers({caseObj})
 {
     const theme = useTheme();
     const dispatch = useDispatch();
+    const navigate = useNavigate();
     const [caseUsers, setCaseUsers] = useState([]);
     const [addUsersDialogOpen, setAddUsersDialogOpen] = useState(false);
 
@@ -45,9 +47,9 @@ export default function CaseUsers({caseObj})
     }, [caseUsersQueryData]);
 
     const [storeUserCaseRole,storeMutationState] = useStoreUserCaseRoleMutation();    
-    handleMutationResults(storeMutationState, dispatch, false, "Updating user case role...", "Error updating user's role in the case.");
+    handleMutationResults(storeMutationState, dispatch, navigate, false, "Updating user case role...", "Error updating user's role in the case.");
     const [deleteUserCaseRole,deleteMutationState] = useDeleteUserCaseRoleMutation();
-    handleMutationResults(deleteMutationState, dispatch, false, "Deleting user case role...", "Error deleting user's role in the case.");
+    handleMutationResults(deleteMutationState, dispatch, navigate, false, "Deleting user case role...", "Error deleting user's role in the case.");
 
     async function updateUserAccess(userId, caseId, role)
     {
@@ -91,7 +93,7 @@ export default function CaseUsers({caseObj})
     {   
         setAddUsersDialogOpen(false);
     }
-    console.log(userData);
+    
     return (
         <Box sx={{width:'100%'}}>
             <Box sx={{display:'flex', flexDirection:'column', height:'100%', flexGrow:1}}>

@@ -22,19 +22,16 @@ function LoadingApplication()
     const dispatch = useDispatch();
 
     const { data:envelope, ...getCurrentUserQueryStatus } = useGetCurrentUserQuery();
-    console.log(getCurrentUserQueryStatus);
 
     useEffect(() => {
         if (getCurrentUserQueryStatus.isError) 
-            handleQueryError(getCurrentUserQueryStatus, dispatch);
+            handleQueryError(getCurrentUserQueryStatus, dispatch, navigate);
     }, [getCurrentUserQueryStatus.isError]);
 
     useEffect(() => {
-        console.log("LoadingApplication.js");
         if (!getCurrentUserQueryStatus.isFetching) 
         {
-            console.log("LoadingApplication.js: navigate to main");
-            navigate("main");
+            navigate("/");
         }
     }, [getCurrentUserQueryStatus.isFetching]);
 

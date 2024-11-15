@@ -10,34 +10,37 @@ import EntityFiles from "./EntityFiles";
 import { useAddFilesToEntityMutation } from "../api/EntityApi";
 import { useStoreFilesMutation } from "../api/FileApi";
 import { useSelector } from "react-redux";
-import { selectActiveCase } from "../state/AppSlice";
+import { selectActiveCase, selectAuthToken } from "../state/AppSlice";
 import { handleMutationResults } from "../api/ApiUtils";
 import { enqueueSnackbar } from "notistack";
 import Paper from "@mui/material/Paper";
 import EntityTasks from "./EntityTasks";
 import { useGetAllEntityDefinitionsQuery } from "../api/EntityDefinitionApi";
 import { useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 
 export default function EntityTabContent({entityId})
 {
     const dispatch = useDispatch();
+    const navigate = useNavigate();
+    const authToken = useSelector(selectAuthToken);
     const activeCase = useSelector(selectActiveCase);
     
     const [addFilesToEntity,addFileMutationState] = useAddFilesToEntityMutation();
     
     const { data:entityDefsEnvelope, refetch, ...entityDefinitionQueryStatus } = useGetAllEntityDefinitionsQuery();
+    const entityDefinitions = entityDefsEnvelope?entityDefsEnvelope.payload:[];
     useEffect(() => {
         if (entityDefinitionQueryStatus.isError) 
-            handleQueryError(entityDefinitionQueryStatus, dispatch);
+            handleQueryError(entityDefinitionQueryStatus, dispatch, navigate);
     }, [entityDefinitionQueryStatus.isError]);
-    const entityDefinitions = entityDefsEnvelope?entityDefsEnvelope.payload:[];
 
-    handleMutationResults(addFileMutationState, dispatch, false, "Adding file link...",
+    handleMutationResults(addFileMutationState, dispatch, navigate, false, "Adding file link...",
         "Error adding file link", 
         ()=>addFileMutationState.data.payload.forEach(entityFile=>enqueueSnackbar("Added link to file: " + entityFile.mfile.name, {variant:'success'}))); 
 
     const [storeFiles,storeFilesMutationState] = useStoreFilesMutation();
-    handleMutationResults(storeFilesMutationState, dispatch, false, "Saving files...",
+    handleMutationResults(storeFilesMutationState, dispatch, navigate, false, "Saving files...",
         "Error saving files.", 
         ()=>{}); 
 

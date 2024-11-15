@@ -31,10 +31,12 @@ import { handleMutationResults } from "../../api/ApiUtils";
 import { enqueueSnackbar } from "notistack";
 import { getTitle } from "../../util/utils";
 import { api } from "../../api/BaseApi";
+import { useNavigate } from "react-router-dom";
 
 export default function EntityLinkDialog({entityObj, entityDefinitions, closeFn})
 {
     const dispatch = useDispatch();
+    const navigate = useNavigate();
     const [selectedEntityDefIdArray, setSelectedEntityDefIdArray] = useState([]);
     const [searchEntityText, setSearchEntityText] = useState('');
     const [entityToLink, setEntityToLink] = useState(undefined);
@@ -44,14 +46,15 @@ export default function EntityLinkDialog({entityObj, entityDefinitions, closeFn}
     const entityToLinkName = entityToLink && getTitle(entityDefinitions, entityToLink);
 
     const [searchEntitiesFn, {data:envelope, ...searchResultsStatus}] = useLazySearchEntitiesNotLinkedQuery();
+    const searchResults = envelope?.payload || [];
     useEffect(() => {
         if (searchResultsStatus.isError) 
-            handleQueryError(searchResultsStatus, dispatch);
+            handleQueryError(searchResultsStatus, dispatch, navigate);
     }, [searchResultsStatus.isError]);
-    const searchResults = envelope?.payload || [];
+
 
     const [linkEntities, linkEntitiesMutationStatus] = useLinkEntitiesMutation();
-    handleMutationResults(linkEntitiesMutationStatus, dispatch, false, "Linking entities...",
+    handleMutationResults(linkEntitiesMutationStatus, dispatch, navigate, false, "Linking entities...",
         "Error creating link between entities", 
         ()=> enqueueSnackbar("Successfully linked " 
                                 + entityObjName 

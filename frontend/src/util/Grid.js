@@ -104,7 +104,7 @@ export default function Grid({header=undefined,
                         {
                             isFetching &&
                             <TableRow sx={{ zIndex:1000, p:0, position:'absolute', height:'100%', width:'100%', overflow:'hidden', backgroundColor:theme.palette.background.default}}>
-                                <TableCell colSpan={columnHeadings?.length} sx={{position:'absolute', width:'100%', overflow:'hidden'}}><LoadingSkeleton/></TableCell>
+                                <TableCell colSpan={columnHeadings?.length} sx={{position:'absolute', width:'100%', height:'100%', overflow:'hidden'}}><LoadingSkeleton/></TableCell>
                             </TableRow>
                         }
                         { 

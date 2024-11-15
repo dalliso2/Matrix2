@@ -173,9 +173,9 @@ public class MatrixEntityController
 
 	@GetMapping("/all_link_chart_for_case/{caseId}")
 	@ResponseStatus(HttpStatus.OK)
-	public ResponseEntity<ApiResponse<List<MatrixEntity>>> getAllLinkChartForCase(@PathVariable("caseId") Long caseId, HttpServletRequest request)
+	public ResponseEntity<ApiResponse<Collection<MatrixEntityProjection>>> getAllLinkChartForCase(@PathVariable("caseId") Long caseId, HttpServletRequest request)
 	{
-		return new ResponseEntity<>(ApiResponseUtil.success(this.matrixEntityService.getAllLinkChartForCase(caseId),
+		return new ResponseEntity<>(ApiResponseUtil.success(this.matrixEntityService.getCaseEntityProjections(caseId),
 															"Retrieved all entities for case: " + caseId,
 															request.getRequestURI()),
 														HttpStatus.OK);
@@ -204,8 +204,19 @@ public class MatrixEntityController
 	
 	@GetMapping("/timeline_entities/{caseId}")
 	@ResponseStatus(HttpStatus.OK)
-	public Collection<MatrixEntity> getTimelineEntitiesForCase(@PathVariable("caseId") Long caseId)
+	public ResponseEntity<ApiResponse<Collection<MatrixEntity>>> getTimelineEntitiesForCase(@PathVariable("caseId") Long caseId, HttpServletRequest request)
 	{
-		return this.matrixEntityService.getTimelineEntitiesForCase(caseId);
+		return new ResponseEntity<>(ApiResponseUtil.success(this.matrixEntityService.getTimelineEntitiesForCase(caseId),
+															"Retrieved entities for timeine.",
+															request.getRequestURI()),
+															HttpStatus.OK);
 	}
+	
+	@GetMapping("/entity_title/{caseId}")
+	public ResponseEntity<ApiResponse<Collection<MatrixEntityTitleDTO>>> findMatrixEntityTitlesByCase(@PathVariable("caseId") Long caseId, HttpServletRequest request)
+	{
+		return new ResponseEntity<>(ApiResponseUtil.success(this.matrixEntityService.findMatrixEntityTitlesByCase(caseId),
+				"Retrieved all entities for case: " + caseId,
+				request.getRequestURI()),
+				HttpStatus.OK);	}
 }

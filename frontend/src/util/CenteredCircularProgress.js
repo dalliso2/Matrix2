@@ -11,16 +11,19 @@ import { useSelector } from "react-redux";
 import { selectGetWaitMessage } from "../state/AppSlice";
 import './CenteredCircularProgress.css';
 import { useTheme } from "@emotion/react";
+import { selectSystemInErrorState } from "../state/AppSlice";
+
 
 function CenteredCircularProgress()
 {
     const theme = useTheme();
     const waitMessage = useSelector(selectGetWaitMessage);
-    
+    const systemInErrorState = useSelector(selectSystemInErrorState);
+
     return ( 
         <React.Fragment>
         {
-            waitMessage?
+            !systemInErrorState && waitMessage?
             (
                 <Box className="FullScreenCover">
                     <Box className=''> 

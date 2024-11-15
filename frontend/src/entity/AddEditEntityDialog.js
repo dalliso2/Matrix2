@@ -33,6 +33,7 @@ import { selectActiveCase, updateEntityTabTitle } from "../state/AppSlice";
 import { getTitle } from "../util/utils";
 import { enqueueSnackbar } from "notistack";
 import { useTheme } from "@emotion/react";
+import { useNavigate } from "react-router-dom";
 
 function getFields(entityDefinition)
 {
@@ -98,10 +99,11 @@ function setValue(setEntityProps, entityId, propDefId,valOrder,value)
     });
 }
 
-export default function AddEditEntityDialog({entity, entityDefinitions, closeFn})
+export default function AddEditEntityDialog({entity, entityDefinitions, closeFn, entityUpdatedCallback})
 {
     const theme = useTheme();
     const dispatch = useDispatch();
+    const navigate = useNavigate();
     const [selectedEntityDefId, setSelectedEntityDefId] = useState(entity && entity.entityDefinition);
     const [entityProps, setEntityProps] = useState(entity && entity.propertyValues);
     const [reRender, setReRender] = useState(false);
@@ -115,10 +117,11 @@ export default function AddEditEntityDialog({entity, entityDefinitions, closeFn}
     const [storeEntity,entityMutationState] = useStoreEntityMutation();
     handleMutationResults(entityMutationState, 
                             dispatch, 
+                            navigate,
                             true, 
                             "Saving entity...",
                             "Error saving entity.", 
-                            ()=>{ enqueueSnackbar( (entity.id?"Updated ":"Created ") + " entity " + getTitle(entityDefinitions,entity), {variant:'success'}); closeFn();});
+                            ()=>{ enqueueSnackbar( (entity?.id?"Updated ":"Created ") + " entity " + getTitle(entityDefinitions,entityMutationState.data), {variant:'success'}); closeFn();});
 
     // set the field values from the entity object
     fields && fields.forEach(field => field.type === IMAGE_ARRAY && (field.value = []));
@@ -194,6 +197,11 @@ export default function AddEditEntityDialog({entity, entityDefinitions, closeFn}
             const e = {id:entity?.id, matrixCase: activeCase.id, entityDefinition: selectedEntityDefId, propertyValues:entityProps};
             storeEntity(e);
             dispatch(updateEntityTabTitle({entityId:e.id,title:getTitle(entityDefinitions,e)}));
+            if (entityUpdatedCallback)
+            {
+                e.__title = getTitle(entityDefinitions,e);
+                entityUpdatedCallback(e);
+            }
         }
         else
         {

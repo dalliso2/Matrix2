@@ -15,6 +15,7 @@ import CaseTabContent from "./CaseTabContent";
 import { useSelector } from "react-redux";
 import { addCaseTab, selectCurrentCaseTabIndex, setCurrentCaseTab, removeCaseTab, selectCaseTabCaseIds } from "../state/AppSlice";
 import { setMessageBoxData } from "../state/AppSlice";
+import SetActiveCaseDialog from "./SetActiveCaseDialog";
 
 function a11yProps(index) 
 {
@@ -61,6 +62,7 @@ export default function CaseTabs()
                     || []);
 
     return (
+        <>
         <TabbedContentArea>
         <TabWrapper>
           <Tabs
@@ -100,5 +102,7 @@ export default function CaseTabs()
             </Content>
         </ContentWrapper> 
       </TabbedContentArea>
+      <SetActiveCaseDialog/>
+      </>
     );
 }   

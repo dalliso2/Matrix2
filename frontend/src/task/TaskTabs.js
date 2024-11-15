@@ -52,10 +52,6 @@ export default function TaskTabs()
     const tabIndex = useSelector(selectCurrentTaskTabIndex);
     const selectedTabData = tabData && tabData[tabIndex];
 
-    console.log('TaskTabs');
-    console.log(tabData);
-    console.log(tabIndex);
-    console.log(selectedTabData);
     function addTask(taskData)   
     {
         dispatch(addTaskTab({taskId:taskData.id, title: "Task " + taskData.caseTaskId + " - " + taskData.title}));

@@ -25,4 +25,6 @@ public interface MatrixEntityService
 //	List<MatrixEntity> searchEntitiesForRelationship(NewEntityRelationshipSearchMessage searchMessage);
 	public MatrixEntity findById(Long matrixEntityId);
 	public Iterable<MatrixEntity> findByIds(LongIdsMessage matrixEntityIds);
+	public Collection<MatrixEntityProjection> getCaseEntityProjections(Long caseId);
+	public Collection<MatrixEntityTitleDTO> findMatrixEntityTitlesByCase(Long caseId);
 }

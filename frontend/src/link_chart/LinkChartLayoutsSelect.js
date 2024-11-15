@@ -1,4 +1,5 @@
 import React from "react";
+import { Select, MenuItem } from "@mui/material";
 
 const layouts = [
     {name:'cose', layout:{name:'cose', componentSpacing:1000, nodeDimensionsIncludeLabels:true}},
@@ -12,11 +13,10 @@ const layouts = [
 export default function LinkChartLayoutsSelect({ setLayoutFn }) 
 {
     return (
-        <Select     value={chartProperties.layout} 
-                    onChange={event=>setLayoutFn(event.target.value)}
-                    sx={{p:0, m:0, '& .MuiSelect-select':{p:1}}}>
+        <Select onChange={event=>{setLayoutFn(event.target.value.layout)}}
+                        sx={{p:0, m:0, '& .MuiSelect-select':{p:1}}}>
         {layouts.map((layout, index) => 
-            <MenuItem key={index} value={index} sx={{p:1}}>{layout.name}</MenuItem>
+            <MenuItem key={index} value={layout} sx={{p:1}}>{layout.name}</MenuItem>
         )}
         </Select>
     );

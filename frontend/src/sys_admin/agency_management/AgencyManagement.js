@@ -19,6 +19,7 @@ import { useGetAllAgenciesQuery } from '../../api/AgencyApi';
 import { useEffect } from 'react';
 import { handleQueryError } from '../../api/ApiUtils';
 import { useDispatch } from 'react-redux';
+import { useNavigate } from 'react-router-dom';
 
 const columnHeadings = ["Name", "Abbreviation"]
 const columnTypes = [TEXT, TEXT];
@@ -36,17 +37,19 @@ const newAgency = {
 export default function AgencyManagement()
 {
     const theme = useTheme();
+    const navigate = useNavigate();
     const dispatch = useDispatch();
     const [editAgency, setEditAgency] = useState(undefined);
     
     const { data:envelope, refetch, ...allAgencyQueryStatus } = useGetAllAgenciesQuery();
-    console.log(allAgencyQueryStatus);
+    const allAgencies = envelope?.payload;
+
     useEffect(() => {
         if (allAgencyQueryStatus.isError) 
-            handleQueryError(allAgencyQueryStatus, dispatch);
+            handleQueryError(allAgencyQueryStatus, dispatch, navigate);
     }, [allAgencyQueryStatus.isError]);
 
-    const allAgencies = envelope?.payload;
+
 
     function successFn(updatedAgency)
     {
@@ -58,7 +61,6 @@ export default function AgencyManagement()
                     sx:{cursor:'pointer','&:hover':{backgroundColor:theme.palette.action.hover}},
                     values:[{value:[record.name]}, {value:[record.acronym]}]}));
 
-    console.log(agencyList);
     return (
         <>
             <Content>   

@@ -20,31 +20,24 @@ import { getListComponent } from "../util/DisplayComponentFactory";
 import { useTheme } from "@mui/material";
 import Grid from "../util/Grid";
 import { useGetAllEntityDefinitionsQuery } from "../api/EntityDefinitionApi";
+import { useNavigate } from "react-router-dom";
 
 export default function EntitySearch()
 {
     const dispatch = useDispatch();
+    const navigate = useNavigate();
     const theme = useTheme();   
     const searchText = useSelector(selectEntitySearchText);   
     const entityDefinitionIds = useSelector(selectEntitySearchEntityDefIdArray);
     const activeCase = useSelector(selectActiveCase);
 
     const { data:entityDefsEnvelope, refetch, ...entityDefinitionQueryStatus } = useGetAllEntityDefinitionsQuery();
-    useEffect(() => {
-        if (entityDefinitionQueryStatus.isError) 
-            handleQueryError(entityDefinitionQueryStatus, dispatch);
-    }, [entityDefinitionQueryStatus.isError]);
     const entityDefinitions = entityDefsEnvelope?entityDefsEnvelope.payload:[];
 
     //
     // code to search for entities
     //
     const [searchEntitiesFn, {data:envelope, ...searchEntitiesQueryStatus}] = useLazySearchEntitiesQuery();
-    useEffect(() => {
-        if (searchEntitiesQueryStatus.isError) 
-            handleQueryError(searchEntitiesQueryStatus, dispatch);
-    }, [searchEntitiesQueryStatus.isError]);
-
     useEffect(() => {
         if (!searchEntitiesQueryStatus.isFetching && searchEntitiesQueryStatus?.isSuccess) 
         {
@@ -53,9 +46,13 @@ export default function EntitySearch()
     }, [searchEntitiesQueryStatus?.isFetching]);
 
     useEffect(() => {
+        if (entityDefinitionQueryStatus.isError) 
+            handleQueryError(entityDefinitionQueryStatus, dispatch, navigate);
         if (searchEntitiesQueryStatus?.isError) 
-            handleQueryError(searchEntitiesQueryStatus, dispatch);
-    }, [searchEntitiesQueryStatus?.isError]);
+            handleQueryError(searchEntitiesQueryStatus, dispatch, navigate);
+         if (searchEntitiesQueryStatus.isError) 
+            handleQueryError(searchEntitiesQueryStatus, dispatch, navigate);
+    }, [searchEntitiesQueryStatus.isError,entityDefinitionQueryStatus.isError,searchEntitiesQueryStatus?.isError]);
 
     const searchResults = useSelector(selectEntitySearchResults);
 

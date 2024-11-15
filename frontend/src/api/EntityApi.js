@@ -10,11 +10,7 @@ const entityApi = api.enhanceEndpoints({addTagTypes:['Entity','EntityFile','Rela
                 return response;
             },
             providesTags: (result, error, data) => 
-            {
-                const y = result?result.payload.flatMap(entityGroup=>entityGroup.map(entity=>({type:'Entity', id:entity.id}))):[];
-                console.log(y);
-                return y;
-            },
+                result?result.payload.flatMap(entityGroup=>entityGroup.map(entity=>({type:'Entity', id:entity.id}))):[],
             keepUnusedDataFor: 300
         }),
         getAllEntitiesForCase: builder.query({
@@ -94,10 +90,7 @@ const entityApi = api.enhanceEndpoints({addTagTypes:['Entity','EntityFile','Rela
             {
                 return response;
             },
-            invalidatesTags: (result, error, arg)=>{
-                const x = result?[{type:'EntityFile', id:result.payload[0].matrixEntity}]:[];
-                return x;
-            },
+            invalidatesTags: (result, error, arg)=>result?[{type:'EntityFile', id:result.payload[0].matrixEntity}]:[],
             //invalidatesTags: (result, error, arg)=>result?result.payload.map(entityFile=>({type:'EntityFile', id:entityFile.id})):[],
         }),        
         getEntityFiles: builder.query({
@@ -107,10 +100,7 @@ const entityApi = api.enhanceEndpoints({addTagTypes:['Entity','EntityFile','Rela
                 //console.log("EntityAPI - getEntityFiles")
                 return response;
             },
-            providesTags: (result, error, arg)=>{
-                const x = [{type:'EntityFile',id:arg}];
-                return x;
-            },
+            providesTags: (result, error, arg)=>[{type:'EntityFile',id:arg}],
             //invalidatesTags: (result, error, arg)=>result?.length?[result.payload[0].matrixEntity]:[],
             //invalidatesTags: (result, error, arg)=>result && result.map((entityFile)=>({type:'EntityFile',entityFile:id})),
         }),
@@ -121,9 +111,7 @@ const entityApi = api.enhanceEndpoints({addTagTypes:['Entity','EntityFile','Rela
                 //console.log("EntityAPI - remodfveEntityFile")
                 return response;
             },
-            invalidatesTags: (result, error, arg)=>{
-                return result && [{type:'EntityFile',id:result.payload.id}];
-            }
+            invalidatesTags: (result, error, arg)=>result && [{type:'EntityFile',id:result.payload.id}],
         }),
         searchEntitiesNotLinked: builder.query({
             query: (data) => ({ url:`/entity/search_unlinked_entities`, method: 'POST', body: data }),
@@ -183,6 +171,19 @@ const entityApi = api.enhanceEndpoints({addTagTypes:['Entity','EntityFile','Rela
             providesTags: (result, error, arg)=>[{type:'EntityRelationships',id:arg}],
             keepUnusedDataFor: 300
         }),
+        getAllTimelineEntitiesForCase: builder.query({
+            query: (caseId) => ({ url:`/entity/timeline_entities/${caseId}`, method: 'GET' }),
+            transformResponse: (response, meta, arg) => 
+            {
+                //console.log("EntityAPI - getEntityFiles")
+                console.log(response);
+                return response;
+            },
+            // providesTags: (result, error, arg)=>[{type:'Entity',id:arg}],
+            // keepUnusedDataFor: 300,
+            //invalidatesTags: (result, error, arg)=>result?.length?[result.payload[0].matrixEntity]:[],
+            //invalidatesTags: (result, error, arg)=>result && result.map((entityFile)=>({type:'EntityFile',entityFile:id})),
+        }),   
     }),
     overrideExisting: false,
 });
@@ -202,4 +203,6 @@ export const { useLazySearchEntitiesQuery,
                 useGetRelatedEntitiesQuery,
                 useUnlinkEntitiesMutation,
                 useLazyFindEntitiesByIdsQuery,
-                useLazyGetCaseEntityRelationshipsQuery } = entityApi;
+                useGetCaseEntityRelationshipsQuery,
+                useLazyGetCaseEntityRelationshipsQuery,
+                useLazyGetAllTimelineEntitiesForCaseQuery } = entityApi;

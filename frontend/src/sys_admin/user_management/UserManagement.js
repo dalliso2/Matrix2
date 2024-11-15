@@ -17,6 +17,7 @@ import UserDataGrid from './UserDataGrid';
 import { useLazySearchUsersQuery } from '../../api/UserApi';
 import { useSelector } from 'react-redux';
 import { setUserSearchText, selectUserSearchText } from '../../state/AppSlice';
+import { useNavigate } from 'react-router-dom';
 
 const columnHeadings = ["Username", "Last Name", "First Name", "Email", "Cell Number", "Work Number", "Agency", "Admin"]
 const columnTypes = [TEXT,TEXT,TEXT,TEXT,TEXT,TEXT,TEXT,TEXT];
@@ -24,16 +25,19 @@ const columnTypes = [TEXT,TEXT,TEXT,TEXT,TEXT,TEXT,TEXT,TEXT];
 export default function UserManagement() 
 {
     const dispatch = useDispatch();
+    const navigate = useNavigate();
     const [editUser, setEditUser] = useState(undefined);
     const filterString = useSelector(selectUserSearchText);
 
     const [searchUsersFn, {data:envelope, ...searchUsersQueryStatus}] = useLazySearchUsersQuery({filter:filterString});
+    const users = envelope?.payload;
+
     useEffect(() => {
         if (searchUsersQueryStatus.isError) 
-            handleQueryError(searchUsersQueryStatus, dispatch);
+            handleQueryError(searchUsersQueryStatus, dispatch, navigate);
     }, [searchUsersQueryStatus.isError]);
 
-    const users = envelope?.payload;
+
 
     useEffect(() => {
         if (filterString.length)

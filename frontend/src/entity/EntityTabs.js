@@ -23,6 +23,7 @@ import { removeEntityTab } from "../state/AppSlice";
 import { useEffect } from "react";
 import { handleQueryError } from "../api/ApiUtils";
 import LoadingSkeleton from "../util/LoadingSkeleton";
+import { useNavigate } from "react-router-dom";
 
 function a11yProps(index)  
 {
@@ -32,24 +33,25 @@ function a11yProps(index)
     };
   }
 
-function getTabTitle(entityObj, entityDefinitions) 
-{
-    //property ids of field that should be displayed in the tab title
-    const titlePropIds = entityDefinitions.find(def=>def.id === entityObj.entityDefinition).props.filter(prop=>prop.includeInTitle).map(prop=>prop.id);
-    return entityObj.propertyValues.filter(propVal=>titlePropIds.includes(propVal.propertyDefinition)).map(propVal=>propVal.value).join(", ");
-}
+// function getTabTitle(entityObj, entityDefinitions) 
+// {
+//     //property ids of field that should be displayed in the tab title
+//     const titlePropIds = entityDefinitions.find(def=>def.id === entityObj.entityDefinition).props.filter(prop=>prop.includeInTitle).map(prop=>prop.id);
+//     return entityObj.propertyValues.filter(propVal=>titlePropIds.includes(propVal.propertyDefinition)).map(propVal=>propVal.value).join(", ");
+// }
 
 export default function EntityTabs()
 {
     const dispatch = useDispatch();
+    const navigate = useNavigate();
     const [showAddEditEntityDialog, setShowAddEditEntityDialog] = React.useState(false);
 
     const { data:envelope, refetch, ...entityDefinitionQueryStatus } = useGetAllEntityDefinitionsQuery();
+    const entityDefinitions = envelope?envelope.payload:[];
     useEffect(() => {
         if (entityDefinitionQueryStatus.isError) 
-            handleQueryError(entityDefinitionQueryStatus, dispatch);
+            handleQueryError(entityDefinitionQueryStatus, dispatch, navigate);
     }, [entityDefinitionQueryStatus.isError]);
-    const entityDefinitions = envelope?envelope.payload:[];
 
     const tabEntityData = useSelector(selectEntityTabData); 
     const currentTabIndex = useSelector(selectCurrentEntityTabIndex);

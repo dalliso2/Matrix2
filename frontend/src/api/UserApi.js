@@ -3,11 +3,26 @@ import { api } from './BaseApi';
 const userApi = api.enhanceEndpoints({addTagTypes:['User','CurrentUser']}).injectEndpoints({
     //entityTypes: ['currentUser','user'],
     endpoints: (builder) => ({
+        login: builder.query({
+            query: (credentials) => ({url: '/login', method: 'POST', body: credentials}),
+            transformResponse: (response, meta, arg) => 
+            {
+                return response || [];
+            },
+            pollInterval: 1000,
+        }),   
+        refreshCredentials: builder.query({
+            query: (credentials) => ({url: '/refresh-credentials', method: 'POST', body: credentials}),
+            transformResponse: (response, meta, arg) => 
+            {
+                return response || [];
+            },
+            pollInterval: 1000,
+        }),       
         searchUsers: builder.query({
             query: (filter) => ({url:`/user/search/${filter}`}),
             transformResponse: (response, meta, arg) => 
             {
-                console.log(response);
                 return response || [];
             },
             providesTags: (result, error, filter) => result?[...result.payload.map(({id}) => ({type: 'User', id}))]:[],
@@ -29,7 +44,7 @@ const userApi = api.enhanceEndpoints({addTagTypes:['User','CurrentUser']}).injec
                 return response;
             },
             providesTags: ['CurrentUser'],
-            keepUnusedDataFor: 300
+            keepUnusedDataFor: 1200,
         }),
         storeUser: builder.mutation({
             query: (data) => ({url: '/user/store', method: 'POST', body: data}),
@@ -41,7 +56,7 @@ const userApi = api.enhanceEndpoints({addTagTypes:['User','CurrentUser']}).injec
                 method: 'PATCH',
                 body: { darkTheme: darkThemeBoolean },
             }),
-            invalidatesTags: (result, error, data) => [{type: 'CurrentUser'}],
+            //invalidatesTags: (result, error, data) => [{type: 'CurrentUser'}],
         }),
         updatePassword: builder.mutation({
             query: (data) => ({
@@ -49,16 +64,19 @@ const userApi = api.enhanceEndpoints({addTagTypes:['User','CurrentUser']}).injec
                 method: 'PATCH',
                 body: data,
             }),
-            invalidatesTags: (result, error, data) => [{type: 'CurrentUser'}],
+            //invalidatesTags: (result, error, data) => [{type: 'CurrentUser'}],
         }),
     }),
     overrideExisting: false,
 });
 
 export const {  useLazySearchUsersQuery,
+                useLazyGetCurrentUserQuery, 
                 useGetCurrentUserQuery, 
                 useSetUserDarkThemeMutation, 
                 useUpdatePasswordMutation,
                 useStoreUserMutation,
                 useGetUserQuery,
+                useLazyLoginQuery,
+                useLazyRefreshCredentialsQuery
                 } = userApi;

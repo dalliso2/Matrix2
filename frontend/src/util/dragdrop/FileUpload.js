@@ -3,7 +3,7 @@ const UPLOAD_FILE_URL = '/api/file/upload';
 
 export default class FileUpload
 {
-    constructor(file, statusChangeFunction, caseId)
+    constructor(file, caseId, authToken, statusChangeFunction )
     {
         this.fileName = file.name;
         this.size = file.size;
@@ -44,6 +44,7 @@ export default class FileUpload
         this.ajax.onabort = this.setAbort;
         //make async request
         this.ajax.open("POST", UPLOAD_FILE_URL);
+        this.ajax.setRequestHeader("Authorization", "Bearer " + authToken);
         //this.ajax.setRequestHeader('Access-Control-Allow-Origin','*');
         this.ajax.send(formData);
     }

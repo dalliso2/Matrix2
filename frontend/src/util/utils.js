@@ -11,7 +11,7 @@ const CaseRoles = ['Owner','Participant','Reviewer'];
 function getMessageBoxAPIError(apiError)
 {
     if (apiError.api_error)
-        return apiError.message + "\n" + apiError.errors.map(error => "\t" + error.message).join('\n')+'\n\ncode: '+apiError.errorCode;
+        return apiError.message + "\n" + apiError.errors?.map(error => "\t" + error.message).join('\n')+'\n\ncode: '+apiError.errorCode;
     else
         return "An unknown error occurred.";
 }

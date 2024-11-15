@@ -20,14 +20,15 @@ import DragDropTarget2 from "../util/dragdrop/DragDropTarget2";
 import { useSelector } from "react-redux";
 import { selectActiveCase } from "../state/AppSlice";
 import { useStoreFilesMutation } from "../api/FileApi";
+import { useNavigate } from "react-router-dom";
 
 const headers = ["File name", "Description", "Download", "Unlink"];
 
 export default function TaskFiles({taskId, unlink=true, sx={}})
 {
     console.log("TaskFiles");
-    console.log(taskId);
     const dispatch = useDispatch();
+    const navigate = useNavigate();
 
     //const [entityFiles,setEntityFiles] = useState([]);
     const [showFileSearchDialog, setShowFileSearchDialog] = React.useState(false);
@@ -37,18 +38,18 @@ export default function TaskFiles({taskId, unlink=true, sx={}})
     const taskFiles = taskFilesQueryResults?.currentData?.payload;
     useEffect(() => {
         if (taskFilesQueryResults.isError) 
-            handleQueryError(taskFilesQueryResults, dispatch);
+            handleQueryError(taskFilesQueryResults, dispatch, navigate);
     }, [taskFilesQueryResults.isError]);
 
     const [addTaskFiles, addTaskFileMutationState] = useAddTaskFilesMutation();
-    console.log(addTaskFileMutationState);
-    handleMutationResults(addTaskFileMutationState, dispatch, false, "Saving link to file...",
+    
+    handleMutationResults(addTaskFileMutationState, dispatch, navigate, false, "Saving link to file...",
         "Error saving task file link.", 
         ()=>addTaskFileMutationState.data.payload.forEach(taskFile=>enqueueSnackbar("Added link to file: " + taskFile.matrixFile.name, {variant:'success'})),
         ()=>{}); 
 
     const [removeTaskFile, removeTaskFileMutationState] = useRemoveTaskFileMutation();
-    handleMutationResults(removeTaskFileMutationState, dispatch, false, "Removing file link...",
+    handleMutationResults(removeTaskFileMutationState, dispatch, navigate, false, "Removing file link...",
         "Error removing file link", 
         ()=>enqueueSnackbar("Removed link to file: " + removeTaskFileMutationState.data.payload.matrixFile.name, {variant:'success'}),
         ()=>{}); 
@@ -72,7 +73,7 @@ export default function TaskFiles({taskId, unlink=true, sx={}})
     }
     
     const [storeFiles,storeFilesMutationState] = useStoreFilesMutation();
-    handleMutationResults(storeFilesMutationState, dispatch, false, "Saving files...",
+    handleMutationResults(storeFilesMutationState, dispatch, navigate, false, "Saving files...",
         "Error saving files.", 
         ()=>{}); 
 
@@ -100,8 +101,6 @@ export default function TaskFiles({taskId, unlink=true, sx={}})
         .concat([{sx:{p:1,width:'0px'},value:[<IconButton onClick={(event)=>unlinkFile(event, taskFile.id)}><LinkOffTwoToneIcon/></IconButton>]}])
     }});
 
-    console.log(taskFiles);
-    console.log(rows);
     return (
         <DragDropTarget2 fileUploadCallback={addFiles} caseId={activeCase?.id}  sx={{ borderRadius:'4px'}}>
             <Box sx={{display:'flex', flexDirection:'column', m:2}}>

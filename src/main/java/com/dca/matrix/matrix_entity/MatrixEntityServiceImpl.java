@@ -2,11 +2,18 @@ package com.dca.matrix.matrix_entity;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
+import java.util.Optional;
+import java.util.Set;
+import java.util.TreeMap;
+import java.util.TreeSet;
+
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.core.simple.JdbcClient;
 import org.springframework.stereotype.Service;
@@ -185,6 +192,40 @@ public class MatrixEntityServiceImpl implements MatrixEntityService
 	}
 
 	@Override
+	public Collection<MatrixEntityProjection> getCaseEntityProjections(Long caseId)
+	{
+		String sql = """
+                    select me.id, pd.id, pd.type, pd.name, pv.val, pd.include_in_title  
+                    from matrix_entity me, property_value pv, property_definition pd, entity_definition ed
+					where me.id = pv.entity_id 
+						and me.entity_definition_id = ed.id
+						and pd.id = pv.property_definition_id 
+						and ed.include_in_link_chart = true
+						and pv.property_definition_id = pd.id and me.matrix_case_id = ?
+					order by me.id, pv.value_order
+                    """;
+
+		LinkedList<MatrixEntityProjection> entityProjections = new LinkedList<MatrixEntityProjection>();
+		
+		this.jdbcClient.sql(sql).param(caseId)
+							.query((rs->{
+								MatrixEntityProjection currentProj = null;
+								if (entityProjections.size() > 0)
+									currentProj = entityProjections.getLast();
+								if (currentProj == null || !currentProj.getId().equals(rs.getLong(1)))
+								{
+									currentProj = new MatrixEntityProjection(rs.getLong(1));
+									entityProjections.add(currentProj);
+								}	
+								currentProj.setProperty(rs.getLong(2), rs.getLong(3), rs.getString(4), rs.getString(5));
+								if (rs.getBoolean(6))
+									currentProj.addToTitle(rs.getString(5));
+							}));
+		
+		return entityProjections;
+	}
+	
+	@Override
 	public Collection<MatrixEntity> getTimelineEntitiesForCase(Long caseId)
 	{
 		return this.meRepository.findAllTimelineEntities(caseId);
@@ -254,6 +295,38 @@ public class MatrixEntityServiceImpl implements MatrixEntityService
 								null, ApiErrorCode.INCORRECT_CASE_FOR_ENTITY);
 		});
 		return entities;
+	}
+
+	@Override
+	public Collection<MatrixEntityTitleDTO> findMatrixEntityTitlesByCase(Long caseId)
+	{
+		String sql = """
+			select pv.val from matrix_entity me, entity_definition ed, property_definition pd, property_value pv
+			where me.entity_definition_id = ed.id
+			and pd.entity_definition_id = ed.id
+			and pv.property_definition_id = pd.id
+			and pv.entity_id = me.id
+			and pd.include_in_title = true
+			and me.entity_definition_id in (select pd.entity_definition_id from property_definition pd where pd.include_in_timeline = true)
+			order by me.id, pv.value_order
+              """;
+
+		LinkedList<MatrixEntityTitleDTO> entityProjections = new LinkedList<>();
+
+		this.jdbcClient.sql(sql).param(caseId)
+							.query((rs->{
+								MatrixEntityTitleDTO dto = new MatrixEntityTitleDTO(rs.getLong(1), rs.getString(1));
+								MatrixEntityTitleDTO lastDTO = entityProjections.getLast();
+								if (dto.id().equals(lastDTO.id()))
+								{
+									entityProjections.removeLast();
+									entityProjections.add(new MatrixEntityTitleDTO(dto.id(), lastDTO.title() + ", " + dto.title()));
+								}
+								else
+									entityProjections.add(dto);
+							}));
+		
+		return entityProjections;
 	}
 	
 //	@Override

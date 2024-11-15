@@ -4,11 +4,14 @@ import { Box } from '@mui/material';
 import FileUploadProgressDialog2 from './FileUploadProgressDialog2';
 import FileUpload from './FileUpload';
 import './dragdroptarget.css';
+import { useSelector } from 'react-redux';
+import { selectAuthToken } from '../../state/AppSlice';
 
 const DragDropTarget2 = ({children, fileUploadCallback, caseId, accept=undefined, multiple=true, sx={} }) =>
 {
     const messageBoxKey = "DRAG_DROP_TARGET_MESSAGE_BOX_KEY";
     const dispatch = useDispatch();
+    const authToken = useSelector(selectAuthToken);
     const [dragActive, setDragActive] = useState(false);
     const [uploadsInProgress, setUploadsInProgress] = useState([]);
     const [progressDialogOpen, setProgressDialogOpen] = useState(false);
@@ -95,7 +98,7 @@ const DragDropTarget2 = ({children, fileUploadCallback, caseId, accept=undefined
         for (const file of files)
         {
             file.tempFileId = tempFileId--;
-            const uploadInProgress = new FileUpload(file, (fileUpload) => 
+            const uploadInProgress = new FileUpload(file, caseId, authToken, (fileUpload) => 
             {   
                 //if (fileUpload?.completed)
                 //        fileIdsCallback(fileUpload.fileId);
@@ -129,7 +132,7 @@ const DragDropTarget2 = ({children, fileUploadCallback, caseId, accept=undefined
                     // }
 
                     return nextState;
-                }) },caseId);
+                }) });
                 //console.log(uploadInProgress);  
             setUploadsInProgress((prevState) => { prevState.push(uploadInProgress); return prevState; });
         };

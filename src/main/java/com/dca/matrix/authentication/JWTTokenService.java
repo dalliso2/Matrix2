@@ -1,0 +1,56 @@
+package com.dca.matrix.authentication;
+
+import java.time.Instant;
+
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.stereotype.Service;
+
+import com.auth0.jwt.JWT;
+import com.auth0.jwt.JWTVerifier;
+import com.auth0.jwt.algorithms.Algorithm;
+import com.auth0.jwt.exceptions.JWTVerificationException;
+
+import ch.qos.logback.core.util.Duration;
+import lombok.extern.slf4j.Slf4j;
+
+@Service
+@Slf4j
+public class JWTTokenService
+{
+	private static final Duration TOKEN_VALID_DURATION = Duration.buildBySeconds(20);
+	
+	private final Algorithm hmac512;
+	private final JWTVerifier verifier;
+	
+	public JWTTokenService(@Value("${jwt.secret}") final String secret)
+	{
+		log.debug("SECRET: " + secret);
+		this.hmac512 = Algorithm.HMAC512(secret);
+		this.verifier = JWT.require(hmac512).build();
+	}
+	
+	public String generateToken(final String username)
+	{
+		return JWT.create().withSubject(username)
+							.withIssuer("Matrix2")
+							.withIssuedAt(Instant.now())
+							.withExpiresAt(Instant.now().plusMillis(TOKEN_VALID_DURATION.getMilliseconds()))
+							.sign(hmac512);
+	}
+	
+	public String validateToken(final String token)
+	{
+		String username = null;
+		try
+		{
+			username = verifier.verify(token).getSubject();
+		}
+		catch(final JWTVerificationException ex)
+		{
+			log.warn("invalid token: " + ex.getMessage());
+		}
+		
+		return username;
+	}
+}

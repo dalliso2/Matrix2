@@ -13,6 +13,7 @@ import { useDispatch } from "react-redux";
 import { handleMutationResults } from "../api/ApiUtils";
 import { setMessageBoxData } from "../state/AppSlice";
 import { enqueueSnackbar } from "notistack";
+import { useNavigate } from "react-router-dom";
 
 const fields = [
     { name: 'currentPassword', label: 'Current Password', type: PASSWORD, required: true, minLength: 8, value: '' },
@@ -26,11 +27,11 @@ const MESSAGEBOX_KEY = 'updating-password-messagebox';
 const ChangePasswordDialog = ({ closeDialogFn }) =>
 {
     const dispatch = useDispatch();
+    const navigate = useNavigate();
     const [passwordData, setPasswordData] = useState({currentPassword:'', newPassword:'', newPassword2:''});
 
     const [updatePassword, mutationState] = useUpdatePasswordMutation();
-    
-    handleMutationResults(mutationState, dispatch, true, "Updating password...", "Error updating password",
+    handleMutationResults(mutationState, dispatch, navigate, true, "Updating password...", "Error updating password",
         // successFn
         ()=>{   dispatch(setMessageBoxData("password-updated", "Success",'Password updated'));
                 closeDialogFn();

@@ -14,26 +14,28 @@ import { useGetCaseUsersQuery } from "../api/CaseApi";
 import { useLazySearchTasksQuery } from "../api/TaskApi";
 import { handleQueryError, handleQueryResultsWithWaitMessage } from "../api/ApiUtils";
 import { DialogContent } from "@mui/material";
+import { useNavigate } from "react-router-dom";
 
 const dateFormat = 'M/D/YYYY HH:mm';
 
 export default function EntityTaskSearchDialog({closeFn}) 
 {
     const theme = useTheme();   
+    const navigate = useNavigate();
     const dispatch = useDispatch(); 
     const activeCase = useSelector(selectActiveCase);
     const currentTabData = useSelector(selectCurrentTabData);
 
     // get users for drop down
     const { data:currentCaseUsers, ...currentCaseUsersQueryStatus } = useGetCaseUsersQuery(activeCase.id);
-    handleQueryResultsWithWaitMessage(currentCaseUsersQueryStatus, dispatch, "Loading case users...", ()=>{});
+    handleQueryResultsWithWaitMessage(currentCaseUsersQueryStatus, dispatch, navigate, "Loading case users...", ()=>{});
 
     // set up search function
     const [ searchTasksFn, { data:envelope, ...searchTasksQueryStatus} ]  = useLazySearchTasksQuery();
     const results = envelope?.payload;  
     useEffect(() => {  
         if (searchTasksQueryStatus.isError)
-            handleQueryError(searchTasksQueryStatus, dispatch);
+            handleQueryError(searchTasksQueryStatus, dispatch, navigate);
     } ,[searchTasksQueryStatus.isError]);
 
     const searchText = getInputComponent({
@@ -70,7 +72,6 @@ export default function EntityTaskSearchDialog({closeFn})
         dispatch(addTaskTab({taskId:taskData.id, title: "Task " + taskData.caseTaskId + " - " + taskData.title}));
     }
 
-    console.log(results);
     const rowValues = results?.map(task=>
         {
             const assignedTo = currentCaseUsers && currentCaseUsers.find(user=>user.userId===task.assignedTo);

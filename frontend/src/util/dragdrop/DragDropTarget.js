@@ -4,10 +4,13 @@ import FileUploadProgressDialog from './FileUploadProgressDialog';
 import FileUpload from './FileUpload';
 import './dragdroptarget.css';
 import { getMessageBoxAPIError } from '../utils';
-import { setMessageBoxData } from '../../state/AppSlice';
+import { selectAuthToken, setMessageBoxData } from '../../state/AppSlice';
+import { useSelector } from 'react-redux';
 
 const DragDropTarget = ({fileIdsCallback, caseId, accept=undefined, multiple=true, dispatch }) =>
 {
+    const authToken = useSelector(selectAuthToken);
+
     const messageBoxKey = "DRAG_DROP_TARGET_MESSAGE_BOX_KEY";
     const [dragActive, setDragActive] = useState(false);
     const [uploadsInProgress, setUploadsInProgress] = useState([]);
@@ -20,9 +23,7 @@ const DragDropTarget = ({fileIdsCallback, caseId, accept=undefined, multiple=tru
     {
         if (uploadsInProgress.length === 0)
         {
-            console.log("uploadsInProgress.length === 0");
             setProgressDialogOpen(false);
-            console.log(errorMessages); 
             if (errorMessages.length)
             {
                 dispatch(setMessageBoxData(messageBoxKey,"Upload Errors", errorMessages.join("\n"))); 
@@ -95,17 +96,14 @@ const DragDropTarget = ({fileIdsCallback, caseId, accept=undefined, multiple=tru
 
     const uploadFiles = (files) =>
     {
-        console.log(files);
         setProgressDialogOpen(true);
     
         var tempFileId = -1;
         for (const file of files)
         {
             file.tempFileId = tempFileId--;
-            const uploadInProgress = new FileUpload(file, (fileUpload) => 
+            const uploadInProgress = new FileUpload(file, caseId, authToken, (fileUpload) => 
             {   
-                console.log("uploadInProgress");
-                console.log(fileUpload);
                 if (fileUpload?.completed)
                 {
                     fileIdsCallback(fileUpload.fileId);
@@ -135,7 +133,7 @@ const DragDropTarget = ({fileIdsCallback, caseId, accept=undefined, multiple=tru
 
                     return nextState;
                 });
-            }, caseId);
+            });
             setUploadsInProgress((prevState) => { [...prevState].push(uploadInProgress); return prevState; });
         };
     }
@@ -144,7 +142,7 @@ const DragDropTarget = ({fileIdsCallback, caseId, accept=undefined, multiple=tru
     const handleChange = (e) =>
     {
         e.preventDefault();
-        console.log(e);
+        
         if (e.target.files && e.target.files.length) 
         {
             uploadFiles(e.target.files); 
