@@ -48,6 +48,16 @@ public class MFile extends EntityBase
 		this.originalName = originalFileName;
 	}
 	
+	public String getFileExtension()
+	{
+		int dotIndex = this.originalName.lastIndexOf(this.originalName);
+	
+		if (dotIndex > -1)
+			return this.originalName.substring(dotIndex);
+		else
+			return null;
+	}
+	
 	// return the name of the file in the server's file system.
 	// currently appends _id to the file name
 	public String getServerFileName()

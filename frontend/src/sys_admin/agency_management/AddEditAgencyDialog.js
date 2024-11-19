@@ -64,12 +64,12 @@ export default function AddEditAgencyDialog({ agency = {...newAgency, modified:f
             // remove the modified property and save
             const {modified, ...tempAgencyData} = agencyData;
             storeAgency(tempAgencyData);
+            //closeFn();
         }
     }
 
     return (
         <>
-            <Button  sx={{ m:0, p:0 }} onClick={() => openDialogFunction( undefined)} >Add Agency</Button>
             <Dialog open={true}>
                 <DialogTitle sx={{backgroundColor:theme.palette.primary.main, color:theme.palette.primary.contrastText }}>Add/Edit Agency</DialogTitle>
                 <DialogContent sx={{mt:2}}>

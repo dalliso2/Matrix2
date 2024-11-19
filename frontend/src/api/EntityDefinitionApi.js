@@ -8,13 +8,12 @@ const entityDefinitionApi = api.enhanceEndpoints({addTagTypes:['EntityDefinition
             {
                 return response;
             },
-            providesTags: (result, error, filter) => 
-                result?result.payload.map(({id}) => ({type: 'EntityDefinition', id})):[],  
+            providesTags: (result, error, filter) => ['EntityDefinition'],  
             keepUnusedDataFor: 300
         }),        
         storeEntityDefinition: builder.mutation({
             query: (data) => ({url: '/entity_definition/store', method: 'POST', body: data}),
-            invalidatesTags: (result, error, data) => result?[{type:'EntityDefinition', id:result.id}]:[],
+            invalidatesTags: (result, error, data) => ['EntityDefinition'],
         }),
     }),
     overrideExisting: false,

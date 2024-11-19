@@ -8,12 +8,13 @@ import { Button } from "@mui/material";
 import { useSetUserDarkThemeMutation, useLazyRefreshCredentialsQuery } from '../api/UserApi';
 import ChangePasswordDialog from "./ChangePasswordDialog";
 import { useDispatch } from 'react-redux';
-import { resetState, selectCurrentUser, selectDarkTheme, setStateDarkTheme, setAuthToken, selectAuthToken } from '../state/AppSlice';
+import { selectCurrentUser, selectDarkTheme, setStateDarkTheme, setAuthToken, selectAuthToken, resetState } from '../state/AppSlice';
 import { useSelector } from "react-redux";
 import { handleMutationResults } from "../api/ApiUtils";
 import { enqueueSnackbar } from "notistack";
 import { useNavigate } from "react-router-dom";
 import { handleQueryError } from "../api/ApiUtils";
+import { api } from "../api/BaseApi";
 
 export default function UserAccountButton()
 {
@@ -56,6 +57,7 @@ export default function UserAccountButton()
 
     async function logout()
     {
+        dispatch(api.util.resetApiState());
         dispatch(resetState());
     }
 

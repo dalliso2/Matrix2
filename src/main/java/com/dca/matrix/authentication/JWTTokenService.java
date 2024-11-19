@@ -18,14 +18,13 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 public class JWTTokenService
 {
-	private static final Duration TOKEN_VALID_DURATION = Duration.buildBySeconds(20);
+	private static final Duration TOKEN_VALID_DURATION = Duration.buildByMinutes(15);
 	
 	private final Algorithm hmac512;
 	private final JWTVerifier verifier;
 	
 	public JWTTokenService(@Value("${jwt.secret}") final String secret)
 	{
-		log.debug("SECRET: " + secret);
 		this.hmac512 = Algorithm.HMAC512(secret);
 		this.verifier = JWT.require(hmac512).build();
 	}
@@ -39,18 +38,8 @@ public class JWTTokenService
 							.sign(hmac512);
 	}
 	
-	public String validateToken(final String token)
+	public String validateTokenReturnUsername(final String token)
 	{
-		String username = null;
-		try
-		{
-			username = verifier.verify(token).getSubject();
-		}
-		catch(final JWTVerificationException ex)
-		{
-			log.warn("invalid token: " + ex.getMessage());
-		}
-		
-		return username;
+		return verifier.verify(token).getSubject();
 	}
 }

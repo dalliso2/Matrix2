@@ -67,15 +67,6 @@ public class EntityBase
 	@JsonIgnore
 	protected MatrixUser lastUpdatedBy;
 	
-//	@Transient
-//	protected String 	createdByUsername;
-//	@Transient
-//	protected String	createdByName;
-//	@Transient
-//	protected String	lastUpdatedByUsername;
-//	@Transient
-//	protected String 	lastUpdatedByName;
-	
 	@PrePersist
 	private void prePersist()
 	{
@@ -95,19 +86,4 @@ public class EntityBase
 			this.lastUpdatedBy =  authService.getCurrentUser();
 		this.lastUpdateTime = Date.from(Instant.now());
 	}
-	
-//	@PostLoad
-//	private void postLoad()
-//	{
-//		if (this.createdBy != null)
-//		{
-//			this.createdByName = this.createdBy.getLastName() + ", " + this.createdBy.getLastName();
-//			this.createdByUsername = this.createdBy.getUsername();
-//		}
-//		if (this.lastUpdatedBy != null)
-//		{
-//			this.lastUpdatedByName = this.lastUpdatedBy.getLastName() + ", " + this.lastUpdatedBy.getLastName();
-//			this.lastUpdatedByUsername = this.lastUpdatedBy.getUsername();
-//		}
-//	}
 }

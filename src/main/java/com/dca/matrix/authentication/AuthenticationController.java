@@ -1,14 +1,17 @@
 package com.dca.matrix.authentication;
 
 import java.util.LinkedList;
+import java.util.Optional;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -33,33 +36,35 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 public class AuthenticationController
 {
-	private final AuthenticationManager authManager;
 	private final JWTTokenService tokenService;
 	private final MatrixUserService matrixUserService;
+	private final PasswordEncoder passwordEncoder;
 	
 	@PostMapping("/login")
 	public ResponseEntity<ApiResponse> login(@RequestBody @Valid final AuthenticationRequestDTO authRequest,
 																			HttpServletRequest request)
 	{
 		ResponseEntity<ApiResponse> responseEntity = null;
+				
+		final Optional<MatrixUser> userOpt = this.matrixUserService.findByUsername(authRequest.username());
 		
-		try
+		if (userOpt.isPresent() && this.passwordEncoder.matches(authRequest.password(), userOpt.get().getPassword()))
 		{
-			authManager.authenticate(new UsernamePasswordAuthenticationToken(authRequest.username(), authRequest.password()));
-			final MatrixUserDTO user = new MatrixUserDTO(this.matrixUserService.findByUsername(authRequest.username()));
+			
+			final MatrixUserDTO user = new MatrixUserDTO(userOpt.get());
 			AuthenticationResponseDTO authResponse = new AuthenticationResponseDTO(tokenService.generateToken(user.username()),
-											user);
+																						user);
 			responseEntity = new ResponseEntity<>(ApiResponseUtil.success(authResponse, 
 												"Authenticated user " + authRequest.username(), 
 												request.getRequestURI()),
 												HttpStatus.OK);
 		}
-		catch (BadCredentialsException ex)
+		else
 		{
 			responseEntity = new ResponseEntity<>(ApiResponseUtil.fail("Invalid credentials", 
-																			new LinkedList<>(), 
-																			ApiErrorCode.INVALID_CREDENTIALS, 
-																			request.getRequestURI()), HttpStatus.UNAUTHORIZED);
+					new LinkedList<>(), 
+					ApiErrorCode.INVALID_CREDENTIALS, 
+					request.getRequestURI()), HttpStatus.UNAUTHORIZED);
 		}
 		
 		return responseEntity;
@@ -69,18 +74,12 @@ public class AuthenticationController
 	public ResponseEntity<ApiResponse<AuthenticationResponseDTO>> refreshCredentials(@RequestBody @Valid final TokenRefreshDTO tokenRefreshDTO,
 																			HttpServletRequest request)
 	{
-		final String username = tokenService.validateToken(tokenRefreshDTO.token());
-
-		final MatrixUserDTO user = new MatrixUserDTO(this.matrixUserService.findByUsername(username));
-		var token = tokenService.generateToken(user.username());
-		log.debug("username: " + user.username() + "  TOKEN DIFF: " + tokenRefreshDTO.equals(token));
-		AuthenticationResponseDTO authResponse = new AuthenticationResponseDTO(token,
-																			user);
-		
-		log.debug("Token username: " + tokenService.validateToken(token));
+		MatrixUserDTO userDTO = new MatrixUserDTO((MatrixUser)SecurityContextHolder.getContext().getAuthentication().getPrincipal());
+		AuthenticationResponseDTO authResponse = new AuthenticationResponseDTO(tokenRefreshDTO.token(), userDTO);
+								
 		
 		return new ResponseEntity<>(ApiResponseUtil.success(authResponse, 
-															"Authenticated user " + username, 
+															"Authenticated user " + userDTO.username(), 
 															request.getRequestURI()),
 															HttpStatus.OK);
 	}

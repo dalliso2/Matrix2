@@ -17,7 +17,7 @@ public record MatrixUserDTO(Long id,
 	public MatrixUserDTO(MatrixUser user)
 	{
 		this(user.getId(), user.getUsername(), MatrixUser.EMPTY_PASSWORD, user.getLastName(), user.getFirstName(), user.getEmail(),
-				user.getWorkNumber(), user.getCellNumber(), user.getAgency().getId(), user.getIsAdmin(),
+				user.getWorkNumber(), user.getCellNumber(), user.getAgency()!=null?user.getAgency().getId():null, user.getIsAdmin(),
 				user.getEnabled(), user.getDarkTheme(), user.getProfileImage()!=null?user.getProfileImage().getId():null);
 	}
 }

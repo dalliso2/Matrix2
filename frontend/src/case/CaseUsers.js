@@ -16,8 +16,8 @@ import AddUsersToCaseDialog from "./AddUsersToCaseDialog";
 import { handleMutationResults } from "../api/ApiUtils";
 import RefreshIcon from '@mui/icons-material/Refresh';
 import { useEffect } from "react";
-import { setMessageBoxData } from "../state/AppSlice";
 import { useNavigate } from "react-router-dom";
+import { handleQueryError } from "../api/ApiUtils";
 
 const REMOVE = -1;
 
@@ -34,12 +34,9 @@ export default function CaseUsers({caseObj})
     const [caseUsers, setCaseUsers] = useState([]);
     const [addUsersDialogOpen, setAddUsersDialogOpen] = useState(false);
 
-    const { data:caseUsersQueryData, refetch, isFetching, isLoading, isError } = useGetCaseUsersQuery(caseObj.id);
-
-    useEffect(() => { 
-        if (isError) 
-            dispatch(setMessageBoxData("CaseUsers", "Error", "An error occurred while retrieving the users assigned to the case.")); 
-    }, [isError]);
+    //const { data:caseUsersQueryData, refetch, isFetching, isLoading, isError } = useGetCaseUsersQuery(caseObj.id);
+    const { data:caseUsersQueryData, refetch, ...caseUsersQueryResults } = useGetCaseUsersQuery(caseObj.id);
+    handleQueryError(caseUsersQueryResults, dispatch, navigate, ()=>{});
 
     useEffect(() => {
         if (caseUsersQueryData)
@@ -99,9 +96,10 @@ export default function CaseUsers({caseObj})
             <Box sx={{display:'flex', flexDirection:'column', height:'100%', flexGrow:1}}>
                 <Box sx={{display:'flex', justifyContent:'space-between'}}>
                     <IconButton onClick={() => refetch()}><RefreshIcon /></IconButton>
+                    <Box>Case Users</Box>
                     <IconButton onClick={()=>setAddUsersDialogOpen(true)}><PersonAddAltTwoToneIcon/></IconButton>
                 </Box>
-                <Grid columnHeadings={['Username','Last Name','First Name','Picture','Role']} rowValues={userData} isFetching={isLoading}/>
+                <Grid columnHeadings={['Username','Last Name','First Name','Picture','Role']} rowValues={userData} isFetching={caseUsersQueryResults.isFetching}/>
                 { addUsersDialogOpen && <AddUsersToCaseDialog 
                                         caseUsers={caseUsers} 
                                         caseId={caseObj.id}

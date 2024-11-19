@@ -3,7 +3,7 @@
  */
 /////////// React imports //////////
 /////////// MUI imports //////////
-import React, { useEffect } from 'react';
+import React from 'react';
 import Box from '@mui/material/Box';
 import Button from '@mui/material/Button';
 import Dialog from '@mui/material/Dialog';
@@ -40,12 +40,11 @@ export default function AddUsersToCaseDialog({caseUsers, caseId, closeDialogFn }
     const [storeUserCaseRole,storeMutationState] = useStoreUserCaseRoleMutation();    
     handleMutationResults(storeMutationState, dispatch, navigate, "Updating user case role...");
 
-    const [searchUsersFn, searchResults] = useLazySearchUsersQuery();
-    useEffect(() => {
-        handleQueryResultsWithWaitMessage(searchResults, dispatch, navigate, "Searching users...",);
-    }, [searchResults.isSuccess, searchResults.isLoading, searchResults.isError]);
+    const [searchUsersFn, {data:searchResultsEnvelope, ...searchResultsQuery}] = useLazySearchUsersQuery();
+    const searchResults = searchResultsEnvelope?.payload;
+    handleQueryResultsWithWaitMessage(searchResultsQuery, dispatch, navigate, "Searching users...",);
 
-    const userData = searchResults.data && searchResults.data.filter(user=>!caseUserIds.includes(user.id))
+    const userData = searchResults && searchResults.filter(user=>!caseUserIds.includes(user.id))
                     .map(user=>{ return {rowProperties:{id:user.id, onClick:()=>{}}, 
                         sx:{cursor:'pointer', '&:hover':{backgroundColor:theme.palette.action.hover}},
                         values:[{value:[user.username],sx:{verticalAlign:'middle',p:0,pl:1}},

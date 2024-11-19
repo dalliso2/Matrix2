@@ -1,4 +1,5 @@
-import { setMessageBoxData, setWaitMessage, removeWaitMessage, setSystemInErrorState, setCurrentUser, setAuthToken } from "../state/AppSlice";
+import { setMessageBoxData, setWaitMessage, removeWaitMessage, setSystemInErrorState, setCurrentUser, setAuthToken, resetState } from "../state/AppSlice";
+import { api } from "../api/BaseApi";
 
 function handleQueryError(queryResults, dispatch, navigate, errorFn)
 {
@@ -22,8 +23,8 @@ function handleQueryError(queryResults, dispatch, navigate, errorFn)
         }
         else if (queryResults.error?.status === 401)
         {
-            dispatch(setCurrentUser(undefined));
-            dispatch(setAuthToken(undefined));
+            dispatch(api.util.resetApiState());
+            dispatch(resetState());
             navigate("/login");
         }
         else
@@ -102,9 +103,9 @@ function handleQueryResultsWithWaitMessage(queryResults, dispatch, navigate, wai
             dispatch(setMessageBoxData(queryResults.requestId, queryResults.error.data.error, queryResults.error.data.message)); 
         }
         else if (queryResults.error?.status === 401)
-        {
-            dispatch(setCurrentUser(undefined));
-            dispatch(setAuthToken(undefined));
+        {        
+            dispatch(api.util.resetApiState());
+            dispatch(resetState());
             navigate("/login");
         }
         else

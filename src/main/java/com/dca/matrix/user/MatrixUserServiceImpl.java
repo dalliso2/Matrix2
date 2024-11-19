@@ -3,6 +3,8 @@ package com.dca.matrix.user;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
+
 import org.apache.logging.log4j.util.Strings;
 import org.springframework.http.HttpStatus;
 import org.springframework.jdbc.core.simple.JdbcClient;
@@ -124,10 +126,9 @@ public class MatrixUserServiceImpl implements MatrixUserService
 	}
 
 	@Override
-	public MatrixUser findByUsername(String username)
+	public Optional<MatrixUser> findByUsername(String username)
 	{
-		return this.MatrixUserRepository.findByUsername(username).orElseThrow(()->
-			new MatrixValidationException("User " + username + " not found.", null, ApiErrorCode.USER_DOES_NOT_EXIST));
+		return this.MatrixUserRepository.findByUsername(username);
 	}
 
 	@Override

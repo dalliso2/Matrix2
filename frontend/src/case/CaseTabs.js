@@ -15,7 +15,6 @@ import CaseTabContent from "./CaseTabContent";
 import { useSelector } from "react-redux";
 import { addCaseTab, selectCurrentCaseTabIndex, setCurrentCaseTab, removeCaseTab, selectCaseTabCaseIds } from "../state/AppSlice";
 import { setMessageBoxData } from "../state/AppSlice";
-import SetActiveCaseDialog from "./SetActiveCaseDialog";
 
 function a11yProps(index) 
 {
@@ -52,7 +51,7 @@ export default function CaseTabs()
     }
 
     const tabData = useSelector(selectCaseTabCaseIds);
-    const tabs = [{title: "My Cases", component: <UserCaseList caseList={isFetching?undefined:caseList} refetchFn={refetch} rowClickFn={addTab}/>}]
+    const tabs = [{title: "My Cases", component: <UserCaseList/>}]
                     .concat(
                         tabData?.map((caseId, index) => 
                         { 
@@ -102,7 +101,6 @@ export default function CaseTabs()
             </Content>
         </ContentWrapper> 
       </TabbedContentArea>
-      <SetActiveCaseDialog/>
       </>
     );
 }   

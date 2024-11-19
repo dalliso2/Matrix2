@@ -1,684 +1,695 @@
-CREATE USER IF NOT EXISTS "SA" SALT 'b525c895ead155be' HASH '9f85c673d317f3dafde180ce25230859b89246d24f03ba19f93946e4df60df2d' ADMIN;
-DROP TABLE IF EXISTS "PUBLIC"."AGENCY" CASCADE;
-DROP TABLE IF EXISTS "PUBLIC"."CASE_ENTITY" CASCADE;
-DROP TABLE IF EXISTS "PUBLIC"."ENTITY_FILE" CASCADE;
-DROP TABLE IF EXISTS "PUBLIC"."ENTITY_DEFINITION" CASCADE;
-DROP TABLE IF EXISTS "PUBLIC"."ENTITY_RELATIONSHIP" CASCADE;
-DROP TABLE IF EXISTS "PUBLIC"."MATRIX_CASE" CASCADE;
-DROP TABLE IF EXISTS "PUBLIC"."MATRIX_USER" CASCADE;
-DROP TABLE IF EXISTS "PUBLIC"."MATRIX_ENTITY" CASCADE;
-DROP TABLE IF EXISTS "PUBLIC"."MFILE" CASCADE;
-DROP TABLE IF EXISTS "PUBLIC"."PROPERTY_VALUE" CASCADE;
-DROP TABLE IF EXISTS "PUBLIC"."PROPERTY_DEFINITION" CASCADE;
-DROP TABLE IF EXISTS "PUBLIC"."TASK" CASCADE;
-DROP TABLE IF EXISTS "PUBLIC"."TASK_ENTITY" CASCADE;
-DROP TABLE IF EXISTS "PUBLIC"."USER_CASE_ROLE" CASCADE;
-DROP TABLE IF EXISTS "PUBLIC"."LINK_CHART" CASCADE;
-DROP TABLE IF EXISTS "PUBLIC"."TASK_FILE" CASCADE;
-DROP TABLE IF EXISTS "PUBLIC"."TIMELINE" CASCADE;
-DROP TABLE IF EXISTS "PUBLIC"."TIMELINE_ENTITY" CASCADE;
+-- MySQL dump 10.13  Distrib 8.0.34, for Win64 (x86_64)
+--
+-- Host: localhost    Database: matrix2
+-- ------------------------------------------------------
+-- Server version	8.0.35
+
+/*!40101 SET @OLD_CHARACTER_SET_CLIENT=@@CHARACTER_SET_CLIENT */;
+/*!40101 SET @OLD_CHARACTER_SET_RESULTS=@@CHARACTER_SET_RESULTS */;
+/*!40101 SET @OLD_COLLATION_CONNECTION=@@COLLATION_CONNECTION */;
+/*!50503 SET NAMES utf8 */;
+/*!40103 SET @OLD_TIME_ZONE=@@TIME_ZONE */;
+/*!40103 SET TIME_ZONE='+00:00' */;
+/*!40014 SET @OLD_UNIQUE_CHECKS=@@UNIQUE_CHECKS, UNIQUE_CHECKS=0 */;
+/*!40014 SET @OLD_FOREIGN_KEY_CHECKS=@@FOREIGN_KEY_CHECKS, FOREIGN_KEY_CHECKS=0 */;
+/*!40101 SET @OLD_SQL_MODE=@@SQL_MODE, SQL_MODE='NO_AUTO_VALUE_ON_ZERO' */;
+/*!40111 SET @OLD_SQL_NOTES=@@SQL_NOTES, SQL_NOTES=0 */;
+
+--
+-- Table structure for table `agency`
+--
+
+DROP TABLE IF EXISTS `agency`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE `agency` (
+  `create_time` datetime(6) DEFAULT NULL,
+  `created_by` bigint DEFAULT NULL,
+  `id` bigint NOT NULL AUTO_INCREMENT,
+  `last_update_time` datetime(6) DEFAULT NULL,
+  `last_updated_by` bigint DEFAULT NULL,
+  `acronym` varchar(255) DEFAULT NULL,
+  `name` varchar(255) DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  KEY `FKcg5nqt66wp78gnhrvyj650rou` (`created_by`),
+  KEY `FKocl5d10jqagot4ipi5sqdx440` (`last_updated_by`),
+  CONSTRAINT `FKcg5nqt66wp78gnhrvyj650rou` FOREIGN KEY (`created_by`) REFERENCES `matrix_user` (`id`),
+  CONSTRAINT `FKocl5d10jqagot4ipi5sqdx440` FOREIGN KEY (`last_updated_by`) REFERENCES `matrix_user` (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `agency`
+--
+
+LOCK TABLES `agency` WRITE;
+/*!40000 ALTER TABLE `agency` DISABLE KEYS */;
+/*!40000 ALTER TABLE `agency` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Table structure for table `case_entity`
+--
+
+DROP TABLE IF EXISTS `case_entity`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE `case_entity` (
+  `create_time` datetime(6) DEFAULT NULL,
+  `created_by` bigint DEFAULT NULL,
+  `id` bigint NOT NULL AUTO_INCREMENT,
+  `last_update_time` datetime(6) DEFAULT NULL,
+  `last_updated_by` bigint DEFAULT NULL,
+  `matrix_case_id` bigint DEFAULT NULL,
+  `matrix_entity_id` bigint DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  KEY `FKc5fi3ucn8d4vgg655y4c7s6jc` (`created_by`),
+  KEY `FKh38w3l45t4x3h70pthmqg6hig` (`last_updated_by`),
+  KEY `FKr9g62wt400sgevo8mljhph6yf` (`matrix_case_id`),
+  KEY `FKncdm2uyoyevlnlvivfiyt4gb0` (`matrix_entity_id`),
+  CONSTRAINT `FKc5fi3ucn8d4vgg655y4c7s6jc` FOREIGN KEY (`created_by`) REFERENCES `matrix_user` (`id`),
+  CONSTRAINT `FKh38w3l45t4x3h70pthmqg6hig` FOREIGN KEY (`last_updated_by`) REFERENCES `matrix_user` (`id`),
+  CONSTRAINT `FKncdm2uyoyevlnlvivfiyt4gb0` FOREIGN KEY (`matrix_entity_id`) REFERENCES `matrix_entity` (`id`),
+  CONSTRAINT `FKr9g62wt400sgevo8mljhph6yf` FOREIGN KEY (`matrix_case_id`) REFERENCES `matrix_case` (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `case_entity`
+--
+
+LOCK TABLES `case_entity` WRITE;
+/*!40000 ALTER TABLE `case_entity` DISABLE KEYS */;
+/*!40000 ALTER TABLE `case_entity` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Table structure for table `entity_definition`
+--
+
+DROP TABLE IF EXISTS `entity_definition`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE `entity_definition` (
+  `editable` bit(1) NOT NULL,
+  `include_in_link_chart` bit(1) DEFAULT NULL,
+  `create_time` datetime(6) DEFAULT NULL,
+  `created_by` bigint DEFAULT NULL,
+  `id` bigint NOT NULL AUTO_INCREMENT,
+  `last_update_time` datetime(6) DEFAULT NULL,
+  `last_updated_by` bigint DEFAULT NULL,
+  `version` bigint NOT NULL,
+  `description` varchar(255) DEFAULT NULL,
+  `name` varchar(255) NOT NULL,
+  PRIMARY KEY (`id`),
+  KEY `FKs0rxdkigtch2r0xbaildxmfwo` (`created_by`),
+  KEY `FK5pog0jcwwmh6des0xfbl3bom0` (`last_updated_by`),
+  CONSTRAINT `FK5pog0jcwwmh6des0xfbl3bom0` FOREIGN KEY (`last_updated_by`) REFERENCES `matrix_user` (`id`),
+  CONSTRAINT `FKs0rxdkigtch2r0xbaildxmfwo` FOREIGN KEY (`created_by`) REFERENCES `matrix_user` (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `entity_definition`
+--
+
+LOCK TABLES `entity_definition` WRITE;
+/*!40000 ALTER TABLE `entity_definition` DISABLE KEYS */;
+/*!40000 ALTER TABLE `entity_definition` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Table structure for table `entity_file`
+--
+
+DROP TABLE IF EXISTS `entity_file`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE `entity_file` (
+  `create_time` datetime(6) DEFAULT NULL,
+  `created_by` bigint DEFAULT NULL,
+  `id` bigint NOT NULL AUTO_INCREMENT,
+  `last_update_time` datetime(6) DEFAULT NULL,
+  `last_updated_by` bigint DEFAULT NULL,
+  `m_file_id` bigint DEFAULT NULL,
+  `matrix_entity_id` bigint DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  KEY `FK9obaqavg3yegkxx8yxjqmbuvw` (`created_by`),
+  KEY `FKsml72tma2nr42ws4kjgwpnbs9` (`last_updated_by`),
+  KEY `FK3jg2qw6mcalwpve7nup0tgj5h` (`m_file_id`),
+  KEY `FKhkwyahpcl4jdq74044g7h5n3l` (`matrix_entity_id`),
+  CONSTRAINT `FK3jg2qw6mcalwpve7nup0tgj5h` FOREIGN KEY (`m_file_id`) REFERENCES `mfile` (`id`),
+  CONSTRAINT `FK9obaqavg3yegkxx8yxjqmbuvw` FOREIGN KEY (`created_by`) REFERENCES `matrix_user` (`id`),
+  CONSTRAINT `FKhkwyahpcl4jdq74044g7h5n3l` FOREIGN KEY (`matrix_entity_id`) REFERENCES `matrix_entity` (`id`),
+  CONSTRAINT `FKsml72tma2nr42ws4kjgwpnbs9` FOREIGN KEY (`last_updated_by`) REFERENCES `matrix_user` (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `entity_file`
+--
+
+LOCK TABLES `entity_file` WRITE;
+/*!40000 ALTER TABLE `entity_file` DISABLE KEYS */;
+/*!40000 ALTER TABLE `entity_file` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Table structure for table `entity_relationship`
+--
+
+DROP TABLE IF EXISTS `entity_relationship`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE `entity_relationship` (
+  `child_id` bigint DEFAULT NULL,
+  `create_time` datetime(6) DEFAULT NULL,
+  `created_by` bigint DEFAULT NULL,
+  `id` bigint NOT NULL AUTO_INCREMENT,
+  `last_update_time` datetime(6) DEFAULT NULL,
+  `last_updated_by` bigint DEFAULT NULL,
+  `parent_id` bigint DEFAULT NULL,
+  `relationship_description` varchar(255) DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  KEY `FK2ytti7u2e0ujnr1bvau2eeb2q` (`created_by`),
+  KEY `FKm91fcde7n7ujl6nlvyvq7drcl` (`last_updated_by`),
+  KEY `FKjd74ftgjunvchhi8758run7rk` (`child_id`),
+  KEY `FKh93jolrs688x8qrs9yofvqvxc` (`parent_id`),
+  CONSTRAINT `FK2ytti7u2e0ujnr1bvau2eeb2q` FOREIGN KEY (`created_by`) REFERENCES `matrix_user` (`id`),
+  CONSTRAINT `FKh93jolrs688x8qrs9yofvqvxc` FOREIGN KEY (`parent_id`) REFERENCES `matrix_entity` (`id`),
+  CONSTRAINT `FKjd74ftgjunvchhi8758run7rk` FOREIGN KEY (`child_id`) REFERENCES `matrix_entity` (`id`),
+  CONSTRAINT `FKm91fcde7n7ujl6nlvyvq7drcl` FOREIGN KEY (`last_updated_by`) REFERENCES `matrix_user` (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `entity_relationship`
+--
+
+LOCK TABLES `entity_relationship` WRITE;
+/*!40000 ALTER TABLE `entity_relationship` DISABLE KEYS */;
+/*!40000 ALTER TABLE `entity_relationship` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Table structure for table `link_chart`
+--
+
+DROP TABLE IF EXISTS `link_chart`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE `link_chart` (
+  `zoom` float DEFAULT NULL,
+  `create_time` datetime(6) DEFAULT NULL,
+  `created_by` bigint DEFAULT NULL,
+  `id` bigint NOT NULL AUTO_INCREMENT,
+  `last_update_time` datetime(6) DEFAULT NULL,
+  `last_updated_by` bigint DEFAULT NULL,
+  `matrix_case_id` bigint NOT NULL,
+  `description` varchar(255) DEFAULT NULL,
+  `entities` varchar(255) DEFAULT NULL,
+  `name` varchar(255) DEFAULT NULL,
+  `pan` varchar(255) DEFAULT NULL,
+  `style_sheet` varchar(255) DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  KEY `FK8vv4rb89rkfgxu2b3jss96g32` (`created_by`),
+  KEY `FKj01fgmw931e8pdn0qhi798s4g` (`last_updated_by`),
+  KEY `FKpfsp6v9oaa82jpukddkbccqml` (`matrix_case_id`),
+  CONSTRAINT `FK8vv4rb89rkfgxu2b3jss96g32` FOREIGN KEY (`created_by`) REFERENCES `matrix_user` (`id`),
+  CONSTRAINT `FKj01fgmw931e8pdn0qhi798s4g` FOREIGN KEY (`last_updated_by`) REFERENCES `matrix_user` (`id`),
+  CONSTRAINT `FKpfsp6v9oaa82jpukddkbccqml` FOREIGN KEY (`matrix_case_id`) REFERENCES `matrix_case` (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `link_chart`
+--
+
+LOCK TABLES `link_chart` WRITE;
+/*!40000 ALTER TABLE `link_chart` DISABLE KEYS */;
+/*!40000 ALTER TABLE `link_chart` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Table structure for table `matrix_case`
+--
+
+DROP TABLE IF EXISTS `matrix_case`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE `matrix_case` (
+  `create_time` datetime(6) DEFAULT NULL,
+  `created_by` bigint DEFAULT NULL,
+  `id` bigint NOT NULL AUTO_INCREMENT,
+  `last_update_time` datetime(6) DEFAULT NULL,
+  `last_updated_by` bigint DEFAULT NULL,
+  `case_description` varchar(255) DEFAULT NULL,
+  `case_number` varchar(255) DEFAULT NULL,
+  `case_title` varchar(255) DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  KEY `FKf7rl0hgvcqro90u71f3ogdeef` (`created_by`),
+  KEY `FKjysis4d2rk20swrx2qu10jlvd` (`last_updated_by`),
+  CONSTRAINT `FKf7rl0hgvcqro90u71f3ogdeef` FOREIGN KEY (`created_by`) REFERENCES `matrix_user` (`id`),
+  CONSTRAINT `FKjysis4d2rk20swrx2qu10jlvd` FOREIGN KEY (`last_updated_by`) REFERENCES `matrix_user` (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `matrix_case`
+--
+
+LOCK TABLES `matrix_case` WRITE;
+/*!40000 ALTER TABLE `matrix_case` DISABLE KEYS */;
+/*!40000 ALTER TABLE `matrix_case` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Table structure for table `matrix_entity`
+--
+
+DROP TABLE IF EXISTS `matrix_entity`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE `matrix_entity` (
+  `create_time` datetime(6) DEFAULT NULL,
+  `created_by` bigint DEFAULT NULL,
+  `entity_definition_id` bigint DEFAULT NULL,
+  `id` bigint NOT NULL AUTO_INCREMENT,
+  `last_update_time` datetime(6) DEFAULT NULL,
+  `last_updated_by` bigint DEFAULT NULL,
+  `matrix_case_id` bigint NOT NULL,
+  PRIMARY KEY (`id`),
+  KEY `FKir40h4rw7cndrbl52u5qbv3oe` (`created_by`),
+  KEY `FKgve3iiagixs7b7kbhsqypldc9` (`last_updated_by`),
+  KEY `FKo5x1lnmilkjc3u1sb1c13dwbb` (`entity_definition_id`),
+  KEY `FKjw1fx15d2xnt77gx31q1yvrkh` (`matrix_case_id`),
+  CONSTRAINT `FKgve3iiagixs7b7kbhsqypldc9` FOREIGN KEY (`last_updated_by`) REFERENCES `matrix_user` (`id`),
+  CONSTRAINT `FKir40h4rw7cndrbl52u5qbv3oe` FOREIGN KEY (`created_by`) REFERENCES `matrix_user` (`id`),
+  CONSTRAINT `FKjw1fx15d2xnt77gx31q1yvrkh` FOREIGN KEY (`matrix_case_id`) REFERENCES `matrix_case` (`id`),
+  CONSTRAINT `FKo5x1lnmilkjc3u1sb1c13dwbb` FOREIGN KEY (`entity_definition_id`) REFERENCES `entity_definition` (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `matrix_entity`
+--
+
+LOCK TABLES `matrix_entity` WRITE;
+/*!40000 ALTER TABLE `matrix_entity` DISABLE KEYS */;
+/*!40000 ALTER TABLE `matrix_entity` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Table structure for table `matrix_user`
+--
+
+DROP TABLE IF EXISTS `matrix_user`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE `matrix_user` (
+  `admin` bit(1) NOT NULL,
+  `dark_theme` bit(1) NOT NULL,
+  `enabled` bit(1) NOT NULL,
+  `agency_id` bigint DEFAULT NULL,
+  `create_time` datetime(6) DEFAULT NULL,
+  `created_by` bigint DEFAULT NULL,
+  `id` bigint NOT NULL AUTO_INCREMENT,
+  `last_update_time` datetime(6) DEFAULT NULL,
+  `last_updated_by` bigint DEFAULT NULL,
+  `profile_image_id` bigint DEFAULT NULL,
+  `cell_number` varchar(255) DEFAULT NULL,
+  `email` varchar(255) DEFAULT NULL,
+  `first_name` varchar(255) NOT NULL,
+  `last_name` varchar(255) NOT NULL,
+  `password` varchar(255) NOT NULL,
+  `username` varchar(255) DEFAULT NULL,
+  `work_number` varchar(255) DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `UKdfg67emqaxd73p1biydxhl8tm` (`profile_image_id`),
+  UNIQUE KEY `UKti72f7s3gm27dhsn8d23y16sf` (`username`),
+  KEY `FKpdmmhi661ir3vx84byam2bhbo` (`created_by`),
+  KEY `FKrow1wlo11fnq4chwxn8co38gn` (`last_updated_by`),
+  KEY `FKo0662ygpi91rrcliko935qyeb` (`agency_id`),
+  CONSTRAINT `FKgb6r4p62k1tcx301cccqf50cj` FOREIGN KEY (`profile_image_id`) REFERENCES `mfile` (`id`),
+  CONSTRAINT `FKo0662ygpi91rrcliko935qyeb` FOREIGN KEY (`agency_id`) REFERENCES `agency` (`id`),
+  CONSTRAINT `FKpdmmhi661ir3vx84byam2bhbo` FOREIGN KEY (`created_by`) REFERENCES `matrix_user` (`id`),
+  CONSTRAINT `FKrow1wlo11fnq4chwxn8co38gn` FOREIGN KEY (`last_updated_by`) REFERENCES `matrix_user` (`id`)
+) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+
+--
+-- Table structure for table `mfile`
+--
+
+DROP TABLE IF EXISTS `mfile`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE `mfile` (
+  `create_time` datetime(6) DEFAULT NULL,
+  `created_by` bigint DEFAULT NULL,
+  `id` bigint NOT NULL AUTO_INCREMENT,
+  `last_update_time` datetime(6) DEFAULT NULL,
+  `last_updated_by` bigint DEFAULT NULL,
+  `matrix_case_id` bigint DEFAULT NULL,
+  `description` varchar(255) DEFAULT NULL,
+  `name` varchar(255) DEFAULT NULL,
+  `original_name` varchar(255) DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `UKtqq729rbt02n81lye1o2t1f9e` (`matrix_case_id`),
+  KEY `FKpeaqr3phrx4y9xlysqvoyavbs` (`created_by`),
+  KEY `FKgbx8vgeybkgyjhcei9uj9oqbw` (`last_updated_by`),
+  CONSTRAINT `FK55r2469jd4y2f81y01i81l4f0` FOREIGN KEY (`matrix_case_id`) REFERENCES `matrix_case` (`id`),
+  CONSTRAINT `FKgbx8vgeybkgyjhcei9uj9oqbw` FOREIGN KEY (`last_updated_by`) REFERENCES `matrix_user` (`id`),
+  CONSTRAINT `FKpeaqr3phrx4y9xlysqvoyavbs` FOREIGN KEY (`created_by`) REFERENCES `matrix_user` (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `mfile`
+--
+
+LOCK TABLES `mfile` WRITE;
+/*!40000 ALTER TABLE `mfile` DISABLE KEYS */;
+/*!40000 ALTER TABLE `mfile` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Table structure for table `property_definition`
+--
+
+DROP TABLE IF EXISTS `property_definition`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE `property_definition` (
+  `deleted` bit(1) NOT NULL,
+  `include_in_list` bit(1) NOT NULL,
+  `include_in_timeline` bit(1) NOT NULL,
+  `include_in_title` bit(1) NOT NULL,
+  `max_length` int DEFAULT NULL,
+  `num_lines` int DEFAULT NULL,
+  `prop_order` int NOT NULL,
+  `required` bit(1) NOT NULL,
+  `type` tinyint NOT NULL,
+  `create_time` datetime(6) DEFAULT NULL,
+  `created_by` bigint DEFAULT NULL,
+  `entity_definition_id` bigint DEFAULT NULL,
+  `id` bigint NOT NULL AUTO_INCREMENT,
+  `last_update_time` datetime(6) DEFAULT NULL,
+  `last_updated_by` bigint DEFAULT NULL,
+  `description` varchar(255) DEFAULT NULL,
+  `mask` varchar(255) DEFAULT NULL,
+  `name` varchar(255) NOT NULL,
+  `options` varchar(255) DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  KEY `FKay7y8qai8kqvdqb3b1wfxl4j` (`created_by`),
+  KEY `FKo3lm4f58evjt4629l85fh28s6` (`last_updated_by`),
+  KEY `FKow41y4hnwlcln8ystmhkifp3o` (`entity_definition_id`),
+  CONSTRAINT `FKay7y8qai8kqvdqb3b1wfxl4j` FOREIGN KEY (`created_by`) REFERENCES `matrix_user` (`id`),
+  CONSTRAINT `FKo3lm4f58evjt4629l85fh28s6` FOREIGN KEY (`last_updated_by`) REFERENCES `matrix_user` (`id`),
+  CONSTRAINT `FKow41y4hnwlcln8ystmhkifp3o` FOREIGN KEY (`entity_definition_id`) REFERENCES `entity_definition` (`id`),
+  CONSTRAINT `property_definition_chk_1` CHECK ((`type` between 0 and 9))
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `property_definition`
+--
+
+LOCK TABLES `property_definition` WRITE;
+/*!40000 ALTER TABLE `property_definition` DISABLE KEYS */;
+/*!40000 ALTER TABLE `property_definition` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Table structure for table `property_value`
+--
+
+DROP TABLE IF EXISTS `property_value`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE `property_value` (
+  `create_time` datetime(6) DEFAULT NULL,
+  `created_by` bigint DEFAULT NULL,
+  `entity_id` bigint NOT NULL,
+  `id` bigint NOT NULL AUTO_INCREMENT,
+  `last_update_time` datetime(6) DEFAULT NULL,
+  `last_updated_by` bigint DEFAULT NULL,
+  `property_definition_id` bigint NOT NULL,
+  `value_order` bigint DEFAULT NULL,
+  `val` varchar(255) DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  KEY `FKfnm8s6pb0pcyr2exfb9uac649` (`created_by`),
+  KEY `FKsej3r9x0p277i4om268gseoao` (`last_updated_by`),
+  KEY `FKalmqoxuw13a673ug2p21ow5o7` (`entity_id`),
+  KEY `FK54m2smsyt0f5jft7ukhol5vt7` (`property_definition_id`),
+  CONSTRAINT `FK54m2smsyt0f5jft7ukhol5vt7` FOREIGN KEY (`property_definition_id`) REFERENCES `property_definition` (`id`),
+  CONSTRAINT `FKalmqoxuw13a673ug2p21ow5o7` FOREIGN KEY (`entity_id`) REFERENCES `matrix_entity` (`id`),
+  CONSTRAINT `FKfnm8s6pb0pcyr2exfb9uac649` FOREIGN KEY (`created_by`) REFERENCES `matrix_user` (`id`),
+  CONSTRAINT `FKsej3r9x0p277i4om268gseoao` FOREIGN KEY (`last_updated_by`) REFERENCES `matrix_user` (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `property_value`
+--
+
+LOCK TABLES `property_value` WRITE;
+/*!40000 ALTER TABLE `property_value` DISABLE KEYS */;
+/*!40000 ALTER TABLE `property_value` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Table structure for table `task`
+--
+
+DROP TABLE IF EXISTS `task`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE `task` (
+  `status` tinyint DEFAULT NULL,
+  `assigned_date_time` datetime(6) DEFAULT NULL,
+  `assigned_to` bigint DEFAULT NULL,
+  `case_id` bigint NOT NULL,
+  `case_task_id` bigint DEFAULT NULL,
+  `completed_date_time` datetime(6) DEFAULT NULL,
+  `create_time` datetime(6) DEFAULT NULL,
+  `created_by` bigint DEFAULT NULL,
+  `due_date_time` datetime(6) DEFAULT NULL,
+  `id` bigint NOT NULL AUTO_INCREMENT,
+  `last_update_time` datetime(6) DEFAULT NULL,
+  `last_updated_by` bigint DEFAULT NULL,
+  `coverage_description` varchar(2048) DEFAULT NULL,
+  `description` varchar(2048) DEFAULT NULL,
+  `title` varchar(255) DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  KEY `FKch1bxos7l909du1u0y5b0v2ap` (`created_by`),
+  KEY `FKl0knjrrm138977srrorn5ucnq` (`last_updated_by`),
+  KEY `FKj6tj7g70sd3oliuu9dftyegso` (`assigned_to`),
+  KEY `FKqwgn9oiuoc3sg14cvr8b6jmbm` (`case_id`),
+  CONSTRAINT `FKch1bxos7l909du1u0y5b0v2ap` FOREIGN KEY (`created_by`) REFERENCES `matrix_user` (`id`),
+  CONSTRAINT `FKj6tj7g70sd3oliuu9dftyegso` FOREIGN KEY (`assigned_to`) REFERENCES `matrix_user` (`id`),
+  CONSTRAINT `FKl0knjrrm138977srrorn5ucnq` FOREIGN KEY (`last_updated_by`) REFERENCES `matrix_user` (`id`),
+  CONSTRAINT `FKqwgn9oiuoc3sg14cvr8b6jmbm` FOREIGN KEY (`case_id`) REFERENCES `matrix_case` (`id`),
+  CONSTRAINT `task_chk_1` CHECK ((`status` between 0 and 4))
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `task`
+--
+
+LOCK TABLES `task` WRITE;
+/*!40000 ALTER TABLE `task` DISABLE KEYS */;
+/*!40000 ALTER TABLE `task` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Table structure for table `task_entity`
+--
+
+DROP TABLE IF EXISTS `task_entity`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE `task_entity` (
+  `create_time` datetime(6) DEFAULT NULL,
+  `created_by` bigint DEFAULT NULL,
+  `id` bigint NOT NULL AUTO_INCREMENT,
+  `last_update_time` datetime(6) DEFAULT NULL,
+  `last_updated_by` bigint DEFAULT NULL,
+  `matrix_entity_id` bigint DEFAULT NULL,
+  `task_id` bigint DEFAULT NULL,
+  `description` varchar(512) DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  KEY `FKfq069ohfj2pcak6ua3crp1bdm` (`created_by`),
+  KEY `FK3rnl96ymld0eyc588pl75mjtm` (`last_updated_by`),
+  KEY `FKfaxf2w22w42qanm3so41lxnnk` (`matrix_entity_id`),
+  KEY `FK6cm52pj59vtxlressgt9m0loa` (`task_id`),
+  CONSTRAINT `FK3rnl96ymld0eyc588pl75mjtm` FOREIGN KEY (`last_updated_by`) REFERENCES `matrix_user` (`id`),
+  CONSTRAINT `FK6cm52pj59vtxlressgt9m0loa` FOREIGN KEY (`task_id`) REFERENCES `task` (`id`),
+  CONSTRAINT `FKfaxf2w22w42qanm3so41lxnnk` FOREIGN KEY (`matrix_entity_id`) REFERENCES `matrix_entity` (`id`),
+  CONSTRAINT `FKfq069ohfj2pcak6ua3crp1bdm` FOREIGN KEY (`created_by`) REFERENCES `matrix_user` (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `task_entity`
+--
+
+LOCK TABLES `task_entity` WRITE;
+/*!40000 ALTER TABLE `task_entity` DISABLE KEYS */;
+/*!40000 ALTER TABLE `task_entity` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Table structure for table `task_file`
+--
+
+DROP TABLE IF EXISTS `task_file`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE `task_file` (
+  `create_time` datetime(6) DEFAULT NULL,
+  `created_by` bigint DEFAULT NULL,
+  `id` bigint NOT NULL AUTO_INCREMENT,
+  `last_update_time` datetime(6) DEFAULT NULL,
+  `last_updated_by` bigint DEFAULT NULL,
+  `matrix_file_id` bigint DEFAULT NULL,
+  `task_id` bigint DEFAULT NULL,
+  `description` varchar(512) DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  KEY `FKf3e571mbfhgbolwh31xwffla9` (`created_by`),
+  KEY `FKrxrsl7qujopavfjhcb8vjxy68` (`last_updated_by`),
+  KEY `FK49leprxgdwe33ebvgkms2limo` (`matrix_file_id`),
+  KEY `FKk9ikv3hs4cyrgi4ti09b02px0` (`task_id`),
+  CONSTRAINT `FK49leprxgdwe33ebvgkms2limo` FOREIGN KEY (`matrix_file_id`) REFERENCES `mfile` (`id`),
+  CONSTRAINT `FKf3e571mbfhgbolwh31xwffla9` FOREIGN KEY (`created_by`) REFERENCES `matrix_user` (`id`),
+  CONSTRAINT `FKk9ikv3hs4cyrgi4ti09b02px0` FOREIGN KEY (`task_id`) REFERENCES `task` (`id`),
+  CONSTRAINT `FKrxrsl7qujopavfjhcb8vjxy68` FOREIGN KEY (`last_updated_by`) REFERENCES `matrix_user` (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `task_file`
+--
+
+LOCK TABLES `task_file` WRITE;
+/*!40000 ALTER TABLE `task_file` DISABLE KEYS */;
+/*!40000 ALTER TABLE `task_file` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Table structure for table `timeline`
+--
+
+DROP TABLE IF EXISTS `timeline`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE `timeline` (
+  `create_time` datetime(6) DEFAULT NULL,
+  `created_by` bigint DEFAULT NULL,
+  `id` bigint NOT NULL AUTO_INCREMENT,
+  `last_update_time` datetime(6) DEFAULT NULL,
+  `last_updated_by` bigint DEFAULT NULL,
+  `matrix_case_id` bigint NOT NULL,
+  `description` varchar(255) DEFAULT NULL,
+  `name` varchar(255) DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  KEY `FK1vwx10j7sjwxw67rwxuena4wm` (`created_by`),
+  KEY `FKdcdpmdxt8wlrofk5ji8suptbx` (`last_updated_by`),
+  KEY `FKetmg3o9fjj3ljgmb1t5877w2m` (`matrix_case_id`),
+  CONSTRAINT `FK1vwx10j7sjwxw67rwxuena4wm` FOREIGN KEY (`created_by`) REFERENCES `matrix_user` (`id`),
+  CONSTRAINT `FKdcdpmdxt8wlrofk5ji8suptbx` FOREIGN KEY (`last_updated_by`) REFERENCES `matrix_user` (`id`),
+  CONSTRAINT `FKetmg3o9fjj3ljgmb1t5877w2m` FOREIGN KEY (`matrix_case_id`) REFERENCES `matrix_case` (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `timeline`
+--
+
+LOCK TABLES `timeline` WRITE;
+/*!40000 ALTER TABLE `timeline` DISABLE KEYS */;
+/*!40000 ALTER TABLE `timeline` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Table structure for table `timeline_entity`
+--
+
+DROP TABLE IF EXISTS `timeline_entity`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE `timeline_entity` (
+  `entity_id` bigint NOT NULL,
+  `timeline_id` bigint NOT NULL,
+  KEY `FK1pumib6dr3b1n3ckjr1hnoa4c` (`entity_id`),
+  KEY `FKd7i44lhw5vxoo037oaru9yc8t` (`timeline_id`),
+  CONSTRAINT `FK1pumib6dr3b1n3ckjr1hnoa4c` FOREIGN KEY (`entity_id`) REFERENCES `matrix_entity` (`id`),
+  CONSTRAINT `FKd7i44lhw5vxoo037oaru9yc8t` FOREIGN KEY (`timeline_id`) REFERENCES `timeline` (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `timeline_entity`
+--
+
+LOCK TABLES `timeline_entity` WRITE;
+/*!40000 ALTER TABLE `timeline_entity` DISABLE KEYS */;
+/*!40000 ALTER TABLE `timeline_entity` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Table structure for table `user_case_role`
+--
+
+DROP TABLE IF EXISTS `user_case_role`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE `user_case_role` (
+  `case_role` tinyint DEFAULT NULL,
+  `case_id` bigint NOT NULL,
+  `create_time` datetime(6) DEFAULT NULL,
+  `created_by` bigint DEFAULT NULL,
+  `last_update_time` datetime(6) DEFAULT NULL,
+  `last_updated_by` bigint DEFAULT NULL,
+  `user_id` bigint NOT NULL,
+  PRIMARY KEY (`case_id`,`user_id`),
+  KEY `FK1ixxe2hov5gn99cb7hd4ub8a1` (`created_by`),
+  KEY `FKapv9msjuhyu9legux2aj6cjbk` (`last_updated_by`),
+  KEY `FKr5o9ac5ogscytdwaeatnpjcum` (`user_id`),
+  CONSTRAINT `FK1ixxe2hov5gn99cb7hd4ub8a1` FOREIGN KEY (`created_by`) REFERENCES `matrix_user` (`id`),
+  CONSTRAINT `FK77pg6j5a81otokkhb0yqqhou` FOREIGN KEY (`case_id`) REFERENCES `matrix_case` (`id`),
+  CONSTRAINT `FKapv9msjuhyu9legux2aj6cjbk` FOREIGN KEY (`last_updated_by`) REFERENCES `matrix_user` (`id`),
+  CONSTRAINT `FKr5o9ac5ogscytdwaeatnpjcum` FOREIGN KEY (`user_id`) REFERENCES `matrix_user` (`id`),
+  CONSTRAINT `user_case_role_chk_1` CHECK ((`case_role` between 0 and 3))
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `user_case_role`
+--
+
+LOCK TABLES `user_case_role` WRITE;
+/*!40000 ALTER TABLE `user_case_role` DISABLE KEYS */;
+/*!40000 ALTER TABLE `user_case_role` ENABLE KEYS */;
+UNLOCK TABLES;
+/*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
+
+/*!40101 SET SQL_MODE=@OLD_SQL_MODE */;
+/*!40014 SET FOREIGN_KEY_CHECKS=@OLD_FOREIGN_KEY_CHECKS */;
+/*!40014 SET UNIQUE_CHECKS=@OLD_UNIQUE_CHECKS */;
+/*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
+/*!40101 SET CHARACTER_SET_RESULTS=@OLD_CHARACTER_SET_RESULTS */;
+/*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
+/*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
+
+-- Dump completed on 2024-11-17 23:34:28
+
+--
+-- Dumping data for table `matrix_user`
+--
+
+INSERT INTO `matrix_user` VALUES (_binary '',_binary '',_binary '',NULL,NULL,NULL,1,'2024-04-19 00:27:00.228000',1,NULL,'2342342342','admin@fbi.gov','fist','last','$2a$10$C.f97.fw918rEaIfGymG0OImBM2LWHJozslh8eUei5ppbTZ3Bj6Ma','admin','3455673456');
 
-CREATE CACHED TABLE "PUBLIC"."AGENCY"(
 
-    "CREATE_TIME" TIMESTAMP(6),
-
-    "CREATED_BY" BIGINT,
-
-    "ID" BIGINT GENERATED BY DEFAULT AS IDENTITY(START WITH 1 RESTART WITH 100) NOT NULL,
-
-    "LAST_UPDATE_TIME" TIMESTAMP(6),
-
-    "LAST_UPDATED_BY" BIGINT,
-
-    "ACRONYM" CHARACTER VARYING(255),
-
-    "NAME" CHARACTER VARYING(255)
-
-);
-ALTER TABLE "PUBLIC"."AGENCY" ADD CONSTRAINT "PUBLIC"."CONSTRAINT_7" PRIMARY KEY("ID");
--- 3 +/- SELECT COUNT(*) FROM PUBLIC.AGENCY;
-INSERT INTO "PUBLIC"."AGENCY" VALUES
-
-(NULL, NULL, 1, NULL, NULL, 'FBI', 'Federal Bureau of Investigation'),
-
-(NULL, NULL, 2, NULL, NULL, 'AST', 'Alaska State Troopers'),
-
-(NULL, NULL, 3, NULL, NULL, 'APD', 'Anchorage Police Department');
-CREATE CACHED TABLE "PUBLIC"."ENTITY_FILE"(
-
-    "CREATE_TIME" TIMESTAMP(6),
-
-    "CREATED_BY" BIGINT,
-
-    "ID" BIGINT GENERATED BY DEFAULT AS IDENTITY(START WITH 1 RESTART WITH 100) NOT NULL,
-
-    "LAST_UPDATE_TIME" TIMESTAMP(6),
-
-    "LAST_UPDATED_BY" BIGINT,
-
-    "M_FILE_ID" BIGINT,
-
-    "MATRIX_ENTITY_ID" BIGINT
-
-);
-ALTER TABLE "PUBLIC"."ENTITY_FILE" ADD CONSTRAINT "PUBLIC"."CONSTRAINT_C" PRIMARY KEY("ID");
--- 0 +/- SELECT COUNT(*) FROM PUBLIC.ENTITY_FILE;
-CREATE CACHED TABLE "PUBLIC"."ENTITY_DEFINITION"(
-
-    "EDITABLE" BOOLEAN NOT NULL,
-
-    "INCLUDE_IN_LINK_CHART" BOOLEAN,
-
-    "CREATE_TIME" TIMESTAMP(6),
-
-    "CREATED_BY" BIGINT,
-
-    "ID" BIGINT GENERATED BY DEFAULT AS IDENTITY(START WITH 1 RESTART WITH 100) NOT NULL,
-
-    "LAST_UPDATE_TIME" TIMESTAMP(6),
-
-    "LAST_UPDATED_BY" BIGINT,
-
-    "VERSION" BIGINT NOT NULL,
-
-    "DESCRIPTION" CHARACTER VARYING(255),
-
-    "NAME" CHARACTER VARYING(255) NOT NULL
-
-);
-ALTER TABLE "PUBLIC"."ENTITY_DEFINITION" ADD CONSTRAINT "PUBLIC"."CONSTRAINT_6" PRIMARY KEY("ID");
--- 3 +/- SELECT COUNT(*) FROM PUBLIC.ENTITY_DEFINITION;
-INSERT INTO "PUBLIC"."ENTITY_DEFINITION" VALUES
-
-(TRUE, TRUE, TIMESTAMP '2024-04-18 22:57:39.063', 1, 1, TIMESTAMP '2024-04-18 22:57:39.063', NULL, 1, NULL, 'Person'),
-
-(TRUE, FALSE, NULL, NULL, 2, TIMESTAMP '2024-04-18 22:59:05.242', 1, 1, NULL, 'Event'),
-
-(TRUE, TRUE, NULL, NULL, 3, TIMESTAMP '2024-04-18 23:40:40.409', 1, 1, NULL, 'Location');
-CREATE CACHED TABLE "PUBLIC"."ENTITY_RELATIONSHIP"(
-
-    "CHILD_ID" BIGINT,
-
-    "CREATE_TIME" TIMESTAMP(6),
-
-    "CREATED_BY" BIGINT,
-
-    "ID" BIGINT GENERATED BY DEFAULT AS IDENTITY(START WITH 1 RESTART WITH 100) NOT NULL,
-
-    "LAST_UPDATE_TIME" TIMESTAMP(6),
-
-    "LAST_UPDATED_BY" BIGINT,
-
-    "PARENT_ID" BIGINT,
-
-    "RELATIONSHIP_DESCRIPTION" CHARACTER VARYING(255)
-
-);
-ALTER TABLE "PUBLIC"."ENTITY_RELATIONSHIP" ADD CONSTRAINT "PUBLIC"."CONSTRAINT_1" PRIMARY KEY("ID");
--- 12 +/- SELECT COUNT(*) FROM PUBLIC.ENTITY_RELATIONSHIP;
-INSERT INTO "PUBLIC"."ENTITY_RELATIONSHIP" VALUES
-
-(5, TIMESTAMP '2024-04-19 00:02:13.443', 1, 9, TIMESTAMP '2024-04-19 00:02:13.443', NULL, 4, 'Attends'),
-
-(4, TIMESTAMP '2024-04-19 00:02:13.443', 1, 10, TIMESTAMP '2024-04-19 00:02:13.443', NULL, 5, NULL),
-
-(3, TIMESTAMP '2024-04-19 00:13:01.051', 1, 11, TIMESTAMP '2024-04-19 00:13:01.051', NULL, 5, NULL),
-
-(5, TIMESTAMP '2024-04-19 00:13:01.052', 1, 12, TIMESTAMP '2024-04-19 00:13:01.052', NULL, 3, 'Attends'),
-
-(4, TIMESTAMP '2024-04-19 00:14:02.853', 1, 13, TIMESTAMP '2024-04-19 00:14:02.853', NULL, 3, NULL),
-
-(3, TIMESTAMP '2024-04-19 00:14:02.854', 1, 14, TIMESTAMP '2024-04-19 00:14:02.854', NULL, 4, 'Friend'),
-
-(1, TIMESTAMP '2024-04-19 00:14:17.345', 1, 15, TIMESTAMP '2024-04-19 00:14:17.345', NULL, 3, 'Son'),
-
-(3, TIMESTAMP '2024-04-19 00:14:17.346', 1, 16, TIMESTAMP '2024-04-19 00:14:17.346', NULL, 1, 'Mother'),
-
-(5, TIMESTAMP '2024-04-19 00:19:01.484', 1, 17, TIMESTAMP '2024-04-19 00:19:01.484', NULL, 6, 'Teaches at'),
-
-(6, TIMESTAMP '2024-04-19 00:19:01.484', 1, 18, TIMESTAMP '2024-04-19 00:19:01.484', NULL, 5, NULL),
-
-(3, TIMESTAMP '2024-04-19 00:19:19.191', 1, 19, TIMESTAMP '2024-04-19 00:19:19.191', NULL, 6, 'Teacher'),
-
-(6, TIMESTAMP '2024-04-19 00:19:19.191', 1, 20, TIMESTAMP '2024-04-19 00:19:19.191', NULL, 3, 'Student');
-CREATE CACHED TABLE "PUBLIC"."MATRIX_CASE"(
-
-    "CREATE_TIME" TIMESTAMP(6),
-
-    "CREATED_BY" BIGINT,
-
-    "ID" BIGINT GENERATED BY DEFAULT AS IDENTITY(START WITH 1 RESTART WITH 100) NOT NULL,
-
-    "LAST_UPDATE_TIME" TIMESTAMP(6),
-
-    "LAST_UPDATED_BY" BIGINT,
-
-    "CASE_DESCRIPTION" CHARACTER VARYING(255),
-
-    "CASE_NUMBER" CHARACTER VARYING(255),
-
-    "CASE_TITLE" CHARACTER VARYING(255)
-
-);
-ALTER TABLE "PUBLIC"."MATRIX_CASE" ADD CONSTRAINT "PUBLIC"."CONSTRAINT_6D" PRIMARY KEY("ID");
--- 2 +/- SELECT COUNT(*) FROM PUBLIC.MATRIX_CASE;
-INSERT INTO "PUBLIC"."MATRIX_CASE" VALUES
-
-(TIMESTAMP '2024-04-18 22:51:20.224', 1, 0, TIMESTAMP '2024-04-18 22:51:20.224', NULL, NULL, 'ADMIN CASE', 'ADMIN CASE'),
-
-(TIMESTAMP '2024-04-18 22:51:20.224', 1, 1, TIMESTAMP '2024-04-18 22:51:20.224', NULL, NULL, '7A-AN-12312312', U&'Kidnapping;\000aJuan Gomez - victim;\000aAnchorage, Alaska');
-CREATE CACHED TABLE "PUBLIC"."LINK_CHART"(
-
-    "CREATE_TIME" TIMESTAMP(6),
-
-    "CREATED_BY" BIGINT,
-
-    "ID" BIGINT GENERATED BY DEFAULT AS IDENTITY(START WITH 1) NOT NULL,
-
-    "LAST_UPDATE_TIME" TIMESTAMP(6),
-
-    "LAST_UPDATED_BY" BIGINT,
-
-    "MATRIX_CASE_ID" BIGINT NOT NULL,
-
-    "ENTITIES" CHARACTER LARGE OBJECT,
-
-    "NAME" CHARACTER VARYING(255),
-
-    "DESCRIPTION" CHARACTER VARYING(255),
-
-    "STYLE_SHEET" CHARACTER LARGE OBJECT,
-
-    "PAN" CHARACTER VARYING(255),
-
-    "ZOOM" FLOAT(24)
-
-);
-ALTER TABLE "PUBLIC"."LINK_CHART" ADD CONSTRAINT "PUBLIC"."CONSTRAINT_9" PRIMARY KEY("ID");
--- 0 +/- SELECT COUNT(*) FROM PUBLIC.LINK_CHART;
-CREATE CACHED TABLE "PUBLIC"."MATRIX_USER"(
-
-    "ADMIN" BOOLEAN NOT NULL,
-
-    "DARK_THEME" BOOLEAN NOT NULL,
-
-    "ENABLED" BOOLEAN NOT NULL,
-
-    "AGENCY_ID" BIGINT,
-
-    "CREATE_TIME" TIMESTAMP(6),
-
-    "CREATED_BY" BIGINT,
-
-    "ID" BIGINT GENERATED BY DEFAULT AS IDENTITY(START WITH 1 RESTART WITH 100) NOT NULL,
-
-    "LAST_UPDATE_TIME" TIMESTAMP(6),
-
-    "LAST_UPDATED_BY" BIGINT,
-
-    "PROFILE_IMAGE_ID" BIGINT,
-
-    "CELL_NUMBER" CHARACTER VARYING(255),
-
-    "EMAIL" CHARACTER VARYING(255),
-
-    "FIRST_NAME" CHARACTER VARYING(255) NOT NULL,
-
-    "LAST_NAME" CHARACTER VARYING(255) NOT NULL,
-
-    "PASSWORD" CHARACTER VARYING(255) NOT NULL,
-
-    "USERNAME" CHARACTER VARYING(255),
-
-    "WORK_NUMBER" CHARACTER VARYING(255)
-
-);
-ALTER TABLE "PUBLIC"."MATRIX_USER" ADD CONSTRAINT "PUBLIC"."CONSTRAINT_6D384" PRIMARY KEY("ID");
--- 5 +/- SELECT COUNT(*) FROM PUBLIC.MATRIX_USER;
-INSERT INTO "PUBLIC"."MATRIX_USER" VALUES
-
-(TRUE, TRUE, TRUE, 2, NULL, NULL, 1, TIMESTAMP '2024-04-19 00:27:00.228', 1, NULL, '2342342342', 'admin@fbi.gov', 'fist', 'last', '$2a$10$C.f97.fw918rEaIfGymG0OImBM2LWHJozslh8eUei5ppbTZ3Bj6Ma', 'admin', '3455673456'),
-
-(TRUE, FALSE, TRUE, 1, NULL, NULL, 2, TIMESTAMP '2024-04-18 22:51:41.015', 1, 1, '2342342342', 'dallison@fbi.gov', 'Allison', 'Daryl', '$2a$10$C.f97.fw918rEaIfGymG0OImBM2LWHJozslh8eUei5ppbTZ3Bj6Ma', 'dallison', '3455673456'),
-
-(TRUE, FALSE, TRUE, 3, NULL, NULL, 3, TIMESTAMP '2024-04-18 22:53:18.568', 1, 4, '2342342342', 'lwatson@fbi.gov', 'Watson', 'Lisa', '$2a$10$C.f97.fw918rEaIfGymG0OImBM2LWHJozslh8eUei5ppbTZ3Bj6Ma', 'lwatson', '3455673456'),
-
-(TRUE, FALSE, TRUE, 1, NULL, NULL, 4, TIMESTAMP '2024-04-18 22:52:59.541', 1, 2, '2342342342', 'jgoeden@fbi.gov', 'Goeden', 'Jolene', '$2a$10$C.f97.fw918rEaIfGymG0OImBM2LWHJozslh8eUei5ppbTZ3Bj6Ma', 'jgoeden', '3455673456'),
-
-(TRUE, FALSE, TRUE, 3, NULL, NULL, 5, TIMESTAMP '2024-04-18 22:53:10.318', 1, 3, '2342342342', 'ltorres@fbi.gov', 'Torres', 'Lenny', '$2a$10$C.f97.fw918rEaIfGymG0OImBM2LWHJozslh8eUei5ppbTZ3Bj6Ma', 'ltorres', '(345) 567-3453');
-CREATE CACHED TABLE "PUBLIC"."MATRIX_ENTITY"(
-
-    "CREATE_TIME" TIMESTAMP(6),
-
-    "CREATED_BY" BIGINT,
-
-    "ENTITY_DEFINITION_ID" BIGINT,
-
-    "MATRIX_CASE_ID" BIGINT NOT NULL,
-
-    "ID" BIGINT GENERATED BY DEFAULT AS IDENTITY(START WITH 1 RESTART WITH 100) NOT NULL,
-
-    "LAST_UPDATE_TIME" TIMESTAMP(6),
-
-    "LAST_UPDATED_BY" BIGINT
-
-);
-ALTER TABLE "PUBLIC"."MATRIX_ENTITY" ADD CONSTRAINT "PUBLIC"."CONSTRAINT_E" PRIMARY KEY("ID");
--- 8 +/- SELECT COUNT(*) FROM PUBLIC.MATRIX_ENTITY;
-INSERT INTO "PUBLIC"."MATRIX_ENTITY" VALUES
-
-(TIMESTAMP '2024-04-18 23:26:58.384', 1, 1, 1, 1, TIMESTAMP '2024-10-03 20:00:10.349', 1),
-
-(TIMESTAMP '2024-04-18 23:33:47.889', 1, 2, 1, 2, TIMESTAMP '2024-04-18 23:33:47.889', NULL),
-
-(TIMESTAMP '2024-04-18 23:34:24.599', 1, 1, 1, 3, TIMESTAMP '2024-10-03 20:00:31.71', 1),
-
-(TIMESTAMP '2024-04-18 23:35:03.964', 1, 1, 1, 4, TIMESTAMP '2024-10-03 20:00:48.814', 1),
-
-(NULL, NULL, 3, 1, 5, TIMESTAMP '2024-10-03 20:01:56.246', 1),
-
-(TIMESTAMP '2024-04-19 00:18:31.115', 1, 1, 1, 6, TIMESTAMP '2024-10-03 20:01:03.748', 1),
-
-(NULL, NULL, 2, 1, 7, TIMESTAMP '2024-04-19 00:43:32.478', 1),
-
-(TIMESTAMP '2024-04-19 00:45:57.341', 1, 2, 1, 8, TIMESTAMP '2024-04-19 00:45:57.341', NULL);
-CREATE CACHED TABLE "PUBLIC"."MFILE"(
-
-    "CREATE_TIME" TIMESTAMP(6),
-
-    "CREATED_BY" BIGINT,
-
-    "ID" BIGINT GENERATED BY DEFAULT AS IDENTITY(START WITH 1 RESTART WITH 100) NOT NULL,
-
-    "MATRIX_CASE_ID" BIGINT NOT NULL,
-
-    "LAST_UPDATE_TIME" TIMESTAMP(6),
-
-    "LAST_UPDATED_BY" BIGINT,
-
-    "DESCRIPTION" CHARACTER VARYING(255),
-
-    "NAME" CHARACTER VARYING(255),
-
-    "ORIGINAL_NAME" CHARACTER VARYING(255)
-
-);
-ALTER TABLE "PUBLIC"."MFILE" ADD CONSTRAINT "PUBLIC"."CONSTRAINT_4" PRIMARY KEY("ID");
--- 6 +/- SELECT COUNT(*) FROM PUBLIC.MFILE;
-INSERT INTO "PUBLIC"."MFILE" VALUES
-
-(TIMESTAMP '2024-10-03 20:00:07.832', 1, 100, 1, TIMESTAMP '2024-10-03 20:00:07.832', NULL, NULL, NULL, 'pexels-cottonbro-studio-5491144.jpg'),
-
-(TIMESTAMP '2024-10-03 20:00:30.032', 1, 101, 1, TIMESTAMP '2024-10-03 20:00:30.032', NULL, NULL, NULL, 'pexels-juan-gomez-3492100.jpg'),
-
-(TIMESTAMP '2024-10-03 20:00:46.04', 1, 102, 1, TIMESTAMP '2024-10-03 20:00:46.04', NULL, NULL, NULL, 'pexels-minan1398-698551.jpg'),
-
-(TIMESTAMP '2024-10-03 20:01:01.583', 1, 103, 1, TIMESTAMP '2024-10-03 20:01:01.583', NULL, NULL, NULL, 'pexels-arthouse-studio-4571943.jpg'),
-
-(TIMESTAMP '2024-10-03 20:01:54.513', 1, 104, 1, TIMESTAMP '2024-10-03 20:01:54.513', NULL, NULL, NULL, 'West High Google Map_5.png'),
-
-(TIMESTAMP '2024-10-03 20:01:54.513', 1, 105, 1, TIMESTAMP '2024-10-03 20:01:54.513', NULL, NULL, NULL, 'west-high-school-anchorage-ak.jpg');
-CREATE CACHED TABLE "PUBLIC"."PROPERTY_VALUE"(
-
-    "CREATE_TIME" TIMESTAMP(6),
-
-    "CREATED_BY" BIGINT,
-
-    "ENTITY_ID" BIGINT,
-
-    "ID" BIGINT GENERATED BY DEFAULT AS IDENTITY(START WITH 1 RESTART WITH 200) NOT NULL,
-
-    "LAST_UPDATE_TIME" TIMESTAMP(6),
-
-    "LAST_UPDATED_BY" BIGINT,
-
-    "PROPERTY_DEFINITION_ID" BIGINT NOT NULL,
-
-    "VALUE_ORDER" BIGINT,
-
-    "VAL" CHARACTER VARYING(255)
-
-);
-ALTER TABLE "PUBLIC"."PROPERTY_VALUE" ADD CONSTRAINT "PUBLIC"."CONSTRAINT_5" PRIMARY KEY("ID");
--- 32 +/- SELECT COUNT(*) FROM PUBLIC.PROPERTY_VALUE;
-INSERT INTO "PUBLIC"."PROPERTY_VALUE" VALUES
-
-(TIMESTAMP '2024-04-18 23:26:58.431', 1, 1, 1, TIMESTAMP '2024-10-03 20:00:10.367', 1, 1, 0, 'Gomez'),
-
-(TIMESTAMP '2024-04-18 23:26:58.431', 1, 1, 2, TIMESTAMP '2024-10-03 20:00:10.369', 1, 2, 0, 'Sandra'),
-
-(TIMESTAMP '2024-04-18 23:26:58.431', 1, 1, 3, TIMESTAMP '2024-10-03 20:00:10.37', 1, 3, 0, '1970-03-23T10:00:00.000Z'),
-
-(TIMESTAMP '2024-04-18 23:26:58.431', 1, 1, 4, TIMESTAMP '2024-10-03 20:00:10.372', 1, 4, 0, '100'),
-
-(TIMESTAMP '2024-04-18 23:33:47.907', 1, 2, 5, TIMESTAMP '2024-04-18 23:33:47.907', NULL, 5, 0, 'Juan Gomez leaves West High School'),
-
-(TIMESTAMP '2024-04-18 23:33:47.908', 1, 2, 6, TIMESTAMP '2024-04-18 23:33:47.908', NULL, 6, 0, 'Gomez''s friend Minh Lu said Gomez left West High School at 4:00pm to go to Carr''s at Northern Lights and Minnesota.'),
-
-(TIMESTAMP '2024-04-18 23:33:47.908', 1, 2, 7, TIMESTAMP '2024-04-18 23:33:47.908', NULL, 7, 0, '2024-04-18T00:00:00.000Z'),
-
-(TIMESTAMP '2024-04-18 23:33:47.908', 1, 2, 8, TIMESTAMP '2024-04-18 23:33:47.908', NULL, 7, 1, '2024-04-18T00:00:00.000Z'),
-
-(TIMESTAMP '2024-04-18 23:34:24.599', 1, 3, 9, TIMESTAMP '2024-10-03 20:00:31.71', 1, 1, 0, 'Gomez'),
-
-(TIMESTAMP '2024-04-18 23:34:24.599', 1, 3, 10, TIMESTAMP '2024-10-03 20:00:31.71', 1, 2, 0, 'Juan'),
-
-(TIMESTAMP '2024-04-18 23:34:24.599', 1, 3, 11, TIMESTAMP '2024-10-03 20:00:31.71', 1, 3, 0, '2010-03-04T09:00:00.000Z'),
-
-(TIMESTAMP '2024-04-18 23:34:24.599', 1, 3, 12, TIMESTAMP '2024-10-03 20:00:31.71', 1, 4, 0, '101'),
-
-(TIMESTAMP '2024-04-18 23:35:03.964', 1, 4, 13, TIMESTAMP '2024-10-03 20:00:48.815', 1, 1, 0, 'Lu'),
-
-(TIMESTAMP '2024-04-18 23:35:03.964', 1, 4, 14, TIMESTAMP '2024-10-03 20:00:48.815', 1, 2, 0, 'Minh'),
-
-(TIMESTAMP '2024-04-18 23:35:03.964', 1, 4, 15, TIMESTAMP '2024-10-03 20:00:48.817', 1, 3, 0, '2011-04-20T08:00:00.000Z'),
-
-(TIMESTAMP '2024-04-18 23:35:03.964', 1, 4, 16, TIMESTAMP '2024-10-03 20:00:48.818', 1, 4, 0, '102'),
-
-(TIMESTAMP '2024-04-18 23:56:18.613', 1, 5, 32, TIMESTAMP '2024-10-03 20:01:56.247', 1, 8, 0, 'West High School'),
-
-(TIMESTAMP '2024-04-18 23:56:18.614', 1, 5, 33, TIMESTAMP '2024-10-03 20:01:56.248', 1, 9, 0, 'West High School'),
-
-(TIMESTAMP '2024-04-19 00:18:31.131', 1, 6, 36, TIMESTAMP '2024-10-03 20:01:03.75', 1, 1, 0, 'Lewis'),
-
-(TIMESTAMP '2024-04-19 00:18:31.131', 1, 6, 37, TIMESTAMP '2024-10-03 20:01:03.751', 1, 2, 0, 'Robert'),
-
-(TIMESTAMP '2024-04-19 00:18:31.131', 1, 6, 38, TIMESTAMP '2024-10-03 20:01:03.752', 1, 3, 0, '1965-09-23T10:00:00.000Z'),
-
-(TIMESTAMP '2024-04-19 00:18:31.131', 1, 6, 39, TIMESTAMP '2024-10-03 20:01:03.753', 1, 4, 0, '103'),
-
-(TIMESTAMP '2024-04-19 00:43:32.476', 1, 7, 44, TIMESTAMP '2024-04-19 00:43:32.476', NULL, 5, 0, 'Gomez seen on video at Carr''s'),
-
-(TIMESTAMP '2024-04-19 00:43:32.477', 1, 7, 45, TIMESTAMP '2024-04-19 00:43:32.477', NULL, 6, 0, 'Gomez seen on video at Carr''s getting into a white truck.'),
-
-(TIMESTAMP '2024-04-19 00:43:32.477', 1, 7, 46, TIMESTAMP '2024-04-19 00:43:32.477', NULL, 7, 0, '2024-04-18T00:15:00.000Z'),
-
-(TIMESTAMP '2024-04-19 00:43:32.477', 1, 7, 47, TIMESTAMP '2024-04-19 00:43:32.477', NULL, 7, 1, '2024-04-18T00:15:00.000Z'),
-
-(TIMESTAMP '2024-04-19 00:45:57.341', 1, 8, 48, TIMESTAMP '2024-04-19 00:45:57.341', NULL, 5, 0, 'Juan Gomez leaves home for school'),
-
-(TIMESTAMP '2024-04-19 00:45:57.341', 1, 8, 49, TIMESTAMP '2024-04-19 00:45:57.341', NULL, 6, 0, 'Juan Gomez leaves home for school'),
-
-(TIMESTAMP '2024-04-19 00:45:57.341', 1, 8, 50, TIMESTAMP '2024-04-19 00:45:57.341', NULL, 7, 0, '2024-04-17T14:50:00.000Z'),
-
-(TIMESTAMP '2024-04-19 00:45:57.341', 1, 8, 51, TIMESTAMP '2024-04-19 00:45:57.341', NULL, 7, 1, '2024-04-17T14:50:00.000Z'),
-
-(TIMESTAMP '2024-10-03 20:01:56.231', 1, 5, 100, TIMESTAMP '2024-10-03 20:01:56.231', NULL, 10, 0, '104'),
-
-(TIMESTAMP '2024-10-03 20:01:56.237', 1, 5, 101, TIMESTAMP '2024-10-03 20:01:56.237', NULL, 10, 1, '105');
-CREATE CACHED TABLE "PUBLIC"."PROPERTY_DEFINITION"(
-
-    "INCLUDE_IN_LIST" BOOLEAN NOT NULL,
-
-    "INCLUDE_IN_TIMELINE" BOOLEAN NOT NULL,
-
-    "INCLUDE_IN_TITLE" BOOLEAN NOT NULL,
-
-    "DELETED" BOOLEAN NOT NULL,
-
-    "MAX_LENGTH" INTEGER,
-
-    "NUM_LINES" INTEGER,
-
-    "PROP_ORDER" INTEGER NOT NULL,
-
-    "REQUIRED" BOOLEAN NOT NULL,
-
-    "TYPE" TINYINT NOT NULL,
-
-    "CREATE_TIME" TIMESTAMP(6),
-
-    "CREATED_BY" BIGINT,
-
-    "ENTITY_DEFINITION_ID" BIGINT,
-
-    "ID" BIGINT GENERATED BY DEFAULT AS IDENTITY(START WITH 1 RESTART WITH 100) NOT NULL,
-
-    "LAST_UPDATE_TIME" TIMESTAMP(6),
-
-    "LAST_UPDATED_BY" BIGINT,
-
-    "DESCRIPTION" CHARACTER VARYING(255),
-
-    "MASK" CHARACTER VARYING(255),
-
-    "NAME" CHARACTER VARYING(255) NOT NULL,
-
-    "OPTIONS" CHARACTER VARYING(255)
-
-);
-ALTER TABLE "PUBLIC"."PROPERTY_DEFINITION" ADD CONSTRAINT "PUBLIC"."CONSTRAINT_403" PRIMARY KEY("ID");
--- 10 +/- SELECT COUNT(*) FROM PUBLIC.PROPERTY_DEFINITION;
-INSERT INTO "PUBLIC"."PROPERTY_DEFINITION" VALUES
-
-(TRUE, FALSE, TRUE, FALSE, NULL, NULL, 0, TRUE, 0, TIMESTAMP '2024-04-18 22:57:39.128', 1, 1, 1, TIMESTAMP '2024-04-18 22:57:39.128', NULL, '', '', 'Last Name', ''),
-
-(TRUE, FALSE, TRUE, FALSE, NULL, NULL, 1, TRUE, 0, TIMESTAMP '2024-04-18 22:57:39.128', 1, 1, 2, TIMESTAMP '2024-04-18 22:57:39.128', NULL, '', '', 'First Name', ''),
-
-(TRUE, FALSE, FALSE, FALSE, NULL, NULL, 2, TRUE, 4, TIMESTAMP '2024-04-18 22:57:39.128', 1, 1, 3, TIMESTAMP '2024-04-18 22:57:39.128', NULL, '', '', 'DOB', ''),
-
-(TRUE, FALSE, FALSE, FALSE, NULL, NULL, 3, TRUE, 2, TIMESTAMP '2024-04-18 22:57:39.128', 1, 1, 4, TIMESTAMP '2024-04-18 22:57:39.128', NULL, '', '', 'Profile Pic', ''),
-
-(TRUE, FALSE, TRUE, FALSE, NULL, NULL, 0, TRUE, 0, NULL, NULL, 2, 5, TIMESTAMP '2024-04-18 22:59:05.237', 1, '', '', 'Name', ''),
-
-(TRUE, FALSE, FALSE, FALSE, NULL, 4, 1, TRUE, 1, NULL, NULL, 2, 6, TIMESTAMP '2024-04-18 22:59:05.242', 1, '', '', 'Description', ''),
-
-(TRUE, TRUE, FALSE, FALSE, NULL, NULL, 2, TRUE, 7, NULL, NULL, 2, 7, TIMESTAMP '2024-04-18 22:59:05.246', 1, '', '', 'Date/Time', ''),
-
-(TRUE, FALSE, TRUE, FALSE, NULL, NULL, 0, TRUE, 0, NULL, NULL, 3, 8, TIMESTAMP '2024-04-18 23:40:40.409', 1, '', '', 'Name', ''),
-
-(TRUE, FALSE, FALSE, FALSE, NULL, 4, 1, TRUE, 1, NULL, NULL, 3, 9, TIMESTAMP '2024-04-18 23:40:40.409', 1, '', '', 'Description', ''),
-
-(TRUE, FALSE, FALSE, FALSE, NULL, NULL, 2, FALSE, 3, NULL, NULL, 3, 10, TIMESTAMP '2024-04-18 23:40:40.424', 1, '', '', 'Images', '');
-CREATE CACHED TABLE "PUBLIC"."TASK"(
-
-    "STATUS" TINYINT,
-
-    "ASSIGNED_DATE_TIME" TIMESTAMP(6),
-
-    "ASSIGNED_TO" BIGINT,
-
-    "CASE_ID" BIGINT NOT NULL,
-
-    "CASE_TASK_ID" BIGINT,
-
-    "COMPLETED_DATE_TIME" TIMESTAMP(6),
-
-    "CREATE_TIME" TIMESTAMP(6),
-
-    "CREATED_BY" BIGINT,
-
-    "DUE_DATE_TIME" TIMESTAMP(6),
-
-    "ID" BIGINT GENERATED BY DEFAULT AS IDENTITY(START WITH 1 RESTART WITH 100) NOT NULL,
-
-    "LAST_UPDATE_TIME" TIMESTAMP(6),
-
-    "LAST_UPDATED_BY" BIGINT,
-
-    "COVERAGE_DESCRIPTION" CHARACTER VARYING(2048),
-
-    "DESCRIPTION" CHARACTER VARYING(2048),
-
-    "TITLE" CHARACTER VARYING(255)
-
-);
-ALTER TABLE "PUBLIC"."TASK" ADD CONSTRAINT "PUBLIC"."CONSTRAINT_272" PRIMARY KEY("ID");
--- 3 +/- SELECT COUNT(*) FROM PUBLIC.TASK;
-INSERT INTO "PUBLIC"."TASK" VALUES
-
-(2, TIMESTAMP '2024-04-18 23:12:51.092', 2, 1, 2, TIMESTAMP '2024-04-18 23:12:51.092', TIMESTAMP '2024-04-18 23:12:51.092', 1, TIMESTAMP '2024-04-18 12:00:00', 2, TIMESTAMP '2024-04-18 23:12:51.092', NULL, 'Sandra talked to Juan''s friend, Minh Lu, who said Juan was going to Carr''s at Northern Lights and Minnesota.', 'Sandra Gomez called 911 at 8:00 am on 4/18/2024 to report that her son didn''t arrive home from school ', 'Interview Sandra Gomez, mother of Juan Gomez'),
-
-(2, TIMESTAMP '2024-04-19 00:17:36.758', 4, 1, 3, TIMESTAMP '2024-04-19 00:17:36.758', TIMESTAMP '2024-04-19 00:17:36.775', 1, TIMESTAMP '2024-04-18 12:30:00', 3, TIMESTAMP '2024-04-19 00:17:36.775', NULL, 'Wright did not see Gomez yesterday.  Gomez was last seen in teacher Robert Lewis'' class.', 'Interview Mary Wright, principal at West Hight School', 'Interview Mary Wright'),
-
-(0, TIMESTAMP '2024-04-19 00:28:20.711', 5, 1, 4, NULL, TIMESTAMP '2024-04-19 00:28:20.728', 1, TIMESTAMP '2024-04-18 01:05:00', 4, TIMESTAMP '2024-04-19 00:28:20.728', NULL, 'Obtained video.', 'Get video from Carr''s at Northern Light and Minnesota', 'Get video from Carr''s');
-CREATE CACHED TABLE "PUBLIC"."TASK_ENTITY"(
-
-    "CREATE_TIME" TIMESTAMP(6),
-
-    "CREATED_BY" BIGINT,
-
-    "ID" BIGINT GENERATED BY DEFAULT AS IDENTITY(START WITH 1 RESTART WITH 100) NOT NULL,
-
-    "LAST_UPDATE_TIME" TIMESTAMP(6),
-
-    "LAST_UPDATED_BY" BIGINT,
-
-    "MATRIX_ENTITY_ID" BIGINT,
-
-    "TASK_ID" BIGINT,
-
-    "DESCRIPTION" CHARACTER VARYING(512)
-
-);
-ALTER TABLE "PUBLIC"."TASK_ENTITY" ADD CONSTRAINT "PUBLIC"."CONSTRAINT_7E" PRIMARY KEY("ID");
--- 5 +/- SELECT COUNT(*) FROM PUBLIC.TASK_ENTITY;
-INSERT INTO "PUBLIC"."TASK_ENTITY" VALUES
-
-(TIMESTAMP '2024-04-18 23:31:36.842', 1, 1, TIMESTAMP '2024-04-18 23:31:36.842', NULL, 1, 2, 'Interviewed'),
-
-(TIMESTAMP '2024-04-18 23:35:31.735', 1, 2, TIMESTAMP '2024-04-18 23:35:31.735', NULL, 3, 2, 'Seen by Minh Lu leaving West High School'),
-
-(TIMESTAMP '2024-04-18 23:35:47.503', 1, 3, TIMESTAMP '2024-04-18 23:35:47.503', NULL, 4, 2, 'Saw Gomez leaving West High School'),
-
-(TIMESTAMP '2024-04-18 23:57:33.981', 1, 4, TIMESTAMP '2024-04-18 23:57:33.981', NULL, 5, 2, 'Gomez left West high school at 4:00pm'),
-
-(TIMESTAMP '2024-04-18 23:59:52.942', 1, 5, TIMESTAMP '2024-04-18 23:59:52.942', NULL, 2, 2, 'Juan left West high school at 4pm');
-CREATE CACHED TABLE "PUBLIC"."TIMELINE"(
-
-    "CREATE_TIME" TIMESTAMP(6),
-
-    "CREATED_BY" BIGINT,
-
-    "ID" BIGINT GENERATED BY DEFAULT AS IDENTITY(START WITH 1) NOT NULL,
-
-    "LAST_UPDATE_TIME" TIMESTAMP(6),
-
-    "LAST_UPDATED_BY" BIGINT,
-
-    "MATRIX_CASE_ID" BIGINT NOT NULL,
-
-    "DESCRIPTION" CHARACTER VARYING(255),
-
-    "NAME" CHARACTER VARYING(255)
-
-);
-ALTER TABLE "PUBLIC"."TIMELINE" ADD CONSTRAINT "PUBLIC"."CONSTRAINT_B2" PRIMARY KEY("ID");
--- 0 +/- SELECT COUNT(*) FROM PUBLIC.TIMELINE;
-CREATE CACHED TABLE "PUBLIC"."TIMELINE_ENTITY"(
-
-    "ENTITY_ID" BIGINT NOT NULL,
-
-    "TIMELINE_ID" BIGINT NOT NULL
-
-);
--- 0 +/- SELECT COUNT(*) FROM PUBLIC.TIMELINE_ENTITY;
-CREATE CACHED TABLE "PUBLIC"."USER_CASE_ROLE"(
-
-    "CASE_ROLE" TINYINT,
-
-    "CASE_ID" BIGINT NOT NULL,
-
-    "USER_ID" BIGINT NOT NULL,
-
-    "CREATE_TIME" TIMESTAMP(6),
-
-    "CREATED_BY" BIGINT,
-
-    "LAST_UPDATE_TIME" TIMESTAMP(6),
-
-    "LAST_UPDATED_BY" BIGINT
-
-);
-ALTER TABLE "PUBLIC"."USER_CASE_ROLE" ADD CONSTRAINT "PUBLIC"."CONSTRAINT_8E" PRIMARY KEY("CASE_ID", "USER_ID");
--- 5 +/- SELECT COUNT(*) FROM PUBLIC.USER_CASE_ROLE;
-INSERT INTO "PUBLIC"."USER_CASE_ROLE" VALUES
-
-(0, 1, 1, TIMESTAMP '2024-04-18 23:31:36.842', 1, TIMESTAMP '2024-04-18 23:31:36.842', 1),
-
-(1, 1, 2, TIMESTAMP '2024-04-18 23:31:36.842', 1, TIMESTAMP '2024-04-18 23:31:36.842', 1),
-
-(1, 1, 4, TIMESTAMP '2024-04-18 23:31:36.842', 1, TIMESTAMP '2024-04-18 23:31:36.842', 1),
-
-(1, 1, 5, TIMESTAMP '2024-04-18 23:31:36.842', 1, TIMESTAMP '2024-04-18 23:31:36.842', 1),
-
-(1, 1, 3, TIMESTAMP '2024-04-18 23:31:36.842', 1, TIMESTAMP '2024-04-18 23:31:36.842', 1);
-CREATE CACHED TABLE "PUBLIC"."TASK_FILE"(
-
-    "CREATE_TIME" TIMESTAMP(6),
-
-    "CREATED_BY" BIGINT,
-
-    "ID" BIGINT GENERATED BY DEFAULT AS IDENTITY(START WITH 1) NOT NULL,
-
-    "LAST_UPDATE_TIME" TIMESTAMP(6),
-
-    "LAST_UPDATED_BY" BIGINT,
-
-    "MATRIX_FILE_ID" BIGINT,
-
-    "TASK_ID" BIGINT,
-
-    "DESCRIPTION" CHARACTER VARYING(512)
-
-);
-ALTER TABLE "PUBLIC"."TASK_FILE" ADD CONSTRAINT "PUBLIC"."CONSTRAINT_B" PRIMARY KEY("ID");
--- 0 +/- SELECT COUNT(*) FROM PUBLIC.TASK_FILE;
-ALTER TABLE "PUBLIC"."USER_CASE_ROLE" ADD CONSTRAINT "PUBLIC"."CONSTRAINT_8" CHECK("CASE_ROLE" BETWEEN 0 AND 2) NOCHECK;
-ALTER TABLE "PUBLIC"."PROPERTY_DEFINITION" ADD CONSTRAINT "PUBLIC"."CONSTRAINT_40" CHECK("TYPE" BETWEEN 0 AND 8) NOCHECK;
-ALTER TABLE "PUBLIC"."TASK" ADD CONSTRAINT "PUBLIC"."CONSTRAINT_27" CHECK("STATUS" BETWEEN 0 AND 4) NOCHECK;
-ALTER TABLE "PUBLIC"."MATRIX_USER" ADD CONSTRAINT "PUBLIC"."CONSTRAINT_6D38" UNIQUE("USERNAME");
-ALTER TABLE "PUBLIC"."MATRIX_USER" ADD CONSTRAINT "PUBLIC"."CONSTRAINT_6D3" UNIQUE("PROFILE_IMAGE_ID");
-ALTER TABLE "PUBLIC"."MATRIX_CASE" ADD CONSTRAINT "PUBLIC"."FKJYSIS4D2RK20SWRX2QU10JLVD" FOREIGN KEY("LAST_UPDATED_BY") REFERENCES "PUBLIC"."MATRIX_USER"("ID") NOCHECK;
-ALTER TABLE "PUBLIC"."MATRIX_ENTITY" ADD CONSTRAINT "PUBLIC"."FKO5X1LNMILKJC3U1SB1C13DWBB" FOREIGN KEY("ENTITY_DEFINITION_ID") REFERENCES "PUBLIC"."ENTITY_DEFINITION"("ID") NOCHECK;
-ALTER TABLE "PUBLIC"."TASK_ENTITY" ADD CONSTRAINT "PUBLIC"."FK6CM52PJ59VTXLRESSGT9M0LOA" FOREIGN KEY("TASK_ID") REFERENCES "PUBLIC"."TASK"("ID") NOCHECK;
-ALTER TABLE "PUBLIC"."MATRIX_USER" ADD CONSTRAINT "PUBLIC"."FKPDMMHI661IR3VX84BYAM2BHBO" FOREIGN KEY("CREATED_BY") REFERENCES "PUBLIC"."MATRIX_USER"("ID") NOCHECK;
-ALTER TABLE "PUBLIC"."MFILE" ADD CONSTRAINT "PUBLIC"."FKGBX8VGEYBKGYJHCEI9UJ9OQBW" FOREIGN KEY("LAST_UPDATED_BY") REFERENCES "PUBLIC"."MATRIX_USER"("ID") NOCHECK;
-ALTER TABLE "PUBLIC"."PROPERTY_DEFINITION" ADD CONSTRAINT "PUBLIC"."FKOW41Y4HNWLCLN8YSTMHKIFP3O" FOREIGN KEY("ENTITY_DEFINITION_ID") REFERENCES "PUBLIC"."ENTITY_DEFINITION"("ID") NOCHECK;
-ALTER TABLE "PUBLIC"."TASK_ENTITY" ADD CONSTRAINT "PUBLIC"."FKFQ069OHFJ2PCAK6UA3CRP1BDM" FOREIGN KEY("CREATED_BY") REFERENCES "PUBLIC"."MATRIX_USER"("ID") NOCHECK;
-ALTER TABLE "PUBLIC"."PROPERTY_VALUE" ADD CONSTRAINT "PUBLIC"."FKALMQOXUW13A673UG2P21OW5O7" FOREIGN KEY("ENTITY_ID") REFERENCES "PUBLIC"."MATRIX_ENTITY"("ID") NOCHECK;
-ALTER TABLE "PUBLIC"."TASK" ADD CONSTRAINT "PUBLIC"."FKL0KNJRRM138977SRRORN5UCNQ" FOREIGN KEY("LAST_UPDATED_BY") REFERENCES "PUBLIC"."MATRIX_USER"("ID") NOCHECK;
-ALTER TABLE "PUBLIC"."ENTITY_FILE" ADD CONSTRAINT "PUBLIC"."FKSML72TMA2NR42WS4KJGWPNBS9" FOREIGN KEY("LAST_UPDATED_BY") REFERENCES "PUBLIC"."MATRIX_USER"("ID") NOCHECK;
-ALTER TABLE "PUBLIC"."USER_CASE_ROLE" ADD CONSTRAINT "PUBLIC"."FKR5O9AC5OGSCYTDWAEATNPJCUM" FOREIGN KEY("USER_ID") REFERENCES "PUBLIC"."MATRIX_USER"("ID") NOCHECK;
-ALTER TABLE "PUBLIC"."TASK" ADD CONSTRAINT "PUBLIC"."FKJ6TJ7G70SD3OLIUU9DFTYEGSO" FOREIGN KEY("ASSIGNED_TO") REFERENCES "PUBLIC"."MATRIX_USER"("ID") NOCHECK;
-ALTER TABLE "PUBLIC"."ENTITY_RELATIONSHIP" ADD CONSTRAINT "PUBLIC"."FKJD74FTGJUNVCHHI8758RUN7RK" FOREIGN KEY("CHILD_ID") REFERENCES "PUBLIC"."MATRIX_ENTITY"("ID") NOCHECK;
-ALTER TABLE "PUBLIC"."MATRIX_ENTITY" ADD CONSTRAINT "PUBLIC"."FKGVE3IIAGIXS7B7KBHSQYPLDC9" FOREIGN KEY("LAST_UPDATED_BY") REFERENCES "PUBLIC"."MATRIX_USER"("ID") NOCHECK;
-ALTER TABLE "PUBLIC"."TASK" ADD CONSTRAINT "PUBLIC"."FKQWGN9OIUOC3SG14CVR8B6JMBM" FOREIGN KEY("CASE_ID") REFERENCES "PUBLIC"."MATRIX_CASE"("ID") NOCHECK;
-ALTER TABLE "PUBLIC"."TASK_ENTITY" ADD CONSTRAINT "PUBLIC"."FK3RNL96YMLD0EYC588PL75MJTM" FOREIGN KEY("LAST_UPDATED_BY") REFERENCES "PUBLIC"."MATRIX_USER"("ID") NOCHECK;
-ALTER TABLE "PUBLIC"."ENTITY_FILE" ADD CONSTRAINT "PUBLIC"."FK9OBAQAVG3YEGKXX8YXJQMBUVW" FOREIGN KEY("CREATED_BY") REFERENCES "PUBLIC"."MATRIX_USER"("ID") NOCHECK;
-ALTER TABLE "PUBLIC"."ENTITY_FILE" ADD CONSTRAINT "PUBLIC"."FKHKWYAHPCL4JDQ74044G7H5N3L" FOREIGN KEY("MATRIX_ENTITY_ID") REFERENCES "PUBLIC"."MATRIX_ENTITY"("ID") NOCHECK;
-ALTER TABLE "PUBLIC"."PROPERTY_DEFINITION" ADD CONSTRAINT "PUBLIC"."FKO3LM4F58EVJT4629L85FH28S6" FOREIGN KEY("LAST_UPDATED_BY") REFERENCES "PUBLIC"."MATRIX_USER"("ID") NOCHECK;
-ALTER TABLE "PUBLIC"."ENTITY_RELATIONSHIP" ADD CONSTRAINT "PUBLIC"."FK2YTTI7U2E0UJNR1BVAU2EEB2Q" FOREIGN KEY("CREATED_BY") REFERENCES "PUBLIC"."MATRIX_USER"("ID") NOCHECK;
-ALTER TABLE "PUBLIC"."AGENCY" ADD CONSTRAINT "PUBLIC"."FKOCL5D10JQAGOT4IPI5SQDX440" FOREIGN KEY("LAST_UPDATED_BY") REFERENCES "PUBLIC"."MATRIX_USER"("ID") NOCHECK;
-ALTER TABLE "PUBLIC"."ENTITY_RELATIONSHIP" ADD CONSTRAINT "PUBLIC"."FKH93JOLRS688X8QRS9YOFVQVXC" FOREIGN KEY("PARENT_ID") REFERENCES "PUBLIC"."MATRIX_ENTITY"("ID") NOCHECK;
-ALTER TABLE "PUBLIC"."ENTITY_FILE" ADD CONSTRAINT "PUBLIC"."FK3JG2QW6MCALWPVE7NUP0TGJ5H" FOREIGN KEY("M_FILE_ID") REFERENCES "PUBLIC"."MFILE"("ID") NOCHECK;
-ALTER TABLE "PUBLIC"."PROPERTY_VALUE" ADD CONSTRAINT "PUBLIC"."FK54M2SMSYT0F5JFT7UKHOL5VT7" FOREIGN KEY("PROPERTY_DEFINITION_ID") REFERENCES "PUBLIC"."PROPERTY_DEFINITION"("ID") NOCHECK;
-ALTER TABLE "PUBLIC"."PROPERTY_VALUE" ADD CONSTRAINT "PUBLIC"."FKFNM8S6PB0PCYR2EXFB9UAC649" FOREIGN KEY("CREATED_BY") REFERENCES "PUBLIC"."MATRIX_USER"("ID") NOCHECK;
-ALTER TABLE "PUBLIC"."ENTITY_DEFINITION" ADD CONSTRAINT "PUBLIC"."FK5POG0JCWWMH6DES0XFBL3BOM0" FOREIGN KEY("LAST_UPDATED_BY") REFERENCES "PUBLIC"."MATRIX_USER"("ID") NOCHECK;
-ALTER TABLE "PUBLIC"."PROPERTY_DEFINITION" ADD CONSTRAINT "PUBLIC"."FKAY7Y8QAI8KQVDQB3B1WFXL4J" FOREIGN KEY("CREATED_BY") REFERENCES "PUBLIC"."MATRIX_USER"("ID") NOCHECK;
-ALTER TABLE "PUBLIC"."ENTITY_RELATIONSHIP" ADD CONSTRAINT "PUBLIC"."FKM91FCDE7N7UJL6NLVYVQ7DRCL" FOREIGN KEY("LAST_UPDATED_BY") REFERENCES "PUBLIC"."MATRIX_USER"("ID") NOCHECK;
-ALTER TABLE "PUBLIC"."MATRIX_ENTITY" ADD CONSTRAINT "PUBLIC"."FKIR40H4RW7CNDRBL52U5QBV3OE" FOREIGN KEY("CREATED_BY") REFERENCES "PUBLIC"."MATRIX_USER"("ID") NOCHECK;
-ALTER TABLE "PUBLIC"."MATRIX_USER" ADD CONSTRAINT "PUBLIC"."FKO0662YGPI91RRCLIKO935QYEB" FOREIGN KEY("AGENCY_ID") REFERENCES "PUBLIC"."AGENCY"("ID") NOCHECK;
-ALTER TABLE "PUBLIC"."USER_CASE_ROLE" ADD CONSTRAINT "PUBLIC"."FK77PG6J5A81OTOKKHB0YQQHOU" FOREIGN KEY("CASE_ID") REFERENCES "PUBLIC"."MATRIX_CASE"("ID") NOCHECK;
-ALTER TABLE "PUBLIC"."AGENCY" ADD CONSTRAINT "PUBLIC"."FKCG5NQT66WP78GNHRVYJ650ROU" FOREIGN KEY("CREATED_BY") REFERENCES "PUBLIC"."MATRIX_USER"("ID") NOCHECK;
-ALTER TABLE "PUBLIC"."PROPERTY_VALUE" ADD CONSTRAINT "PUBLIC"."FKSEJ3R9X0P277I4OM268GSEOAO" FOREIGN KEY("LAST_UPDATED_BY") REFERENCES "PUBLIC"."MATRIX_USER"("ID") NOCHECK;
-ALTER TABLE "PUBLIC"."TASK_ENTITY" ADD CONSTRAINT "PUBLIC"."FKFAXF2W22W42QANM3SO41LXNNK" FOREIGN KEY("MATRIX_ENTITY_ID") REFERENCES "PUBLIC"."MATRIX_ENTITY"("ID") NOCHECK;
-ALTER TABLE "PUBLIC"."MATRIX_CASE" ADD CONSTRAINT "PUBLIC"."FKF7RL0HGVCQRO90U71F3OGDEEF" FOREIGN KEY("CREATED_BY") REFERENCES "PUBLIC"."MATRIX_USER"("ID") NOCHECK;
-ALTER TABLE "PUBLIC"."MATRIX_USER" ADD CONSTRAINT "PUBLIC"."FKGB6R4P62K1TCX301CCCQF50CJ" FOREIGN KEY("PROFILE_IMAGE_ID") REFERENCES "PUBLIC"."MFILE"("ID") NOCHECK;
-ALTER TABLE "PUBLIC"."MATRIX_USER" ADD CONSTRAINT "PUBLIC"."FKROW1WLO11FNQ4CHWXN8CO38GN" FOREIGN KEY("LAST_UPDATED_BY") REFERENCES "PUBLIC"."MATRIX_USER"("ID") NOCHECK;
-ALTER TABLE "PUBLIC"."MFILE" ADD CONSTRAINT "PUBLIC"."FKPEAQR3PHRX4Y9XLYSQVOYAVBS" FOREIGN KEY("CREATED_BY") REFERENCES "PUBLIC"."MATRIX_USER"("ID") NOCHECK;
-ALTER TABLE "PUBLIC"."ENTITY_DEFINITION" ADD CONSTRAINT "PUBLIC"."FKS0RXDKIGTCH2R0XBAILDXMFWO" FOREIGN KEY("CREATED_BY") REFERENCES "PUBLIC"."MATRIX_USER"("ID") NOCHECK;
-ALTER TABLE "PUBLIC"."TASK" ADD CONSTRAINT "PUBLIC"."FKCH1BXOS7L909DU1U0Y5B0V2AP" FOREIGN KEY("CREATED_BY") REFERENCES "PUBLIC"."MATRIX_USER"("ID") NOCHECK;
-
-ALTER TABLE "PUBLIC"."AGENCY" ALTER COLUMN id RESTART WITH 100;
-ALTER TABLE "PUBLIC"."ENTITY_FILE" ALTER COLUMN id RESTART WITH 100;
-ALTER TABLE "PUBLIC"."ENTITY_DEFINITION" ALTER COLUMN id RESTART WITH 100;
-ALTER TABLE "PUBLIC"."ENTITY_RELATIONSHIP" ALTER COLUMN id RESTART WITH 100;
-ALTER TABLE "PUBLIC"."MATRIX_CASE" ALTER COLUMN id RESTART WITH 100;
-ALTER TABLE "PUBLIC"."MATRIX_USER" ALTER COLUMN id RESTART WITH 100;
-ALTER TABLE "PUBLIC"."MATRIX_ENTITY" ALTER COLUMN id RESTART WITH 100;
-ALTER TABLE "PUBLIC"."MFILE" ALTER COLUMN id RESTART WITH 200;
-ALTER TABLE "PUBLIC"."PROPERTY_VALUE" ALTER COLUMN id RESTART WITH 200;
-ALTER TABLE "PUBLIC"."PROPERTY_DEFINITION" ALTER COLUMN id RESTART WITH 100;
-ALTER TABLE "PUBLIC"."TASK" ALTER COLUMN id RESTART WITH 100;
-ALTER TABLE "PUBLIC"."TASK_ENTITY" ALTER COLUMN id RESTART WITH 100; 

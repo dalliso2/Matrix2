@@ -7,6 +7,7 @@ import java.util.Optional;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
@@ -24,38 +25,21 @@ import com.dca.matrix.user.MatrixUser;
 import com.dca.matrix.user.MatrixUserRepository;
 
 import jakarta.servlet.http.HttpServletResponse;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
 @Configuration
 @EnableMethodSecurity
+@RequiredArgsConstructor
 @Slf4j
 public class SecurityConfig
-{
+{	
 	@Bean
 	public PasswordEncoder passwordEncoder()
 	{
 		return new BCryptPasswordEncoder();
 	}
 
-//	@Bean
-//	SecurityFilterChain web(HttpSecurity http) throws Exception
-//	{
-//		// allow frames for h2 console
-//		http.headers(h -> h.frameOptions(f -> f.sameOrigin()));
-//
-//		http.authorizeHttpRequests(auth->auth.requestMatchers(antMatcher("/h2-console/**"))
-//		.permitAll());
-//
-//		// make sure all users are authenticated	
-//		http.authorizeHttpRequests(auth->auth.requestMatchers(antMatcher("/**"))
-//				.authenticated()).csrf(csrf->csrf.disable());
-//		
-//		return http.formLogin(f->f.loginProcessingUrl("/api/user/login").permitAll()).
-//				sessionManagement(sm->sm.invalidSessionStrategy(invalidSessionStrategy()))
-//				// remove httpBasic for production
-//				.build();
-//	}	
-	
 	@Bean
 	public UserDetailsService userDetailsService(MatrixUserRepository userRepo)
 	{
@@ -65,12 +49,6 @@ public class SecurityConfig
 		};
 	}
 	
-//    @Bean
-//    public PasswordEncoder passwordEncoder() 
-//    {
-//        return PasswordEncoderFactories.createDelegatingPasswordEncoder();
-//    }
-//    
     @Bean
     public AuthenticationManager authenticationManager(final AuthenticationConfiguration authenticationConfiguration)
     		throws Exception
@@ -78,8 +56,12 @@ public class SecurityConfig
     	return authenticationConfiguration.getAuthenticationManager();
     }
     
+    
     @Bean
-    public SecurityFilterChain configure(final HttpSecurity http, final JWTAuthenticationRequestFilter filter) throws Exception
+    public SecurityFilterChain configure(final HttpSecurity http, 
+    										final JWTAuthenticationRequestFilter filter, 
+    										UserDetailsService userDetailsService, 
+    										JWTTokenService tokenService) throws Exception
     {
 		// allow frames for h2 console
 		http.headers(h -> h.frameOptions(f -> f.sameOrigin()));
@@ -89,7 +71,9 @@ public class SecurityConfig
 
     	http.cors(Customizer.withDefaults()).csrf(csrf->csrf.disable())
     									.authorizeHttpRequests(auth->auth.requestMatchers("/","/api/login","/api/file/**").permitAll()
-    									.anyRequest().authenticated()).exceptionHandling(exh -> exh.authenticationEntryPoint(
+    									.anyRequest().authenticated())
+    									.authenticationProvider(new JWTAuthenticationProvider(userDetailsService, tokenService))
+    									.exceptionHandling(exh -> exh.authenticationEntryPoint(
     								            (request, response, ex) -> {
     								                response.sendError(HttpServletResponse.SC_UNAUTHORIZED, ex.getMessage());
     								            }

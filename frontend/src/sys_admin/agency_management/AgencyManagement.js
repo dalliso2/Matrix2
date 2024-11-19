@@ -16,10 +16,10 @@ import Content from '../../util/Content';
 import AddEditAgencyDialog from './AddEditAgencyDialog';
 import { useTheme } from '@mui/material/styles';
 import { useGetAllAgenciesQuery } from '../../api/AgencyApi';
-import { useEffect } from 'react';
 import { handleQueryError } from '../../api/ApiUtils';
 import { useDispatch } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
+import { api } from '../../api/BaseApi';
 
 const columnHeadings = ["Name", "Abbreviation"]
 const columnTypes = [TEXT, TEXT];
@@ -41,19 +41,33 @@ export default function AgencyManagement()
     const dispatch = useDispatch();
     const [editAgency, setEditAgency] = useState(undefined);
     
-    const { data:envelope, refetch, ...allAgencyQueryStatus } = useGetAllAgenciesQuery();
+    const { currentData:envelope, refetch, ...allAgencyQueryStatus } = useGetAllAgenciesQuery();
     const allAgencies = envelope?.payload;
-
-    useEffect(() => {
-        if (allAgencyQueryStatus.isError) 
-            handleQueryError(allAgencyQueryStatus, dispatch, navigate);
-    }, [allAgencyQueryStatus.isError]);
-
-
+    handleQueryError(allAgencyQueryStatus, dispatch, navigate);
+    console.log(allAgencyQueryStatus);
 
     function successFn(updatedAgency)
     {
         setAgencies(prevAgencies=>[...prevAgencies].with(prevAgencies.findIndex((agency)=>agency.id===updatedAgency.id), updatedAgency));
+    }
+
+    // function optimisticAgencyUpdate(agencyData)
+    // {
+    //     dispatch(api.util.updateQueryData('getAllAgencies',
+    //         taskId,
+    //         (cache)=>{
+    //             cache.payload = taskData;
+    //             return cache;
+    //         })); 
+    //     setEditTaskData(undefined);
+    // }
+
+    function refresh()
+    {
+        dispatch(api.util.updateQueryData('getAllAgencies',
+                    undefined,
+                    (cache)=>{cache.payload = undefined;})); 
+        refetch();
     }
 
     const agencyList = allAgencies && allAgencies.map((record) => 
@@ -66,10 +80,10 @@ export default function AgencyManagement()
             <Content>   
                 <Box sx={{ position:'relative', width:'100%', maxHeight:'100%', display: 'flex', flexDirection:'column' }}>
                     <Box sx={{position:'relative',display:'flex', justifyContent:'space-between', padding:'5px', flexGrow:0}}>
-                        <IconButton onClick={() => refetch()}><RefreshIcon/></IconButton>
-                        <Button  sx={{ m:0, p:0 }} onClick={() => setEditAgency({...newAgency})} >Add Organization</Button>
+                        <IconButton disabled={!allAgencies && allAgencyQueryStatus.isFetching} onClick={() => refresh()}><RefreshIcon/></IconButton>
+                        <Button disabled={!allAgencies && allAgencyQueryStatus.isFetching} sx={{ m:0, p:0 }} onClick={() => setEditAgency({...newAgency})} >Add Organization</Button>
                     </Box>
-                    <Grid columnHeadings={columnHeadings} columnTypes={columnTypes} rowValues={agencyList} isFetching={allAgencyQueryStatus.isFetching}/>
+                    <Grid columnHeadings={columnHeadings} columnTypes={columnTypes} rowValues={agencyList} isFetching={!allAgencies && allAgencyQueryStatus.isFetching}/>
                     { editAgency && <AddEditAgencyDialog agency={editAgency} successFn={successFn} closeFn={()=>setEditAgency(undefined)} />}
                 </Box> 
             </Content>

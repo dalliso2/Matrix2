@@ -1,5 +1,6 @@
 package com.dca.matrix.agency;
 
+import java.util.LinkedList;
 import java.util.List;
 
 import org.springframework.http.HttpRequest;
@@ -37,20 +38,11 @@ public class AgencyController
 	
 	@PostMapping(path = "/store", consumes = "application/json")
 	@PreAuthorize("hasRole('ADMIN')")
-	public ResponseEntity<ApiResponse<Agency>> createAgency(@RequestBody Agency agency, HttpServletRequest request)
-	{
-		return	new ResponseEntity<>(ApiResponseUtil.success(this.agencyService.createUpdateAgency(agency), 
-										"Successfully created agency", 
-										request.getRequestURI()), HttpStatus.OK);
-	}
-	
-	@PutMapping(path = "/store", consumes = "application/json")
-	@PreAuthorize("hasRole('ADMIN')")
 	public ResponseEntity<ApiResponse<Agency>> storeAgency(@RequestBody Agency agency, HttpServletRequest request)
 	{
 		return	new ResponseEntity<>(ApiResponseUtil.success(this.agencyService.createUpdateAgency(agency), 
 										"Successfully updated agency", 
-										request.getRequestURI()), HttpStatus.CREATED);
+										request.getRequestURI()), HttpStatus.OK);
 	}
 	
 	@DeleteMapping(path = "/delete/{agencyId}")

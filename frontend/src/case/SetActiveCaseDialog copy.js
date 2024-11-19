@@ -45,7 +45,7 @@ export default function SetActiveCaseDialog()
             <>
             <Dialog open={!caseList?.length}>
                 <DialogTitle sx={{backgroundColor:theme.palette.primary.main, color:theme.palette.primary.contrastText }}>No Cases Available</DialogTitle>
-                <DialogContent>
+                <DialogContent sx={{p:24}}>
                     <Box>There are no cases available.  Click OK to be taken to the case management screen.</Box>
                 </DialogContent>
                 <DialogActions>

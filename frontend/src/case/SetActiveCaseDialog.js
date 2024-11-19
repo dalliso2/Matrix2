@@ -23,8 +23,7 @@ export default function SetActiveCaseDialog()
     const activeCase = useSelector(selectActiveCase);   
     const [selectedCase, setSelectedCase] = useState(null);
 
-    const { data:envelope, currentData, ...userCaseListQueryStatus } = useGetUserCaseListQuery();
-    
+    const { data:envelope, ...userCaseListQueryStatus } = useGetUserCaseListQuery();
     console.log(userCaseListQueryStatus);
     handleQueryResultsWithWaitMessage(userCaseListQueryStatus, dispatch, navigate, "Loading cases...");
     const caseList = envelope?.payload;
@@ -44,7 +43,7 @@ export default function SetActiveCaseDialog()
             </Dialog>
             <Dialog open={!activeCase && !!caseList?.length} onClose={()=>{}}>
             <DialogTitle sx={{backgroundColor:theme.palette.primary.main, color:theme.palette.primary.contrastText }}>Set Active Case</DialogTitle>
-            <DialogContent>
+            <DialogContent sx={{'& .MuiDialogContent-root':{pt:24}}}>
             <List >
                 {
                     caseList && caseList.map((aCase, index) =>

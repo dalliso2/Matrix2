@@ -10,7 +10,7 @@ import com.fasterxml.jackson.databind.deser.std.StdDeserializer;
 import com.fasterxml.jackson.databind.node.LongNode;
 
 /*
- *
+ *	Used to deserialize an agency from an id
  */
 public class AgencyDeserializer extends StdDeserializer<Agency>
 {

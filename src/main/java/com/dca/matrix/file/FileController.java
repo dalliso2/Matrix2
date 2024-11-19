@@ -1,10 +1,13 @@
 	package com.dca.matrix.file;
 
+import java.time.Duration;
 import java.util.Collection;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Stream;
 
+import org.springframework.http.CacheControl;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -20,9 +23,11 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
+import com.auth0.jwt.exceptions.JWTVerificationException;
 import com.dca.matrix.api.ApiErrorCode;
 import com.dca.matrix.api.ApiResponse;
 import com.dca.matrix.api.ApiResponseUtil;
+import com.dca.matrix.authentication.JWTTokenService;
 import com.dca.matrix.exception.MatrixUncheckedException;
 import com.dca.matrix.exception.MatrixValidationException;
 import com.dca.matrix.task_file.TaskFileSearchMessage;
@@ -39,6 +44,7 @@ import lombok.extern.slf4j.Slf4j;
 public class FileController
 {
 	private final FileStorageService storageService;
+	private final JWTTokenService tokenService;
 	
 	@PostMapping(value = "/upload", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
 	public Collection<MFile> uploadFiles(@RequestParam Long matrixCaseId, 
@@ -76,15 +82,23 @@ public class FileController
 		//return this.storageService.updateFiles(files);
 	}
 	
-	@GetMapping(value="{id}", produces=MediaType.ALL_VALUE)
-	public ResponseEntity<byte[]> getFile(@PathVariable("id") Long id)
+	@GetMapping(value="/{id}", produces=MediaType.ALL_VALUE)
+	public ResponseEntity<byte[]> getFile(@PathVariable("id") Long id, @RequestParam Map<String,String> params)
 	{
 		try
 		{
+			String token = params.get("t");
+			String username = this.tokenService.validateTokenReturnUsername(token);
+			log.debug("USERNAME: " + username);
+			// TODO check is user has access to this file 
 			HttpHeaders headers = new HttpHeaders();
 			headers.setContentType(MediaType.IMAGE_JPEG);
-			//headers.setCacheControl(CacheControl.maxAge(Duration.ofDays(365)));
+			headers.setCacheControl(CacheControl.maxAge(Duration.ofDays(365)));
 			return new ResponseEntity(this.storageService.load(id), headers, HttpStatus.OK);
+		}
+		catch (JWTVerificationException ex)
+		{
+			throw new MatrixUncheckedException("Invalid credentials",null, ApiErrorCode.NOT_AUTHORIZED);
 		}
 		catch (Exception ex)
 		{				

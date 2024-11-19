@@ -1,6 +1,7 @@
 package com.dca.matrix.user;
 
 import java.util.List;
+import java.util.Optional;
 
 public interface MatrixUserService
 {
@@ -8,7 +9,7 @@ public interface MatrixUserService
 	
 	MatrixUser updateUser(MatrixUser mUser);
 	
-	MatrixUser findByUsername(String username);
+	Optional<MatrixUser> findByUsername(String username);
 	
 	MatrixUser findById(Long id);
 	

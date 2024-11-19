@@ -1,6 +1,6 @@
 import { api } from './BaseApi';
 
-const userApi = api.enhanceEndpoints({addTagTypes:['User','CurrentUser']}).injectEndpoints({
+const userApi = api.enhanceEndpoints({addTagTypes:['User']}).injectEndpoints({
     //entityTypes: ['currentUser','user'],
     endpoints: (builder) => ({
         login: builder.query({
@@ -9,7 +9,6 @@ const userApi = api.enhanceEndpoints({addTagTypes:['User','CurrentUser']}).injec
             {
                 return response || [];
             },
-            pollInterval: 1000,
         }),   
         refreshCredentials: builder.query({
             query: (credentials) => ({url: '/refresh-credentials', method: 'POST', body: credentials}),
@@ -17,7 +16,6 @@ const userApi = api.enhanceEndpoints({addTagTypes:['User','CurrentUser']}).injec
             {
                 return response || [];
             },
-            pollInterval: 1000,
         }),       
         searchUsers: builder.query({
             query: (filter) => ({url:`/user/search/${filter}`}),
@@ -25,8 +23,7 @@ const userApi = api.enhanceEndpoints({addTagTypes:['User','CurrentUser']}).injec
             {
                 return response || [];
             },
-            providesTags: (result, error, filter) => result?[...result.payload.map(({id}) => ({type: 'User', id}))]:[],
-            keepUnusedDataFor: 300
+            providesTags: (result, error, arg) => result.payload?.map(user => ({type: 'User', id:user.id})),
         }),
         getUser: builder.query({
             query: (id) => ({url:`/user/${id}`}),
@@ -43,12 +40,10 @@ const userApi = api.enhanceEndpoints({addTagTypes:['User','CurrentUser']}).injec
             {
                 return response;
             },
-            providesTags: ['CurrentUser'],
-            keepUnusedDataFor: 1200,
         }),
         storeUser: builder.mutation({
             query: (data) => ({url: '/user/store', method: 'POST', body: data}),
-            invalidatesTags: (result, error, data) => result?[{type: 'User', id:result.payload.id}]:[],
+            invalidatesTags: (result, error, arg) => result.payload?[{type: 'User', id:user.id}]:[],
         }),
         setUserDarkTheme: builder.mutation({
             query: (darkThemeBoolean) => ({

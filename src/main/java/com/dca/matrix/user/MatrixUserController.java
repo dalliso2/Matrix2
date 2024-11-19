@@ -30,20 +30,7 @@ public class MatrixUserController
 {
 	private final MatrixUserService userService;
 	private final AuthenticationService authService;
-	
-	@PostMapping("/login")
-	public ResponseEntity<ApiResponse<MatrixUserDTO>> login(@PathVariable("username") String username, @PathVariable("password") String password)
-	{
-		log.debug("*****************************");
-		log.debug("*****************************");
-		log.debug("*****************************");
-		log.debug("*****************************");
-		log.debug("*****************************");
-		MatrixUser user = this.userService.findByUsername(username);
 
-		return new ResponseEntity<>(ApiResponseUtil.success(this.createDTO(user), "Login Successful", "/api/login"), HttpStatus.OK);
-	}
-	
 	@PreAuthorize("isAuthenticated()")
 	@GetMapping("/all")
 	@ResponseStatus(HttpStatus.OK)
@@ -80,6 +67,7 @@ public class MatrixUserController
 	@ResponseStatus(HttpStatus.OK)
 	public ResponseEntity<ApiResponse<List<MatrixUserDTO>>> searchUsers(@PathVariable("q") String searchString, HttpServletRequest request) throws Exception
 	{
+		authService.getCurrentUser().getAuthorities().forEach(ga->log.debug(ga.getAuthority()));
 		List<MatrixUser> users = this.userService.search(searchString);
 		
 		List<MatrixUserDTO> userDTOs = users.stream().map(matrixUser->createDTO(matrixUser)).toList();
@@ -109,6 +97,7 @@ public class MatrixUserController
 	@PreAuthorize("hasRole('ADMIN')")
 	public ResponseEntity<ApiResponse<MatrixUserDTO>> storeUser(@RequestBody MatrixUser user, HttpServletRequest request)
 	{
+		authService.getCurrentUser().getAuthorities().forEach(ga->log.debug(ga.getAuthority()));
 		MatrixUser savedUser = this.userService.updateUser(user);
 		return new ResponseEntity<>(ApiResponseUtil.success(this.createDTO(savedUser), 
 															"Created/Updated user", 
