@@ -14,9 +14,9 @@ public class Agency extends EntityBase
 	public static final String NAME = "name";
 	public static final String ACRONYM = "acronym";
 	
-	@Column(name = NAME)
+	@Column(name = NAME, unique = true)
 	private String name;
 	
-	@Column(name = ACRONYM)
+	@Column(name = ACRONYM, unique = true)
 	private String acronym;
 }

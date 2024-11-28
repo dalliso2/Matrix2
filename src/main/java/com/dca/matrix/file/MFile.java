@@ -32,7 +32,7 @@ public class MFile extends EntityBase
 	private String description;
 	
 	// Every file must be associated to a case
-	@OneToOne
+	@ManyToOne
 	@JoinColumn(name = "MATRIX_CASE_ID")
 	@JsonDeserialize(using = MatrixCaseDeserializer.class)
 	@JsonSerialize(using = MatrixCaseIDSerializer.class)

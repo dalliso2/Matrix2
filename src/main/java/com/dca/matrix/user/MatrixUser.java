@@ -129,6 +129,9 @@ public class MatrixUser extends EntityBase implements UserDetails, Cloneable
 		if (this.isAdmin)
 			authorities.add(new SimpleGrantedAuthority(ROLE_ADMIN));
 				
+		this.userCaseRoles.forEach(ucr->
+			authorities.add(new SimpleGrantedAuthority("CASE_" + ucr.getMatrixCase().getId() + "_" + ucr.getCaseRole())));
+		
 		return authorities;
 	}
 

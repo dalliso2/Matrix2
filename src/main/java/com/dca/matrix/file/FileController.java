@@ -5,6 +5,7 @@ import java.util.Collection;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.stream.Stream;
 
 import org.springframework.http.CacheControl;
@@ -47,7 +48,7 @@ public class FileController
 	private final JWTTokenService tokenService;
 	
 	@PostMapping(value = "/upload", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-	public Collection<MFile> uploadFiles(@RequestParam Long matrixCaseId, 
+	public Collection<MFile> uploadFiles(@RequestParam Optional<Long> matrixCaseId, 
 																	@RequestParam("files") MultipartFile[] files,
 																	HttpServletRequest request)
 	{

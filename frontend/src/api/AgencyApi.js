@@ -1,16 +1,15 @@
 import { api } from './BaseApi';
-import { router } from '../router/MatrixRouter';
+import { onQueryStartedHandler } from './ApiUtils';
 
 const agencyApi = api.injectEndpoints({
     entityTypes: ['agency'],
     endpoints: (builder) => ({
         getAllAgencies: builder.query({
             query: () => '/agency/all',
-            transformResponse: (response, meta, arg) => 
-            {
-                return response;
-            },
             providesTags: ['allAgencies'],
+            async onQueryStarted(undefined, { dispatch, queryFulfilled }) {
+                onQueryStartedHandler(queryFulfilled, dispatch, undefined);
+            },
             keepUnusedDataFor: 300
         }),
         storeAgency: builder.mutation({
@@ -19,16 +18,11 @@ const agencyApi = api.injectEndpoints({
                 method: 'POST',
                 body: agency,
             }),
-            transformResponse: (response, meta, arg) =>
-            {
-                console.log(response);
-            },
-            transformErrorResponse: (response, meta, arg) =>
-            {
-                router.navigate("/login");
-                console.log(response);
-            },
             invalidatesTags: ['allAgencies'],
+            async onQueryStarted(agency, { dispatch, queryFulfilled }) {
+                onQueryStartedHandler(queryFulfilled, dispatch, agency, "Saving agency - " + agency.name);
+            },
+
             // async onQueryStarted(agency, { dispatch, queryFulfilled }) {
 
             //     const result = dispatch(api.util.updateQueryData('getAllAgencies', undefined, (draft) => {
@@ -52,6 +46,6 @@ const agencyApi = api.injectEndpoints({
         }),
     }),
     overrideExisting: false,
-});
+}); 
 
-export const { useGetAllAgenciesQuery, useStoreAgencyMutation } = agencyApi;
+export const { useGetAllAgenciesQuery, useLazyGetAllAgenciesQuery, useStoreAgencyMutation } = agencyApi;

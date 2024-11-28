@@ -119,11 +119,14 @@ public class MatrixUserController
 	@PreAuthorize("isAuthenticated()")
 	@PatchMapping(path="/theme", consumes="application/json")
 	@ResponseStatus(HttpStatus.OK)
-	public MatrixUserDTO setTheme(@RequestBody SetThemeMessage msg)
+	public ResponseEntity<ApiResponse<MatrixUserDTO>> setTheme(@RequestBody SetThemeMessage msg, HttpServletRequest request)
 	{
 		MatrixUser u = this.userService.setTheme(msg);
 		u.setDarkTheme(!msg.darkTheme());
-		return this.createDTO(u);
+		return new ResponseEntity<>(ApiResponseUtil.success(new MatrixUserDTO(u), 
+										"Changed user theme to " + (msg.darkTheme()?"dark.":"light."), 
+										request.getRequestURI()),
+HttpStatus.OK);
 	}
 	
 

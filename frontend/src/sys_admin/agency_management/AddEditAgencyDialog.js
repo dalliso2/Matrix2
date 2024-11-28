@@ -3,7 +3,7 @@
  * 
  */
 /////////// React imports //////////
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useTheme } from '@emotion/react';
 /////////// MUI imports //////////
 import Dialog from '@mui/material/Dialog';
@@ -17,12 +17,12 @@ import Box from '@mui/material/Box';
 //import './AddEditOrgDialog.css';
 import { TEXT } from '../../util/PropertyType';
 import { getInputComponent } from '../../util/InputComponentFactory';
-import { validate } from '../../validation/validation';
+import { clearErrors, validate } from '../../validation/validation';
 import { useStoreAgencyMutation } from '../../api/AgencyApi';
 import { useDispatch } from 'react-redux';
-import { handleMutationResults } from '../../api/ApiUtils';
-import { enqueueSnackbar } from 'notistack';
 import { useNavigate } from 'react-router-dom';
+import { enqueueSnackbar } from 'notistack';
+import { handleMutationResults } from '../../api/ApiUtils';
 
 const newAgency = { 
     id: undefined,
@@ -32,8 +32,8 @@ const newAgency = {
 
 const fields = [
     {   name: 'id', label: 'id', type: 'hidden', required: false, },
-    {   name: 'name', label: 'Name', type: TEXT, maxLength: 40, required: true, },
-    {   name: 'acronym', label: 'Abbreviation', type: TEXT, maxLength:10, required: true, }
+    {   name: 'name', label: 'Name', type: TEXT, maxLength: 255, required: true, },
+    {   name: 'acronym', label: 'Abbreviation', type: TEXT, width: 12, maxLength:5, required: true, }
 ];
 
 const messageKey = "ADD_EDIT_ORG_DIALOG";
@@ -45,16 +45,26 @@ export default function AddEditAgencyDialog({ agency = {...newAgency, modified:f
     const navigate = useNavigate();
     const [agencyData, setAgencyData] = useState(agency);
 
+    useEffect(() => {
+        return ()=>clearErrors(fields);
+    }, [agency]);
+
+    const [storeAgency, mutationState] = useStoreAgencyMutation();
+    handleMutationResults(mutationState, 
+                            dispatch, 
+                            // navigate,  
+                            // true, 
+                            // (agencyData.id?"Updating":"Creating") + " agency - " + agencyData.name,
+                            // "Error " + agencyData.id?"updating":"creating" + " agency", 
+                            ()=>{ enqueueSnackbar((agencyData.id?"Updated":"Created") + " agency: " + agencyData.name, {variant:'success'}); closeFn();},
+                            ()=>{ } );
+
     fields.forEach((field, index) => {
         field.onChange=(event) => setAgencyData(prevData => ({...prevData, [field.name]:event.target.value, modified:true}));
         field.value = agencyData[field.name];
+        field.disabled = mutationState.isLoading;
     });
-
-    const [storeAgency,mutationState] = useStoreAgencyMutation();
-    handleMutationResults(mutationState, dispatch, navigate, true, "Creating/updating agency...",
-                            "Error creating/updating agency", 
-                            ()=>{ enqueueSnackbar("Created/updated agency: " + agency.name, {variant:'success'}); closeFn();});
-
+                              
     async function onSave()
     {
         if (!validate(fields))
@@ -70,7 +80,7 @@ export default function AddEditAgencyDialog({ agency = {...newAgency, modified:f
 
     return (
         <>
-            <Dialog open={true}>
+            <Dialog open={true} fullWidth={true} maxWidth={'sm'}>
                 <DialogTitle sx={{backgroundColor:theme.palette.primary.main, color:theme.palette.primary.contrastText }}>Add/Edit Agency</DialogTitle>
                 <DialogContent sx={{mt:2}}>
                 {
@@ -83,8 +93,8 @@ export default function AddEditAgencyDialog({ agency = {...newAgency, modified:f
                 }
                 </DialogContent>
                 <DialogActions> 
-                    <Button disabled={!agencyData.modified} onClick={() => onSave()}>Save</Button>
-                    <Button onClick={() => closeFn()}>Cancel</Button>
+                    <Button disabled={!agencyData.modified || mutationState.isLoading} onClick={() => onSave()}>Save</Button>
+                    <Button disabled={mutationState.isLoading} onClick={() => closeFn()}>Cancel</Button>
                 </DialogActions>
             </Dialog>
         </>

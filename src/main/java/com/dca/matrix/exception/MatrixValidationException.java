@@ -28,4 +28,10 @@ public class MatrixValidationException extends RuntimeException
 		this.errors = errors;
 		this.errorCode = errorCode;
 	}
+	
+	public MatrixValidationException(String message, ApiErrorCode errorCode)
+	{
+		this.message = message;
+		this.errorCode = errorCode;
+	}
 }

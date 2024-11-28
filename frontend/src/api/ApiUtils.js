@@ -1,38 +1,20 @@
-import { setMessageBoxData, setWaitMessage, removeWaitMessage, setSystemInErrorState, setCurrentUser, setAuthToken, resetState } from "../state/AppSlice";
+import { setMessageBoxData, setWaitMessage, removeWaitMessage, resetState } from "../state/AppSlice";
 import { api } from "../api/BaseApi";
+import { router } from "../router/MatrixRouter";
 
 function handleQueryError(queryResults, dispatch, navigate, errorFn)
 {
+    //console.log(queryResults);
     if (!queryResults)
         return;
-    if (queryResults.error)
+    if (queryResults.data?.api_error)
     {
-        if (queryResults.error?.data?.api_error)
-        {
-            dispatch(setMessageBoxData(queryResults.requestId, 
-                                        "Error",
-                                        queryResults.error.data.message + " " + 
-                                        queryResults.error.data?.errors?.map(error=>"\n"+error.field+" - "+error.message).join(""),));
-        }
-        else if (queryResults.error?.data?.error)
-        {
-            dispatch(setMessageBoxData(queryResults.requestId, 
-                                        "Error" ,
-                                        queryResults.error.data.error + " " + 
-                                        queryResults.error.data.message)); 
-        }
-        else if (queryResults.error?.status === 401)
-        {
-            dispatch(api.util.resetApiState());
-            dispatch(resetState());
-            navigate("/login");
-        }
-        else
-        {
-            dispatch(setSystemInErrorState(true));
-        }
+        const errorList = (queryResults.data.errors?.length)?("\n\n" + mutationResults.data.error.data.errors.join("\n")):"";
 
-        dispatch(removeWaitMessage(queryResults.requestId));
+        dispatch(setMessageBoxData( queryResults.requestId, 
+                                    "Error",
+                                    queryResults.data.message + 
+                                    errorList));
 
         if (errorFn)
             errorFn();
@@ -41,46 +23,27 @@ function handleQueryError(queryResults, dispatch, navigate, errorFn)
 
 function handleMutationResults(mutationResults, 
                                 dispatch, 
-                                navigate,
-                                waitForResults=false, 
-                                waitMessage = "Please wait...", 
-                                errorMsgBoxTitle = "Error ", 
+                                // navigate,
+                                // waitForResults=false, 
+                                // waitMessage = "Please wait...", 
+                                // errorMsgBoxTitle = "Error ", 
                                 successFn=()=>{}, 
                                 failureFn=()=>{})
 {
-    if (mutationResults.error)
+    // console.log("handleMutationResults");
+    // console.log(mutationResults);
+    if (mutationResults.data?.api_error)
     {
-        dispatch(removeWaitMessage(mutationResults.requestId));
-        if (failureFn)
-            failureFn();
-        mutationResults.reset();        
-        
-        if (mutationResults.error?.data?.api_error)
-        {
-            const errorList = (mutationResults.error.data?.errors?.length)?("\n\n" + mutationResults.error.data.errors.join("\n")):"";
-            dispatch(setMessageBoxData(mutationResults.requestId, 
-                                        errorMsgBoxTitle,
-                                        mutationResults.error.data.message + 
-                                        errorList));
-        }
-        else if (mutationResults.error?.data?.error)
-        {
-            dispatch(setMessageBoxData(mutationResults.requestId, mutationResults.error.data.error, mutationResults.error.data.message)); 
-        }
-        else if (mutationResults.error?.status === 401)
-        {
-            dispatch(setCurrentUser(undefined));
-            dispatch(setAuthToken(undefined));
-            navigate("/login");
-        }
-    }
-    else if (mutationResults.isLoading && mutationResults.requestId && waitForResults)
-    {
-        dispatch(setWaitMessage(mutationResults.requestId, waitMessage));
+        const errorList = (mutationResults.data.errors?.length)?("\n\n" + mutationResults.data.errors.join("\n")):"";
+        console.log(errorList);
+        dispatch(setMessageBoxData( mutationResults.requestId, 
+                                    "Error",
+                                    mutationResults.data.message + errorList));
+        failureFn();
+        mutationResults.reset();
     }
     else if (mutationResults.isSuccess && mutationResults.requestId)
     {
-        dispatch(removeWaitMessage(mutationResults.requestId));
         if (successFn)
             successFn();
         mutationResults.reset();
@@ -125,9 +88,29 @@ function handleQueryResultsWithWaitMessage(queryResults, dispatch, navigate, wai
     }
 }
 
+async function onQueryStartedHandler(queryFullfilledPromise, dispatch, mutatedObj, waitMessage)
+{
+    const messageId = JSON.stringify(mutatedObj);
+    if (waitMessage)
+        dispatch(setWaitMessage(messageId, waitMessage));
+
+    queryFullfilledPromise.then((response) => {
+        dispatch(removeWaitMessage(messageId));
+    })
+    .catch((error) => {
+        dispatch(removeWaitMessage(messageId));
+        router.navigate("/login");
+
+        if (error.meta.response.status === 401)
+            dispatch(setMessageBoxData(messageId, "Session expired", "Your session expired.  Please login again."));
+        else
+            dispatch(setMessageBoxData(messageId, "Unexpected Error", error.meta.response.status + " - " + error.meta.response.statusText));
+    });
+}
+
 function showApiErrorMessageBox(queryStatus, dispatch)
 {
-    console.log("showApiErrorMessageBox");
+    //console.log("showApiErrorMessageBox");
     const error = queryStatus.error;
     if (error.data)
     {
@@ -151,4 +134,4 @@ function showApiErrorMessageBox(queryStatus, dispatch)
 
 }
 
-export { handleQueryResultsWithWaitMessage, handleMutationResults, handleQueryError, showApiErrorMessageBox };
+export { handleQueryResultsWithWaitMessage, handleMutationResults, onQueryStartedHandler, handleQueryError, showApiErrorMessageBox };

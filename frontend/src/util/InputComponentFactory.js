@@ -17,6 +17,7 @@ import { DesktopDatePicker, DesktopDateTimePicker } from "@mui/x-date-pickers";
 import InputMask from "react-input-mask";
 import DragDropTarget from "./dragdrop/DragDropTarget";
 import ImageArrayInput from "./ImageArrayInput";
+import Image from "./Image";
 
 const RETRIEVE_FILE_URL = "/api/file/";
 
@@ -60,7 +61,7 @@ export function getInputComponent(fieldData, index, dispatch)
                             <FormHelperText id={field.name + "-label"} error={true}>
                                 {helperText}
                             </FormHelperText>
-                        </FormControl>                    }
+                        </FormControl>}
                 </InputMask>
             }
             else
@@ -71,8 +72,9 @@ export function getInputComponent(fieldData, index, dispatch)
                         value={field.value || ''}
                         fullWidth
                         size="small"
+                        inputProps={{ maxLength: field.maxLength }}
                         sx={{mt:1, 
-                            width:field.maxLength?(field.maxLength + 15) + 'ch':undefined}} />
+                            width:field.width?(field.width + 2) + 'ch':undefined}} />
                         <FormHelperText id={field.name + "-label"} error={true}>
                             {helperText}
                         </FormHelperText>
@@ -313,14 +315,15 @@ export function getInputComponent(fieldData, index, dispatch)
         case PROFILE_IMAGE:
             // console.log("InputComponentFactory PROFILE_IMAGE");
             // console.log(caseId);
+            console.log(field);
             component = 
                 <Box sx={{mt:3}} key={index}>
                 {
                     field?.value?
                     (
                     <Box id="profile_image_container" sx={{display:'inline-block'}}>
-                        <DragDropTarget fileIdsCallback={field.onChange} caseId={caseId} multiple={false}/>
-                        <img className="label-profile-image" id="profile_image" src={RETRIEVE_FILE_URL + field.value} />
+                        <DragDropTarget fileIdsCallback={(id)=>field.onChange(id)} caseId={caseId} multiple={false} dispatch={dispatch}/>
+                        <Image src={RETRIEVE_FILE_URL + field.value} className="label-profile-image"/>
                         <IconButton onClick={()=>field.onChange(undefined)} sx={{ cursor: "pointer", 
                             position:'absolute', 
                             right:15, bottom: 15, 
@@ -334,7 +337,7 @@ export function getInputComponent(fieldData, index, dispatch)
                     ):
                     (
                     <Box className={error?"error-label-file-upload":"label-file-upload"}  sx={{float:'right'}}>
-                        <DragDropTarget fileIdsCallback={field.onChange} caseId={caseId} accept="image/*" multiple={false} dispatch={dispatch}/>
+                        <DragDropTarget fileIdsCallback={(id)=>field.onChange(id)} caseId={caseId} accept="image/*" multiple={false} dispatch={dispatch}/>
 
                             <Box sx={{textAlign:'center', width:'100%'}}>Drop profile image here</Box>
                             <Box sx={{textAlign:'center', width:'100%'}}>or click to select file.</Box>

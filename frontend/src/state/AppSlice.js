@@ -65,7 +65,7 @@ const appSlice = createSlice({
         {
             reducer(state, action)
             {
-                return JSON.parse(JSON.stringify(initialState));
+                return { ...JSON.parse(JSON.stringify(initialState)), messageBoxData:state.messageBoxData };
             }
         },
         setAuthToken:
@@ -80,6 +80,7 @@ const appSlice = createSlice({
             reducer(state, action)
             {
                 state.currentUser = action.payload;
+                state.darkTheme = action.payload.darkTheme;
             },
         },
         setSystemInErrorState:

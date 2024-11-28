@@ -54,7 +54,7 @@ export default function UserManagement()
                                     size="small" sx={{width:'40ch'}} value={filterString}/>                    
                     </Box><br></br>
                     <UserDataGrid users={users} onClickUser={setEditUser} isFetching={searchUsersQueryStatus.isFetching}/>
-                    { editUser && <AddEditUserDialog user={editUser} closeFn={()=>setEditUser(undefined) }/> }
+                    { editUser && <AddEditUserDialog user={editUser} closeFn={()=>setEditUser(undefined) } /> }
             </Box>
         </Content>
     );

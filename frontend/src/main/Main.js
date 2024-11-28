@@ -84,7 +84,8 @@ export default function Main()
     // application state
     const systemInErrorState = useSelector(selectSystemInErrorState);
     const currentUser = useSelector(selectCurrentUser);
-
+console.log("=============================");
+console.log(currentUser);
     React.useEffect(() => {
         if (!currentUser)
             navigate('/login');

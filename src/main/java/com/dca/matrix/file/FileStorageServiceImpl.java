@@ -65,12 +65,15 @@ public class FileStorageServiceImpl implements InitializingBean, FileStorageServ
 
 	@Override
 	@Transactional
-	public MFile save(Long caseId, MultipartFile file)
+	public MFile save(Optional<Long> caseId, MultipartFile file)
 	{
 		MFile newFile = null;
 		log.debug("save(file): begin");
 
-		MatrixCase mCase = this.matrixCaseRepository.findById(caseId).orElseThrow(()->		
+		MatrixCase mCase = null;
+		
+		if (caseId.isPresent())
+			mCase = this.matrixCaseRepository.findById(caseId.get()).orElseThrow(()->		
 								new MatrixValidationException("Case with id " + caseId + " does not exist.",
 										null, ApiErrorCode.CASE_DOES_NOT_EXIST));
 		

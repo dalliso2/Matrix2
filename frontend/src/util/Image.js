@@ -11,6 +11,8 @@ export default function Image({id, className})
     const authToken = useSelector(selectAuthToken);
     const imgRef = useRef(null);
 
+    console.log("Image id: " + id);
+    console.log(authToken);
     return (
         <img ref={imgRef} id={'img_' + id} className={className} 
                 src={RETRIEVE_FILE_URL + id + "?t=" + authToken} />

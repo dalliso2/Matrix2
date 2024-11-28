@@ -17,6 +17,9 @@ import { handleMutationResults, handleQueryResultsWithWaitMessage } from '../../
 import { validate } from '../../validation/validation';
 import { enqueueSnackbar } from 'notistack';
 import { useNavigate } from 'react-router-dom';
+import { selectCurrentUser } from '../../state/AppSlice';
+import { useSelector } from 'react-redux';
+import { setCurrentUser } from '../../state/AppSlice';
 
 const EMPTY_PASSWORD = "        ";
 
@@ -33,7 +36,7 @@ const fields = [
         {   name: 'isAdmin', value:false, label: 'Admin', type: CHECKBOX, onChange: (event) => change(event) },
         {   name: 'enabled', value: true, label: 'Enabled', type: CHECKBOX,  onChange: (event) => change(event) },
         {   name: 'darkTheme', value: true, label: 'Dark Theme', type: CHECKBOX,  onChange: (event) => change(event) },
-        {   name: 'profileImage', label: 'Profile Image', caseId: 0, type: PROFILE_IMAGE, },
+        {   name: 'profileImage', label: 'Profile Image', caseId: '', type: PROFILE_IMAGE, },
     ];
 
 const AddEditUserDialog = ({ user, closeFn }) => 
@@ -41,6 +44,7 @@ const AddEditUserDialog = ({ user, closeFn }) =>
     const theme = useTheme();
     const dispatch = useDispatch();
     const navigate = useNavigate();
+    const currentUser = useSelector(selectCurrentUser);
     const [userData, setUserData] = useState({...user, modified:false});
 
     const { data:envelope, ...allAgenciesQueryStatus } = useGetAllAgenciesQuery();
@@ -50,10 +54,16 @@ const AddEditUserDialog = ({ user, closeFn }) =>
     const allAgencies = envelope?.payload;
 
     const [storeUser,mutationState] = useStoreUserMutation();
-    handleMutationResults(mutationState, dispatch, true, 
-                            "Creating/updating user " + userData.username, 
-                            "Error " + userData.id?"creating":"updating" + " user " + userData.username, 
-                            ()=>{ enqueueSnackbar("Created/updated user: " + userData.username, {variant:'success'}); closeFn(); });
+    handleMutationResults(mutationState, dispatch,
+                            ()=>{
+                                const updatedUserData = mutationState.data.payload;
+                                if (updatedUserData.id === currentUser.id)
+                                    dispatch(setCurrentUser(updatedUserData));
+                                enqueueSnackbar((userData.id?"Updated":"Created") + " user: " + userData.username, {variant:'success'}); closeFn(); 
+                            },
+                            ()=>{ closeFn(); });
+
+console.log("userData",userData);
 
     function change(event)
     {
@@ -85,22 +95,22 @@ const AddEditUserDialog = ({ user, closeFn }) =>
                 field.disabled = !!userData.id;
                 break;
             case 'profileImage':
-                field.onChange = id=>setUserData(prev=>({...prev, profileImage:id, modified:true}));
+                field.onChange = id=>{console.log("id",id);setUserData(prev=>({...prev, profileImage:id, modified:true}));};
                 break;
             case 'password':
                 field.onKeyDown = id=>(event) => 
                     (event.target.value === EMPTY_PASSWORD) && setUserData(prev=>{return {...prev, password:''}});
                 break;
             case 'agency':
-                field.selectData = allAgencies && allAgencies.map(agency=>({id:agency.id, name:agency.name}));
-                if (!field.value)
-                    field.value = allAgencies?.length && allAgencies[0].id;
+                field.selectData = allAgencies && [{id:undefined, name:undefined}].concat(allAgencies.map(agency=>({id:agency.id, name:agency.name})));
+                // if (!field.value)
+                //     field.value = allAgencies?.length && allAgencies[0].id;
                 break;
         }
     });
 
     const nonImageFields = fields.filter(field => field.type != 'PROFILE_IMAGE');
-    
+    console.log("userData",userData);
     return (
         <div>
         <Dialog open={true} fullWidth maxWidth='md'>
@@ -124,7 +134,7 @@ const AddEditUserDialog = ({ user, closeFn }) =>
                             nonImageFields.slice(6,12).map((field, index) => 
                             (
                                 <Box key={index} sx={{ width: 260, paddingBottom: 1.5 }}>
-                                    { getInputComponent(field, index) }
+                                    { getInputComponent(field, index, dispatch) }
                                 </Box>
                             ))
                         }
@@ -132,7 +142,7 @@ const AddEditUserDialog = ({ user, closeFn }) =>
                         <Box sx={{width: "15px"}} />
                         <Box className="profileimagebox">
                             {
-                                getInputComponent(fields[12], 13)
+                                getInputComponent(fields[12], 13, dispatch)
                             }
                         </Box>
                     </Box>

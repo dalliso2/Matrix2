@@ -40,14 +40,14 @@ public class GlobalExceptionHandler
 	public ResponseEntity<ApiResponse<Void>> handleMatrixValidationException(MatrixValidationException ex, HttpServletRequest request)
 	{
 		return new ResponseEntity<>(ApiResponseUtil.fail(ex.getMessage(), ex.getErrors(), ex.getErrorCode(), request.getRequestURI()),
-									HttpStatus.BAD_REQUEST);
+									HttpStatus.OK);
 	}
 	
 	@ExceptionHandler({MatrixUncheckedException.class})
 	public ResponseEntity<ApiResponse<Void>> handleMatrixValidationException(MatrixUncheckedException ex, HttpServletRequest request)
 	{
 		return new ResponseEntity<>(ApiResponseUtil.fail(ex.getMessage(), ex.getErrors(), ex.getErrorCode(), request.getRequestURI()),
-									HttpStatus.BAD_REQUEST);
+									HttpStatus.OK);
 	}
 	
 	@ExceptionHandler({AccessDeniedException.class})

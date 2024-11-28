@@ -8,6 +8,7 @@ import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.web.authentication.preauth.PreAuthenticatedAuthenticationToken;
 import org.springframework.stereotype.Component;
 
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
@@ -20,6 +21,7 @@ public class JWTAuthenticationProvider implements AuthenticationProvider
 	private final JWTTokenService tokenService;
 	
 	@Override
+	@Transactional
 	public Authentication authenticate(Authentication authentication) throws AuthenticationException
 	{
 		String username = tokenService.validateTokenReturnUsername((String)authentication.getCredentials());

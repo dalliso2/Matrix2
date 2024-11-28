@@ -108,7 +108,6 @@ const DragDropTarget = ({fileIdsCallback, caseId, accept=undefined, multiple=tru
                 {
                     fileIdsCallback(fileUpload.fileId);
                 }
-
                 setUploadsInProgress((prevState) => 
                 {
                     var nextState = [...prevState];

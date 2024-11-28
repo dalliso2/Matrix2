@@ -2,6 +2,7 @@ package com.dca.matrix.agency;
 
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Objects;
 
 import org.apache.logging.log4j.util.Strings;
 import org.springframework.http.HttpStatus;
@@ -20,10 +21,10 @@ public class AgencyServiceImpl implements AgencyService
 	private final AgencyRepository agencyRepository;
 	
 	@Override
-	public Agency createUpdateAgency(Agency agency)
+	public Agency createUpdateAgency(final Agency agency)
 	{
 		List<String> fieldErrors = new LinkedList<>();
-
+		
 		if (Strings.isBlank(agency.getName()))
 			fieldErrors.add("Agency name cannot be blank.");
 			
@@ -32,10 +33,18 @@ public class AgencyServiceImpl implements AgencyService
 	
 		if (fieldErrors.size() > 0)
 			throw new MatrixValidationException("Please correct the following errors:", fieldErrors, ApiErrorCode.VALIDATION_ERROR);
+
+		this.agencyRepository.findByName(agency.getName()).ifPresent(sameNameAgency->{
+			if (!Objects.equals(agency.getId(), sameNameAgency.getId()))
+					throw new MatrixValidationException("An agency with the name " + agency.getName() + " already exists.", ApiErrorCode.VALIDATION_ERROR);
+		});
 		
-		agency = this.agencyRepository.save(agency);
-		
-		return agency;
+		this.agencyRepository.findByAcronym(agency.getAcronym()).ifPresent(sameAcronymAgency->{
+			if (!Objects.equals(agency.getId(), sameAcronymAgency.getId()))
+					throw new MatrixValidationException("An agency with the abbreviation " + agency.getAcronym() + " already exists.", ApiErrorCode.VALIDATION_ERROR);
+		});
+
+		return this.agencyRepository.save(agency);
 	}
 
 	@Override

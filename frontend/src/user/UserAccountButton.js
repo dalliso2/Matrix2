@@ -30,12 +30,12 @@ export default function UserAccountButton()
     const [apiSetDarkTheme,mutationState] = useSetUserDarkThemeMutation();
     handleMutationResults(mutationState, 
                             dispatch, 
-                            navigate,
-                            false, 
-                            "",
-                            "", 
+                            // navigate,
+                            // false, 
+                            // "",
+                            // "", 
                             ()=>{ enqueueSnackbar("Set theme to " + (darkTheme?"dark.":"light."), {variant:'success'});},
-                            ()=>{ enqueueSnackbar("Failed to change theme.", {variant:'error'}); closeFn();});
+                            ()=>{ closeFn();});
 
     const [refreshCredentials, { data:credentialsEnvelope, ...refreshCredentialsStatus }] = useLazyRefreshCredentialsQuery();
     const credentials = credentialsEnvelope?.payload;

@@ -41,8 +41,10 @@ public class AgencyController
 	public ResponseEntity<ApiResponse<Agency>> storeAgency(@RequestBody Agency agency, HttpServletRequest request)
 	{
 		return	new ResponseEntity<>(ApiResponseUtil.success(this.agencyService.createUpdateAgency(agency), 
-										"Successfully updated agency", 
-										request.getRequestURI()), HttpStatus.OK);
+				"Successfully updated agency", 
+				request.getRequestURI()), HttpStatus.OK);
+//		return	new ResponseEntity<>(ApiResponseUtil.fail("Failed", new LinkedList(), ApiErrorCode.CASE_DOES_NOT_EXIST, ""),
+//									HttpStatus.OK);
 	}
 	
 	@DeleteMapping(path = "/delete/{agencyId}")
@@ -55,6 +57,7 @@ public class AgencyController
 	}
 	
 	@GetMapping(path = "/all")
+	@PreAuthorize("hasRole('ADMIN')")
 	public ResponseEntity<ApiResponse<List<Agency>>> getAllAgencies(HttpServletRequest request)
 	{
 		return	new ResponseEntity<>(ApiResponseUtil.success(this.agencyService.getAgencyList(), 

@@ -71,7 +71,7 @@ const columnHeadingsTest =
 export default function Grid({header=undefined, 
                                 columnHeadings=columnHeadingsTest, 
                                 cellCss=[], 
-                                rowValues=rowsTest, 
+                                rowValues=[], 
                                 isFetching=false,
                                 noResultsMessage})
 {

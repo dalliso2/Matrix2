@@ -8,14 +8,17 @@ import React from 'react';
 import Button from '@mui/material/Button';
 import Dialog from '@mui/material/Dialog';
 import DialogActions from '@mui/material/DialogActions';
-import DialogContent from '@mui/material/DialogContent';
-import DialogContentText from '@mui/material/DialogContentText';
 import DialogTitle from '@mui/material/DialogTitle';
+import Box from '@mui/material/Box';
+
 import { useDispatch, useSelector } from 'react-redux';
 import { removeMessageBoxData, selectMessageBoxData } from '../state/AppSlice';
+import { useTheme } from '@mui/material/styles';
+import { Typography } from '@mui/material';
 
 export default function MainMessageBox()
 { 
+    const theme = useTheme();
     const messageBoxData = useSelector(selectMessageBoxData);    
     const dispatch = useDispatch();
     
@@ -29,14 +32,14 @@ export default function MainMessageBox()
         <Dialog     open={true} 
                     aria-labelledby="alert-dialog-title"
                     aria-describedby="alert-dialog-description">
-            <DialogTitle id="alert-dialog-title">
+            <DialogTitle id="alert-dialog-title" sx={{backgroundColor:theme.palette.primary.main, color:theme.palette.primary.contrastText }}>
             {messageBoxData.title}
             </DialogTitle>
-            <DialogContent>
-                <DialogContentText id="alert-dialog-description" sx={{whiteSpace:'pre-wrap'}}>
+            <Box>
+            <Typography variant="body1" sx={{m:2, whiteSpace:'pre-wrap'}}>
                 {messageBoxData.message}
-                </DialogContentText>
-            </DialogContent>
+            </Typography>
+            </Box>
             <DialogActions>
                 <Button onClick={onClickOk}>Ok</Button>
             </DialogActions>

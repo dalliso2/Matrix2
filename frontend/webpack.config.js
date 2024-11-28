@@ -2,7 +2,7 @@ const webpack = require('webpack');
 const path = require('path');
 
 const config = {
-  mode: 'production',
+  mode: 'development',
   entry: [
     'react-hot-loader/patch',
     './src/index.js'

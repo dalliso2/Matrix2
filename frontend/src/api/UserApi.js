@@ -7,7 +7,12 @@ const userApi = api.enhanceEndpoints({addTagTypes:['User']}).injectEndpoints({
             query: (credentials) => ({url: '/login', method: 'POST', body: credentials}),
             transformResponse: (response, meta, arg) => 
             {
+                console.log("login",response);
                 return response || [];
+            },
+            providesTags: (result, error, arg) => {
+                console.log("login - providesTags",result.payload?.user?[{type: 'User', id:result.payload.user.id}]:[]);
+                return result.payload?.user?[{type: 'User', id:result.payload.user.id}]:[]
             },
         }),   
         refreshCredentials: builder.query({
@@ -21,14 +26,20 @@ const userApi = api.enhanceEndpoints({addTagTypes:['User']}).injectEndpoints({
             query: (filter) => ({url:`/user/search/${filter}`}),
             transformResponse: (response, meta, arg) => 
             {
+                console.log("searchUsers",response);    
                 return response || [];
             },
-            providesTags: (result, error, arg) => result.payload?.map(user => ({type: 'User', id:user.id})),
+            providesTags: (result, error, arg) => 
+            {
+                console.log("searchUsers - providesTags",result.payload?.map(user => ({type: 'User', id:user.id})));
+                return result.payload?.map(user => ({type: 'User', id:user.id}))
+            },
         }),
         getUser: builder.query({
             query: (id) => ({url:`/user/${id}`}),
             transformResponse: (response, meta, arg) => 
             {
+                console.log("getUser",response);
                 return response;
             },
             providesTags: (result, error, id) => result?[{type: 'User', id:result.payload.id}]:[],
@@ -38,12 +49,18 @@ const userApi = api.enhanceEndpoints({addTagTypes:['User']}).injectEndpoints({
             query: () => '/user/current',
             transformResponse: (response, meta, arg) => 
             {
+                console.log("getCurrentUser",response);
                 return response;
             },
+            providesTags: (result, error, id) => result?[{type: 'User', id:result.payload.id}]:[],
         }),
         storeUser: builder.mutation({
             query: (data) => ({url: '/user/store', method: 'POST', body: data}),
-            invalidatesTags: (result, error, arg) => result.payload?[{type: 'User', id:user.id}]:[],
+            invalidatesTags: (result, error, arg) => 
+            {
+                console.log("storeUser - invalidating tags ",result.payload?[{type: 'User', id:result.payload.id}]:[]);
+                return result.payload?[{type: 'User', id:result.payload.id}]:[];
+            },
         }),
         setUserDarkTheme: builder.mutation({
             query: (darkThemeBoolean) => ({
@@ -51,7 +68,16 @@ const userApi = api.enhanceEndpoints({addTagTypes:['User']}).injectEndpoints({
                 method: 'PATCH',
                 body: { darkTheme: darkThemeBoolean },
             }),
-            //invalidatesTags: (result, error, data) => [{type: 'CurrentUser'}],
+            transformResponse: (response, meta, arg) => 
+            {
+                console.log("setUserDarkTheme",response);
+                return response;
+            },
+            invalidatesTags: (result, error, arg) => 
+            {
+                console.log("setUserDarkTheme - invalidating tags ",result.payload?[{type: 'User', id:user.id}]:[]);
+                return result.payload?[{type: 'User', id:user.id}]:[]
+            },
         }),
         updatePassword: builder.mutation({
             query: (data) => ({
@@ -59,7 +85,12 @@ const userApi = api.enhanceEndpoints({addTagTypes:['User']}).injectEndpoints({
                 method: 'PATCH',
                 body: data,
             }),
-            //invalidatesTags: (result, error, data) => [{type: 'CurrentUser'}],
+            transformResponse: (response, meta, arg) => 
+            {
+                console.log("updatePassword",response);
+                return response;
+            },            
+            invalidatesTags: (result, error, arg) => result.payload?[{type: 'User', id:user.id}]:[],
         }),
     }),
     overrideExisting: false,

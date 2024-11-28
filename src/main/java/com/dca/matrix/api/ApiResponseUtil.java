@@ -16,5 +16,4 @@ public class ApiResponseUtil
 		return new ApiResponse<>(true, message, null, errors, errorCode, System.currentTimeMillis(), path);
 		//return new ApiResponse<>(true, message, null, List.of("error1", "error 2", "error 3"), errorCode, System.currentTimeMillis(), path);
 	}
-	
 }

@@ -11,6 +11,7 @@ import { useSelector } from "react-redux";
 import { api } from "../api/BaseApi";
 import CenteredCircularProgress from "../util/CenteredCircularProgress";
 import { ThemeProvider } from "@emotion/react";
+import MainMessageBox from "../util/MainMessageBox";
 
 export default function Login() 
 {   
@@ -43,6 +44,7 @@ export default function Login()
         }
         else if (loginStatus.isError) 
         {
+            dispatch(removeWaitMessage(loginStatus.requestId));
             if (loginStatus.error?.status === 401)
                 setError("Invalid username or password.");
             else
@@ -83,6 +85,7 @@ export default function Login()
             </Table>
             </Box>
         </Box>
+        <MainMessageBox />
         <CenteredCircularProgress/>
         </ThemeProvider>
     );
