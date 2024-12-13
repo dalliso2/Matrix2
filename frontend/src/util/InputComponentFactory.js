@@ -313,9 +313,6 @@ export function getInputComponent(fieldData, index, dispatch)
                 </Box>
             break;
         case PROFILE_IMAGE:
-            // console.log("InputComponentFactory PROFILE_IMAGE");
-            // console.log(caseId);
-            console.log(field);
             component = 
                 <Box sx={{mt:3}} key={index}>
                 {
@@ -323,7 +320,7 @@ export function getInputComponent(fieldData, index, dispatch)
                     (
                     <Box id="profile_image_container" sx={{display:'inline-block'}}>
                         <DragDropTarget fileIdsCallback={(id)=>field.onChange(id)} caseId={caseId} multiple={false} dispatch={dispatch}/>
-                        <Image src={RETRIEVE_FILE_URL + field.value} className="label-profile-image"/>
+                        <Image id={field.value} className="label-profile-image"/>
                         <IconButton onClick={()=>field.onChange(undefined)} sx={{ cursor: "pointer", 
                             position:'absolute', 
                             right:15, bottom: 15, 

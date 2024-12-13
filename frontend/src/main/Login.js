@@ -38,7 +38,7 @@ export default function Login()
             dispatch(setWaitMessage(loginStatus.requestId, "Logging in..."));
         else if (loginStatus.isSuccess && loginStatus.requestId)
         {
-            dispatch(setAuthToken(loginEnvelope.payload.accessToken));
+            dispatch(setAuthToken(loginEnvelope.payload.authToken));
             dispatch(setCurrentUser(loginEnvelope.payload.user));
             dispatch(removeWaitMessage(loginStatus.requestId));
         }

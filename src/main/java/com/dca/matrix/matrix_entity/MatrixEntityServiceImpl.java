@@ -19,11 +19,14 @@ import org.springframework.jdbc.core.simple.JdbcClient;
 import org.springframework.stereotype.Service;
 
 import com.dca.matrix.api.ApiErrorCode;
+import com.dca.matrix.authentication.AuthenticationService;
 import com.dca.matrix.exception.MatrixUncheckedException;
 import com.dca.matrix.matrix_case.MatrixCaseRepository;
 import com.dca.matrix.message.LongIdMessage;
 import com.dca.matrix.message.LongIdsMessage;
 import com.dca.matrix.property_value.PropertyValue;
+import com.dca.matrix.user.MatrixUser;
+
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -37,6 +40,7 @@ public class MatrixEntityServiceImpl implements MatrixEntityService
 	private final EntityRelationshipRepository relationshipRepository;
 	private final MatrixCaseRepository mcRepository;
 	private final JdbcClient jdbcClient;
+	private final AuthenticationService authenticationService;
 
 	//private final JdbcClient jdbcClient;
 

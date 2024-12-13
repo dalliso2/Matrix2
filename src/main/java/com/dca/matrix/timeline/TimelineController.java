@@ -33,7 +33,7 @@ public class TimelineController
 	{
 		return new ResponseEntity<>(ApiResponseUtil.success(this.timelineService.store(timelineDTO),
 										"Stored timeline: " + timelineDTO.name(),
-										request.getRequestURI()),
+										request),
 										HttpStatus.OK);
 	}
 	
@@ -42,7 +42,7 @@ public class TimelineController
 	{
 		return new ResponseEntity<>(ApiResponseUtil.success(this.timelineService.findById(timelineId),
 										"Retrieved timeline: " + timelineId,
-										request.getRequestURI()),
+										request),
 										HttpStatus.OK);	
 	}
 	
@@ -51,7 +51,7 @@ public class TimelineController
 	{
 		return new ResponseEntity<>(ApiResponseUtil.success(this.timelineService.findByCase(caseId),
 										"Retrieved timelines for case " + caseId,
-										request.getRequestURI()),
+										request),
 										HttpStatus.OK);	
 	}
 }

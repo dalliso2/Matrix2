@@ -14,6 +14,7 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
 import com.dca.matrix.agency.Agency;
+import com.dca.matrix.authentication.AuthenticationService;
 import com.dca.matrix.exception.MatrixUncheckedException;
 
 class MatrixUserServiceUT

@@ -2,7 +2,6 @@ import React from "react";
 import { Dialog, DialogContent, DialogTitle, Box, DialogActions, Button } from "@mui/material";
 import { getTitle } from "../../util/utils";
 import { IMAGE_ARRAY, PROFILE_IMAGE } from "../../util/PropertyType";
-import { RETRIEVE_FILE_URL } from "../../api/file";
 import './LinkDialog.css';
 import { useTheme } from "@mui/material";
 import { useDispatch } from "react-redux";
@@ -16,6 +15,7 @@ import { handleMutationResults } from "../../api/ApiUtils";
 //import { apiLinkEntities } from "../../api/entity";
 //import { setReRender } from "../../state/EntityTabsSlice";
 import { useNavigate } from "react-router-dom";
+import Image from "../../util/Image";
 
 function getImageId(entityDefinitions, entityOne)
 {
@@ -114,7 +114,7 @@ export default function TaskEntityLinkDialog({entity, description, saveFn, close
                         {
                             entityImageId && 
                             <Box sx={{ display:'flex', alignItems:'center', justifyContent:'center', height:'200px', width:'200px', border: entityImageId?undefined:'1px solid grey', borderRadius: 5 }}>
-                                <img className="label-profile-image" style={{maxWidth:'100%', maxHeight:'100%'}} src={RETRIEVE_FILE_URL + entityImageId} />
+                                <Image className={"label-profile-image-small"} id={entityImageId} />
                             </Box>
                         }
                         </Box>

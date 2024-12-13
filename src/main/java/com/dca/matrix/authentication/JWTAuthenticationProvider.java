@@ -30,8 +30,6 @@ public class JWTAuthenticationProvider implements AuthenticationProvider
 														authentication.getCredentials(),
 														userDetails.getAuthorities());
 		auth.setAuthenticated(true);
-		log.debug("Authenticated user: " + userDetails.getUsername());
-		userDetails.getAuthorities().forEach(ga->log.debug(ga.getAuthority()));
 		return auth;
 	}
 

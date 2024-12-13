@@ -1,4 +1,5 @@
 import React from "react";
+import { useState } from "react";
 import Grid from '../util/Grid';
 import Box from "@mui/material/Box";
 import IconButton from "@mui/material/IconButton";
@@ -31,7 +32,7 @@ export default function TaskFiles({taskId, unlink=true, sx={}})
     const navigate = useNavigate();
 
     //const [entityFiles,setEntityFiles] = useState([]);
-    const [showFileSearchDialog, setShowFileSearchDialog] = React.useState(false);
+    const [showFileSearchDialog, setShowFileSearchDialog] = useState(false);
     const activeCase = useSelector(selectActiveCase);   
 
     const {refetch:refetchTaskFiles, ...taskFilesQueryResults} = useGetFilesForTaskQuery(taskId);
@@ -43,16 +44,14 @@ export default function TaskFiles({taskId, unlink=true, sx={}})
 
     const [addTaskFiles, addTaskFileMutationState] = useAddTaskFilesMutation();
     
-    handleMutationResults(addTaskFileMutationState, dispatch, navigate, false, "Saving link to file...",
-        "Error saving task file link.", 
+    handleMutationResults(addTaskFileMutationState, dispatch, 
         ()=>addTaskFileMutationState.data.payload.forEach(taskFile=>enqueueSnackbar("Added link to file: " + taskFile.matrixFile.name, {variant:'success'})),
         ()=>{}); 
 
     const [removeTaskFile, removeTaskFileMutationState] = useRemoveTaskFileMutation();
-    handleMutationResults(removeTaskFileMutationState, dispatch, navigate, false, "Removing file link...",
-        "Error removing file link", 
+    handleMutationResults(removeTaskFileMutationState, dispatch, 
         ()=>enqueueSnackbar("Removed link to file: " + removeTaskFileMutationState.data.payload.matrixFile.name, {variant:'success'}),
-        ()=>{}); 
+        ()=>enqueueSnackbar("Unable to remove link to file: " + removeTaskFileMutationState.data.payload.matrixFile.name, {variant:'error'})); 
 
     async function unlinkFile(event, entityFileId)
     {
@@ -83,15 +82,15 @@ export default function TaskFiles({taskId, unlink=true, sx={}})
         addTaskFiles(fileDataArray.map((fileData)=>({taskId, fileId:fileData.id})));
     }
 
-    // function onClickFile(fileId)
-    // {
-    //     console.log("fileId",fileId);
-    // } 
+    function onClickFile(fileId)
+    {
+        console.log("fileId",fileId);
+    } 
 
-    // async function downloadFile(fileId, fileName)
-    // {
-    //     await apiGetFile(fileId,fileName);
-    // }
+    async function downloadFile(fileId, fileName)
+    {
+        await apiGetFile(fileId,fileName);
+    }
 
     const rows = taskFiles && taskFiles.map((taskFile) => {
         return {rowProperties:{ id:taskFile.id, onClick: ()=>onClickFile(taskFile.id)},
@@ -107,8 +106,8 @@ export default function TaskFiles({taskId, unlink=true, sx={}})
                 <Box sx={{display:'flex', justifyContent:'space-between', width:'100%', alignItems:'center'}}>
                     <Box sx={{fontWeight:'bold'}}>Linked Files</Box>
                     <Box>
-                    <IconButton onClick={() => refetchTaskFiles()}><RefreshIcon/></IconButton>
-                    <IconButton onClick={()=> {setShowFileSearchDialog(true)}}>
+                    <IconButton disabled={taskFilesQueryResults.isFetching} onClick={() => refetchTaskFiles()}><RefreshIcon/></IconButton>
+                    <IconButton disabled={taskFilesQueryResults.isFetching} onClick={()=> {setShowFileSearchDialog(true)}}>
                         <AddLinkSharp/>
                     </IconButton>
                     </Box> 

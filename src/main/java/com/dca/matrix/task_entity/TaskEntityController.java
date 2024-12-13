@@ -39,7 +39,7 @@ public class TaskEntityController
 		TaskEntity te = this.taskEntityService.save(taskEntityMessage);
 		return new ResponseEntity<>(ApiResponseUtil.success(te, 
 															"Saved task entity " + te.getId(), 
-															request.getRequestURI()),HttpStatus.OK);
+															request),HttpStatus.OK);
 	}
 
 	@PostMapping(path = "/delete")
@@ -48,7 +48,7 @@ public class TaskEntityController
 	{	
 		return new ResponseEntity<>(ApiResponseUtil.success(this.taskEntityService.delete(taskEntityId.id()), 
 															"Deleted task entity " + taskEntityId, 
-															request.getRequestURI()),HttpStatus.OK);
+															request),HttpStatus.OK);
 	}
 
 	@GetMapping(path = "/all_for_task/{taskId}")
@@ -56,7 +56,7 @@ public class TaskEntityController
 	public ResponseEntity<ApiResponse<List<List<TaskEntity>>>> getAllForTask(@PathVariable("taskId") Long taskId, HttpServletRequest request)
 	{
 		List<List<TaskEntity>> taskEntities = this.taskEntityService.findAllForTaskId(taskId);
-		return new ResponseEntity<>(ApiResponseUtil.success(taskEntities, "Retrieved task entities for task " + taskId, request.getRequestURI()), 
+		return new ResponseEntity<>(ApiResponseUtil.success(taskEntities, "Retrieved task entities for task " + taskId, request), 
 																HttpStatus.OK);
 	}
 	
@@ -66,7 +66,7 @@ public class TaskEntityController
 	{
 		return new ResponseEntity<>(ApiResponseUtil.success(this.taskEntityService.findAllForEntityId(entityId), 
 															"Retrieved task entities for entity " + entityId,
-															request.getRequestURI()), HttpStatus.OK);
+															request), HttpStatus.OK);
 	}
 	
 	@PostMapping("/search_unlinked_entities")
@@ -75,6 +75,6 @@ public class TaskEntityController
 	{
 		return new ResponseEntity<>(ApiResponseUtil.success(this.taskEntityService.searchEntitiesNotLinked(searchMessage), 
 															"Successfully loaded entities not linked to task.",
-															request.getRequestURI()), HttpStatus.OK);
+															request), HttpStatus.OK);
 	}
 }

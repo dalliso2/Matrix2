@@ -29,7 +29,7 @@ public class CaseEntityController
 	{	
 		return new ResponseEntity<>(ApiResponseUtil.success(this.caseEntityService.addCaseEntity(caseEntity),
 										"Successfully created case-entity.",
-										request.getRequestURI()), HttpStatus.CREATED);
+										request), HttpStatus.CREATED);
 	}
 
 }

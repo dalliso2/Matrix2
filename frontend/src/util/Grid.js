@@ -108,7 +108,7 @@ export default function Grid({header=undefined,
                             </TableRow>
                         }
                         { 
-                            rowValues.length===0 && noResultsMessage?
+                            rowValues?.length===0 && noResultsMessage?
                                 <TableRow sx={{ p:0, height:'100%', width:'100%', overflow:'hidden'}}>
                                     <TableCell colSpan={columnHeadings?.length} sx={{ p:0, textAlign:'center', opacity:0.5, border:0 }}>
                                         <h2 sx={{p:0}}>{noResultsMessage}</h2>

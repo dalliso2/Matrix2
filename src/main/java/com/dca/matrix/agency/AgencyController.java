@@ -20,8 +20,8 @@ import org.springframework.web.bind.annotation.RestController;
 import com.dca.matrix.api.ApiErrorCode;
 import com.dca.matrix.api.ApiResponse;
 import com.dca.matrix.api.ApiResponseUtil;
+import com.dca.matrix.authentication.AuthenticationService;
 import com.dca.matrix.exception.MatrixValidationException;
-import com.dca.matrix.user.AuthenticationService;
 import com.dca.matrix.user.MatrixUserService;
 
 import jakarta.servlet.http.HttpServletRequest;
@@ -42,7 +42,7 @@ public class AgencyController
 	{
 		return	new ResponseEntity<>(ApiResponseUtil.success(this.agencyService.createUpdateAgency(agency), 
 				"Successfully updated agency", 
-				request.getRequestURI()), HttpStatus.OK);
+				request), HttpStatus.OK);
 //		return	new ResponseEntity<>(ApiResponseUtil.fail("Failed", new LinkedList(), ApiErrorCode.CASE_DOES_NOT_EXIST, ""),
 //									HttpStatus.OK);
 	}
@@ -53,7 +53,7 @@ public class AgencyController
 	{
 		return	new ResponseEntity<>(ApiResponseUtil.success(this.agencyService.deleteAgency(agencyId), 
 										"Successfully removed agency", 
-										request.getRequestURI()), HttpStatus.OK);
+										request), HttpStatus.OK);
 	}
 	
 	@GetMapping(path = "/all")
@@ -62,7 +62,7 @@ public class AgencyController
 	{
 		return	new ResponseEntity<>(ApiResponseUtil.success(this.agencyService.getAgencyList(), 
 										"Successfully retrieved all agencies.", 
-										request.getRequestURI()), HttpStatus.OK);
+										request), HttpStatus.OK);
 	}
 	
 	@GetMapping(path = "/{agencyId}")
@@ -70,6 +70,6 @@ public class AgencyController
 	{
 		return	new ResponseEntity<>(ApiResponseUtil.success(this.agencyService.getAgency(agencyId), 
 										"Successfully retrieved all agencies.", 
-										request.getRequestURI()), HttpStatus.OK);
+										request), HttpStatus.OK);
 	}
 }

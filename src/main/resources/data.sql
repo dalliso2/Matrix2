@@ -1,3 +1,5 @@
+CREATE DATABASE  IF NOT EXISTS `matrix2` /*!40100 DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci */ /*!80016 DEFAULT ENCRYPTION='N' */;
+USE `matrix2`;
 -- MySQL dump 10.13  Distrib 8.0.34, for Win64 (x86_64)
 --
 -- Host: localhost    Database: matrix2
@@ -31,11 +33,13 @@ CREATE TABLE `agency` (
   `acronym` varchar(255) DEFAULT NULL,
   `name` varchar(255) DEFAULT NULL,
   PRIMARY KEY (`id`),
+  UNIQUE KEY `UKpxs3ufm27ekx0x60dohhyxusf` (`acronym`),
+  UNIQUE KEY `UK6m6c3mscbn3eohv8sslxlp12c` (`name`),
   KEY `FKcg5nqt66wp78gnhrvyj650rou` (`created_by`),
   KEY `FKocl5d10jqagot4ipi5sqdx440` (`last_updated_by`),
   CONSTRAINT `FKcg5nqt66wp78gnhrvyj650rou` FOREIGN KEY (`created_by`) REFERENCES `matrix_user` (`id`),
   CONSTRAINT `FKocl5d10jqagot4ipi5sqdx440` FOREIGN KEY (`last_updated_by`) REFERENCES `matrix_user` (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=11 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -44,6 +48,7 @@ CREATE TABLE `agency` (
 
 LOCK TABLES `agency` WRITE;
 /*!40000 ALTER TABLE `agency` DISABLE KEYS */;
+INSERT INTO `agency` VALUES ('2024-12-02 21:20:13.029000',1,1,'2024-12-02 21:20:13.029000',NULL,'FBI','Federal Bureau of Investigation'),('2024-12-02 21:20:13.029000',1,2,'2024-12-02 21:20:13.029000',NULL,'APD','Anchorage Police Department'),('2024-12-02 21:20:13.029000',1,3,'2024-12-02 21:20:13.029000',NULL,'AST','Alaska State Troopers'),('2024-12-02 21:20:13.029000',1,4,'2024-12-02 21:20:13.029000',NULL,'WPD','Wasilla Police Department'),('2024-12-02 21:20:13.029000',1,5,'2024-12-02 21:20:13.029000',NULL,'FPD','Fairbanks Police Department'),('2024-12-02 21:20:13.029000',1,6,'2024-12-02 21:20:13.029000',NULL,'BPD','Bethen Police Department'),('2024-12-02 21:20:13.029000',1,7,'2024-12-02 21:20:13.029000',NULL,'KPD','Kenai Police Department'),('2024-12-02 21:20:13.029000',1,8,'2024-12-02 21:20:13.029000',NULL,'WPC','Whittier Police Department'),('2024-12-02 21:20:13.029000',1,9,'2024-12-02 21:20:13.029000',NULL,'PPD','Palmer Police Department'),('2024-12-02 21:20:13.029000',1,10,'2024-12-02 21:20:13.029000',NULL,'HPD','Homer Police Department');
 /*!40000 ALTER TABLE `agency` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -106,7 +111,7 @@ CREATE TABLE `entity_definition` (
   KEY `FK5pog0jcwwmh6des0xfbl3bom0` (`last_updated_by`),
   CONSTRAINT `FK5pog0jcwwmh6des0xfbl3bom0` FOREIGN KEY (`last_updated_by`) REFERENCES `matrix_user` (`id`),
   CONSTRAINT `FKs0rxdkigtch2r0xbaildxmfwo` FOREIGN KEY (`created_by`) REFERENCES `matrix_user` (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -115,6 +120,7 @@ CREATE TABLE `entity_definition` (
 
 LOCK TABLES `entity_definition` WRITE;
 /*!40000 ALTER TABLE `entity_definition` DISABLE KEYS */;
+INSERT INTO `entity_definition` VALUES (_binary '',_binary '','2024-12-02 21:22:02.958000',1,1,'2024-12-02 21:22:02.958000',NULL,1,NULL,'Person'),(_binary '',_binary '\0','2024-12-02 21:22:55.347000',1,2,'2024-12-02 21:22:55.347000',NULL,1,NULL,'Event');
 /*!40000 ALTER TABLE `entity_definition` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -142,7 +148,7 @@ CREATE TABLE `entity_file` (
   CONSTRAINT `FK9obaqavg3yegkxx8yxjqmbuvw` FOREIGN KEY (`created_by`) REFERENCES `matrix_user` (`id`),
   CONSTRAINT `FKhkwyahpcl4jdq74044g7h5n3l` FOREIGN KEY (`matrix_entity_id`) REFERENCES `matrix_entity` (`id`),
   CONSTRAINT `FKsml72tma2nr42ws4kjgwpnbs9` FOREIGN KEY (`last_updated_by`) REFERENCES `matrix_user` (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -151,6 +157,7 @@ CREATE TABLE `entity_file` (
 
 LOCK TABLES `entity_file` WRITE;
 /*!40000 ALTER TABLE `entity_file` DISABLE KEYS */;
+INSERT INTO `entity_file` VALUES ('2024-12-02 21:27:03.097000',1,1,'2024-12-02 21:27:03.097000',NULL,3,2),('2024-12-02 21:27:03.135000',1,2,'2024-12-02 21:27:03.135000',NULL,4,2);
 /*!40000 ALTER TABLE `entity_file` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -179,7 +186,7 @@ CREATE TABLE `entity_relationship` (
   CONSTRAINT `FKh93jolrs688x8qrs9yofvqvxc` FOREIGN KEY (`parent_id`) REFERENCES `matrix_entity` (`id`),
   CONSTRAINT `FKjd74ftgjunvchhi8758run7rk` FOREIGN KEY (`child_id`) REFERENCES `matrix_entity` (`id`),
   CONSTRAINT `FKm91fcde7n7ujl6nlvyvq7drcl` FOREIGN KEY (`last_updated_by`) REFERENCES `matrix_user` (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -188,6 +195,7 @@ CREATE TABLE `entity_relationship` (
 
 LOCK TABLES `entity_relationship` WRITE;
 /*!40000 ALTER TABLE `entity_relationship` DISABLE KEYS */;
+INSERT INTO `entity_relationship` VALUES (2,'2024-12-02 21:26:14.204000',1,1,'2024-12-02 21:26:14.204000',NULL,1,'person to event'),(1,'2024-12-02 21:26:14.213000',1,2,'2024-12-02 21:26:14.213000',NULL,2,'event to person');
 /*!40000 ALTER TABLE `entity_relationship` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -218,7 +226,7 @@ CREATE TABLE `link_chart` (
   CONSTRAINT `FK8vv4rb89rkfgxu2b3jss96g32` FOREIGN KEY (`created_by`) REFERENCES `matrix_user` (`id`),
   CONSTRAINT `FKj01fgmw931e8pdn0qhi798s4g` FOREIGN KEY (`last_updated_by`) REFERENCES `matrix_user` (`id`),
   CONSTRAINT `FKpfsp6v9oaa82jpukddkbccqml` FOREIGN KEY (`matrix_case_id`) REFERENCES `matrix_case` (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -227,6 +235,7 @@ CREATE TABLE `link_chart` (
 
 LOCK TABLES `link_chart` WRITE;
 /*!40000 ALTER TABLE `link_chart` DISABLE KEYS */;
+INSERT INTO `link_chart` VALUES (NULL,'2024-12-03 20:31:11.691000',1,1,'2024-12-03 20:31:11.691000',NULL,1,NULL,NULL,'Main',NULL,NULL),(NULL,'2024-12-03 20:31:13.772000',1,2,'2024-12-03 20:31:13.772000',NULL,1,NULL,NULL,'Main',NULL,NULL);
 /*!40000 ALTER TABLE `link_chart` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -251,7 +260,7 @@ CREATE TABLE `matrix_case` (
   KEY `FKjysis4d2rk20swrx2qu10jlvd` (`last_updated_by`),
   CONSTRAINT `FKf7rl0hgvcqro90u71f3ogdeef` FOREIGN KEY (`created_by`) REFERENCES `matrix_user` (`id`),
   CONSTRAINT `FKjysis4d2rk20swrx2qu10jlvd` FOREIGN KEY (`last_updated_by`) REFERENCES `matrix_user` (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -260,6 +269,7 @@ CREATE TABLE `matrix_case` (
 
 LOCK TABLES `matrix_case` WRITE;
 /*!40000 ALTER TABLE `matrix_case` DISABLE KEYS */;
+INSERT INTO `matrix_case` VALUES ('2024-12-02 21:23:51.742000',1,1,'2024-12-03 20:32:39.579000',1,'Sed ut perspiciatis unde omnis iste natus error sit voluptatem accusantium doloremque laudantium, totam rem aperiam, eaque ipsa quae ab','24-000001','Case 1 Description Line 1\nCase 1 Description Line 2\nCase 1 Description Line 3');
 /*!40000 ALTER TABLE `matrix_case` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -287,7 +297,7 @@ CREATE TABLE `matrix_entity` (
   CONSTRAINT `FKir40h4rw7cndrbl52u5qbv3oe` FOREIGN KEY (`created_by`) REFERENCES `matrix_user` (`id`),
   CONSTRAINT `FKjw1fx15d2xnt77gx31q1yvrkh` FOREIGN KEY (`matrix_case_id`) REFERENCES `matrix_case` (`id`),
   CONSTRAINT `FKo5x1lnmilkjc3u1sb1c13dwbb` FOREIGN KEY (`entity_definition_id`) REFERENCES `entity_definition` (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -296,6 +306,7 @@ CREATE TABLE `matrix_entity` (
 
 LOCK TABLES `matrix_entity` WRITE;
 /*!40000 ALTER TABLE `matrix_entity` DISABLE KEYS */;
+INSERT INTO `matrix_entity` VALUES ('2024-12-02 21:24:28.994000',1,1,1,'2024-12-03 20:31:34.722000',1,1),('2024-12-02 21:25:03.853000',1,2,2,'2024-12-02 21:25:03.853000',NULL,1);
 /*!40000 ALTER TABLE `matrix_entity` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -334,9 +345,18 @@ CREATE TABLE `matrix_user` (
   CONSTRAINT `FKo0662ygpi91rrcliko935qyeb` FOREIGN KEY (`agency_id`) REFERENCES `agency` (`id`),
   CONSTRAINT `FKpdmmhi661ir3vx84byam2bhbo` FOREIGN KEY (`created_by`) REFERENCES `matrix_user` (`id`),
   CONSTRAINT `FKrow1wlo11fnq4chwxn8co38gn` FOREIGN KEY (`last_updated_by`) REFERENCES `matrix_user` (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=14 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
+--
+-- Dumping data for table `matrix_user`
+--
+
+LOCK TABLES `matrix_user` WRITE;
+/*!40000 ALTER TABLE `matrix_user` DISABLE KEYS */;
+INSERT INTO `matrix_user` VALUES (_binary '',_binary '\0',_binary '',1,NULL,NULL,1,'2024-12-03 20:30:54.712000',1,18,'2342342342','admin@fbi.gov','first','last','$2a$10$C.f97.fw918rEaIfGymG0OImBM2LWHJozslh8eUei5ppbTZ3Bj6Ma','admin','3455673456'),(_binary '',_binary '',_binary '',1,NULL,NULL,2,'2024-12-03 20:20:55.702000',1,12,'(111) 111-1111','dalliso2@gmail.com','Lois','Griffin','$2a$10$Rc7m0ok9ryhxhQO.vpZPAuLYWABnVlN38IIWzaSoEZimUyYFp8FdS','lgriffin','(333) 333-3333'),(_binary '',_binary '',_binary '',1,NULL,NULL,3,'2024-12-03 20:21:34.438000',1,15,'(222) 222-2222','dalliso2@gmail.com','Stewie','Griffin','$2a$10$Rc7m0ok9ryhxhQO.vpZPAuLYWABnVlN38IIWzaSoEZimUyYFp8FdS','sgriffin','(333) 333-3333'),(_binary '',_binary '',_binary '',1,NULL,NULL,4,'2024-12-03 20:19:36.958000',1,7,'(333) 333-3333','dalliso2@gmail.com','Brian','Griffin','$2a$10$Rc7m0ok9ryhxhQO.vpZPAuLYWABnVlN38IIWzaSoEZimUyYFp8FdS','bgriffin','(333) 333-3333'),(_binary '',_binary '',_binary '',2,NULL,NULL,5,'2024-12-03 20:21:23.167000',1,14,'(444) 444-4444','dalliso2@gmail.com','Peter','Griffin','$2a$10$Rc7m0ok9ryhxhQO.vpZPAuLYWABnVlN38IIWzaSoEZimUyYFp8FdS','pgriffin','(333) 333-3333'),(_binary '',_binary '',_binary '',2,NULL,NULL,6,'2024-12-03 20:21:06.374000',1,13,'(555) 555-5555','dalliso2@gmail.com','Meg','Griffin','$2a$10$Rc7m0ok9ryhxhQO.vpZPAuLYWABnVlN38IIWzaSoEZimUyYFp8FdS','mgriffin','(333) 333-3333'),(_binary '',_binary '',_binary '',2,NULL,NULL,7,'2024-12-03 20:20:11.383000',1,11,'(666) 666-6666','dalliso2@gmail.com','Cartman','Unknown','$2a$10$Rc7m0ok9ryhxhQO.vpZPAuLYWABnVlN38IIWzaSoEZimUyYFp8FdS','cartman','(333) 333-3333'),(_binary '',_binary '',_binary '',3,NULL,NULL,8,'2024-12-03 20:22:08.606000',1,17,'(777) 777-7777','dalliso2@gmail.com','Snoopy','Unknown','$2a$10$Rc7m0ok9ryhxhQO.vpZPAuLYWABnVlN38IIWzaSoEZimUyYFp8FdS','snoopy','(333) 333-3333'),(_binary '',_binary '',_binary '',3,NULL,NULL,9,'2024-12-03 20:19:47.617000',1,8,'(888) 888-8888','dalliso2@gmail.com','Bart','Simpson','$2a$10$Rc7m0ok9ryhxhQO.vpZPAuLYWABnVlN38IIWzaSoEZimUyYFp8FdS','bsimpson','(333) 333-3333'),(_binary '',_binary '',_binary '',3,NULL,NULL,10,'2024-12-03 20:19:56.100000',1,9,'(999) 999-9999','dalliso2@gmail.com','Patrick','Star','$2a$10$Rc7m0ok9ryhxhQO.vpZPAuLYWABnVlN38IIWzaSoEZimUyYFp8FdS','pstar','(333) 333-3333'),(_binary '',_binary '',_binary '',4,NULL,NULL,11,'2024-12-03 20:20:03.624000',1,10,'(555) 555-5555','dalliso2@gmail.com','Dora','The Explorer','$2a$10$Rc7m0ok9ryhxhQO.vpZPAuLYWABnVlN38IIWzaSoEZimUyYFp8FdS','doratheexplorer','(333) 333-3333'),(_binary '',_binary '',_binary '',4,NULL,NULL,12,'2024-12-03 20:21:42.754000',1,16,'(555) 555-5555','dalliso2@gmail.com','Bob','Sponge','$2a$10$Rc7m0ok9ryhxhQO.vpZPAuLYWABnVlN38IIWzaSoEZimUyYFp8FdS','spongebob','(333) 333-3333'),(_binary '',_binary '',_binary '',4,NULL,NULL,13,'2024-12-03 20:18:48.849000',1,6,'(555) 555-5555','dalliso2@gmail.com','Garfield','Cat','$2a$10$Rc7m0ok9ryhxhQO.vpZPAuLYWABnVlN38IIWzaSoEZimUyYFp8FdS','garfield','(333) 333-3333');
+/*!40000 ALTER TABLE `matrix_user` ENABLE KEYS */;
+UNLOCK TABLES;
 
 --
 -- Table structure for table `mfile`
@@ -356,13 +376,13 @@ CREATE TABLE `mfile` (
   `name` varchar(255) DEFAULT NULL,
   `original_name` varchar(255) DEFAULT NULL,
   PRIMARY KEY (`id`),
-  UNIQUE KEY `UKtqq729rbt02n81lye1o2t1f9e` (`matrix_case_id`),
   KEY `FKpeaqr3phrx4y9xlysqvoyavbs` (`created_by`),
   KEY `FKgbx8vgeybkgyjhcei9uj9oqbw` (`last_updated_by`),
+  KEY `FK55r2469jd4y2f81y01i81l4f0` (`matrix_case_id`),
   CONSTRAINT `FK55r2469jd4y2f81y01i81l4f0` FOREIGN KEY (`matrix_case_id`) REFERENCES `matrix_case` (`id`),
   CONSTRAINT `FKgbx8vgeybkgyjhcei9uj9oqbw` FOREIGN KEY (`last_updated_by`) REFERENCES `matrix_user` (`id`),
   CONSTRAINT `FKpeaqr3phrx4y9xlysqvoyavbs` FOREIGN KEY (`created_by`) REFERENCES `matrix_user` (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=20 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -371,6 +391,7 @@ CREATE TABLE `mfile` (
 
 LOCK TABLES `mfile` WRITE;
 /*!40000 ALTER TABLE `mfile` DISABLE KEYS */;
+INSERT INTO `mfile` VALUES ('2024-12-02 21:20:45.994000',1,1,'2024-12-02 21:20:45.994000',NULL,NULL,NULL,NULL,'meg.jpg'),('2024-12-02 21:24:27.560000',1,2,'2024-12-02 21:24:27.560000',NULL,1,NULL,NULL,'stewey.jpg'),('2024-12-02 21:26:41.394000',1,3,'2024-12-02 21:27:03.087000',1,1,'Schedule description','Schedule','Fall 2023 Schedule.pdf'),('2024-12-02 21:26:41.395000',1,4,'2024-12-02 21:27:03.101000',1,1,'transcript description','transcript','Daryl_Allison_ASU_transcript.pdf'),('2024-12-02 21:46:31.643000',1,5,'2024-12-02 21:46:31.643000',NULL,NULL,NULL,NULL,'lois_20_19.jpg'),('2024-12-03 20:18:47.147000',1,6,'2024-12-03 20:18:47.147000',NULL,NULL,NULL,NULL,'garfield.jpg'),('2024-12-03 20:19:35.489000',1,7,'2024-12-03 20:19:35.489000',NULL,NULL,NULL,NULL,'3q5ole7ggyoc1.jpeg'),('2024-12-03 20:19:46.127000',1,8,'2024-12-03 20:19:46.127000',NULL,NULL,NULL,NULL,'bart.png'),('2024-12-03 20:19:54.635000',1,9,'2024-12-03 20:19:54.635000',NULL,NULL,NULL,NULL,'patrick.jpg'),('2024-12-03 20:20:01.999000',1,10,'2024-12-03 20:20:01.999000',NULL,NULL,NULL,NULL,'dora.png'),('2024-12-03 20:20:09.856000',1,11,'2024-12-03 20:20:09.856000',NULL,NULL,NULL,NULL,'cartman.png'),('2024-12-03 20:20:54.201000',1,12,'2024-12-03 20:20:54.201000',NULL,NULL,NULL,NULL,'lois.jpg'),('2024-12-03 20:21:05.136000',1,13,'2024-12-03 20:21:05.136000',NULL,NULL,NULL,NULL,'meg.jpg'),('2024-12-03 20:21:21.517000',1,14,'2024-12-03 20:21:21.517000',NULL,NULL,NULL,NULL,'FamilyGuy_Single_PeterDrink_R7.webp'),('2024-12-03 20:21:32.803000',1,15,'2024-12-03 20:21:32.803000',NULL,NULL,NULL,NULL,'stewey.jpg'),('2024-12-03 20:21:41.008000',1,16,'2024-12-03 20:21:41.008000',NULL,NULL,NULL,NULL,'spongebob.jpg'),('2024-12-03 20:22:07.000000',1,17,'2024-12-03 20:22:07.000000',NULL,NULL,NULL,NULL,'snoopie.jpg'),('2024-12-03 20:23:04.112000',1,18,'2024-12-03 20:23:04.112000',NULL,NULL,NULL,NULL,'20240705_121157.jpg'),('2024-12-03 20:31:32.987000',1,19,'2024-12-03 20:31:32.987000',NULL,1,NULL,NULL,'20240705_121157.jpg');
 /*!40000 ALTER TABLE `mfile` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -409,7 +430,7 @@ CREATE TABLE `property_definition` (
   CONSTRAINT `FKo3lm4f58evjt4629l85fh28s6` FOREIGN KEY (`last_updated_by`) REFERENCES `matrix_user` (`id`),
   CONSTRAINT `FKow41y4hnwlcln8ystmhkifp3o` FOREIGN KEY (`entity_definition_id`) REFERENCES `entity_definition` (`id`),
   CONSTRAINT `property_definition_chk_1` CHECK ((`type` between 0 and 9))
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=8 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -418,6 +439,7 @@ CREATE TABLE `property_definition` (
 
 LOCK TABLES `property_definition` WRITE;
 /*!40000 ALTER TABLE `property_definition` DISABLE KEYS */;
+INSERT INTO `property_definition` VALUES (_binary '\0',_binary '',_binary '\0',_binary '',NULL,NULL,0,_binary '',0,'2024-12-02 21:22:02.964000',1,1,1,'2024-12-02 21:22:02.964000',NULL,'','','Last Name',''),(_binary '\0',_binary '',_binary '\0',_binary '',NULL,NULL,1,_binary '',0,'2024-12-02 21:22:02.970000',1,1,2,'2024-12-02 21:22:02.970000',NULL,'','','First Name',''),(_binary '\0',_binary '',_binary '\0',_binary '\0',NULL,NULL,2,_binary '',4,'2024-12-02 21:22:02.974000',1,1,3,'2024-12-02 21:22:02.974000',NULL,'','','DOB',''),(_binary '\0',_binary '\0',_binary '\0',_binary '\0',NULL,NULL,3,_binary '\0',2,'2024-12-02 21:22:02.982000',1,1,4,'2024-12-02 21:22:02.982000',NULL,'','','Profile Pic',''),(_binary '\0',_binary '',_binary '\0',_binary '',NULL,NULL,0,_binary '',0,'2024-12-02 21:22:55.355000',1,2,5,'2024-12-02 21:22:55.355000',NULL,'','','Title',''),(_binary '\0',_binary '',_binary '\0',_binary '\0',NULL,4,1,_binary '',1,'2024-12-02 21:22:55.355000',1,2,6,'2024-12-02 21:22:55.355000',NULL,'','','Description',''),(_binary '\0',_binary '',_binary '',_binary '\0',NULL,NULL,2,_binary '',7,'2024-12-02 21:22:55.376000',1,2,7,'2024-12-02 21:22:55.376000',NULL,'','','Date Range','');
 /*!40000 ALTER TABLE `property_definition` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -447,7 +469,7 @@ CREATE TABLE `property_value` (
   CONSTRAINT `FKalmqoxuw13a673ug2p21ow5o7` FOREIGN KEY (`entity_id`) REFERENCES `matrix_entity` (`id`),
   CONSTRAINT `FKfnm8s6pb0pcyr2exfb9uac649` FOREIGN KEY (`created_by`) REFERENCES `matrix_user` (`id`),
   CONSTRAINT `FKsej3r9x0p277i4om268gseoao` FOREIGN KEY (`last_updated_by`) REFERENCES `matrix_user` (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=9 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -456,6 +478,7 @@ CREATE TABLE `property_value` (
 
 LOCK TABLES `property_value` WRITE;
 /*!40000 ALTER TABLE `property_value` DISABLE KEYS */;
+INSERT INTO `property_value` VALUES ('2024-12-02 21:24:29.000000',1,1,1,'2024-12-03 20:31:34.722000',1,1,0,'Allison'),('2024-12-02 21:24:29.004000',1,1,2,'2024-12-03 20:31:34.722000',1,2,0,'Daryl'),('2024-12-02 21:24:29.007000',1,1,3,'2024-12-03 20:31:34.728000',1,3,0,'1970-01-01T10:00:00.000Z'),('2024-12-02 21:24:29.009000',1,1,4,'2024-12-03 20:31:34.728000',1,4,0,'19'),('2024-12-02 21:25:03.858000',1,2,5,'2024-12-02 21:25:03.858000',NULL,5,0,'Event 1'),('2024-12-02 21:25:03.862000',1,2,6,'2024-12-02 21:25:03.862000',NULL,6,0,'Sed ut perspiciatis unde omnis iste natus error sit voluptatem accusantium doloremque laudantium, totam rem aperiam, eaque ipsa quae ab'),('2024-12-02 21:25:03.867000',1,2,7,'2024-12-02 21:25:03.867000',NULL,7,0,'2024-12-31T09:10:00.000Z'),('2024-12-02 21:25:03.871000',1,2,8,'2024-12-02 21:25:03.871000',NULL,7,1,'2025-01-16T09:00:00.000Z');
 /*!40000 ALTER TABLE `property_value` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -492,7 +515,7 @@ CREATE TABLE `task` (
   CONSTRAINT `FKl0knjrrm138977srrorn5ucnq` FOREIGN KEY (`last_updated_by`) REFERENCES `matrix_user` (`id`),
   CONSTRAINT `FKqwgn9oiuoc3sg14cvr8b6jmbm` FOREIGN KEY (`case_id`) REFERENCES `matrix_case` (`id`),
   CONSTRAINT `task_chk_1` CHECK ((`status` between 0 and 4))
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -501,6 +524,7 @@ CREATE TABLE `task` (
 
 LOCK TABLES `task` WRITE;
 /*!40000 ALTER TABLE `task` DISABLE KEYS */;
+INSERT INTO `task` VALUES (0,'2024-12-02 21:27:29.794000',1,1,1,NULL,'2024-12-02 21:27:44.643000',1,'2024-12-11 00:00:00.000000',1,'2024-12-02 21:27:44.643000',NULL,'Sed ut perspiciatis unde omnis iste natus error sit voluptatem accusantium doloremque laudantium, totam rem aperiam, eaque ipsa quae ab','Sed ut perspiciatis unde omnis iste natus error sit voluptatem accusantium doloremque laudantium, totam rem aperiam, eaque ipsa quae ab','Task 1');
 /*!40000 ALTER TABLE `task` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -529,7 +553,7 @@ CREATE TABLE `task_entity` (
   CONSTRAINT `FK6cm52pj59vtxlressgt9m0loa` FOREIGN KEY (`task_id`) REFERENCES `task` (`id`),
   CONSTRAINT `FKfaxf2w22w42qanm3so41lxnnk` FOREIGN KEY (`matrix_entity_id`) REFERENCES `matrix_entity` (`id`),
   CONSTRAINT `FKfq069ohfj2pcak6ua3crp1bdm` FOREIGN KEY (`created_by`) REFERENCES `matrix_user` (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -538,6 +562,7 @@ CREATE TABLE `task_entity` (
 
 LOCK TABLES `task_entity` WRITE;
 /*!40000 ALTER TABLE `task_entity` DISABLE KEYS */;
+INSERT INTO `task_entity` VALUES ('2024-12-02 21:28:34.541000',1,1,'2024-12-02 21:28:34.541000',NULL,1,1,'Mentioned in interview');
 /*!40000 ALTER TABLE `task_entity` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -566,7 +591,7 @@ CREATE TABLE `task_file` (
   CONSTRAINT `FKf3e571mbfhgbolwh31xwffla9` FOREIGN KEY (`created_by`) REFERENCES `matrix_user` (`id`),
   CONSTRAINT `FKk9ikv3hs4cyrgi4ti09b02px0` FOREIGN KEY (`task_id`) REFERENCES `task` (`id`),
   CONSTRAINT `FKrxrsl7qujopavfjhcb8vjxy68` FOREIGN KEY (`last_updated_by`) REFERENCES `matrix_user` (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -575,6 +600,7 @@ CREATE TABLE `task_file` (
 
 LOCK TABLES `task_file` WRITE;
 /*!40000 ALTER TABLE `task_file` DISABLE KEYS */;
+INSERT INTO `task_file` VALUES ('2024-12-02 21:29:07.922000',1,1,'2024-12-02 21:29:07.922000',NULL,3,1,NULL);
 /*!40000 ALTER TABLE `task_file` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -672,6 +698,7 @@ CREATE TABLE `user_case_role` (
 
 LOCK TABLES `user_case_role` WRITE;
 /*!40000 ALTER TABLE `user_case_role` DISABLE KEYS */;
+INSERT INTO `user_case_role` VALUES (0,1,'2024-12-02 21:23:51.770000',1,'2024-12-02 21:23:51.771000',NULL,1);
 /*!40000 ALTER TABLE `user_case_role` ENABLE KEYS */;
 UNLOCK TABLES;
 /*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
@@ -684,12 +711,4 @@ UNLOCK TABLES;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2024-11-17 23:34:28
-
---
--- Dumping data for table `matrix_user`
---
-
-INSERT INTO `matrix_user` VALUES (_binary '',_binary '',_binary '',NULL,NULL,NULL,1,'2024-04-19 00:27:00.228000',1,NULL,'2342342342','admin@fbi.gov','fist','last','$2a$10$C.f97.fw918rEaIfGymG0OImBM2LWHJozslh8eUei5ppbTZ3Bj6Ma','admin','3455673456');
-
-
+-- Dump completed on 2024-12-03 20:35:16

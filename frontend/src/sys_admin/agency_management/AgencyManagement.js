@@ -15,10 +15,9 @@ import Grid from '../../util/Grid';
 import Content from '../../util/Content';
 import AddEditAgencyDialog from './AddEditAgencyDialog';
 import { useTheme } from '@mui/material/styles';
-import { handleQueryError } from '../../api/ApiUtils';
 import { useDispatch } from 'react-redux';
-import { useNavigate } from 'react-router-dom';
-import { useLazyGetAllAgenciesQuery } from '../../api/AgencyApi';
+import { useGetAllAgenciesQuery } from '../../api/AgencyApi';
+import { handleQueryResultsWithWaitMessage } from '../../api/ApiUtils';
 
 const columnHeadings = ["Name", "Abbreviation"]
 const columnTypes = [TEXT, TEXT];
@@ -35,32 +34,21 @@ const newAgency = {
 
 export default function AgencyManagement()
 {
-    console.log("AgencyManagement");
     const theme = useTheme();
-    const navigate = useNavigate();
     const dispatch = useDispatch();
     const [editAgency, setEditAgency] = useState(undefined);
     
-    const [getAllAgencies, { currentData:envelope, refetch, ...allAgencyQueryStatus }] = useLazyGetAllAgenciesQuery();
-    const allAgencies = envelope?.payload;
-    
-    useEffect(() => {
-        getAllAgencies();
-    },[]);
+    // const [getAllAgencies, { refetch, ...allAgencyQueryResults }] = useLazyGetAllAgenciesQuery();
+    const { refetch, ...allAgencyQueryResults } = useGetAllAgenciesQuery();
+    const allAgencies = allAgencyQueryResults?.data?.payload;
 
     useEffect(() => {
-        if (allAgencyQueryStatus.isSuccess)
-            handleQueryError(allAgencyQueryStatus, dispatch, navigate);
-    }, [allAgencyQueryStatus.isSuccess]);
+        handleQueryResultsWithWaitMessage(allAgencyQueryResults, dispatch);
+    }, [allAgencyQueryResults?.isFetching]);
 
     function successFn(updatedAgency)
     {
         setAgencies(prevAgencies=>[...prevAgencies].with(prevAgencies.findIndex((agency)=>agency.id===updatedAgency.id), updatedAgency));
-    }
-
-    function refresh()
-    {
-        refetch();
     }
 
     const agencyList = allAgencies?.map((record) => 
@@ -73,10 +61,10 @@ export default function AgencyManagement()
             <Content>   
                 <Box sx={{ position:'relative', width:'100%', maxHeight:'100%', display: 'flex', flexDirection:'column' }}>
                     <Box sx={{position:'relative',display:'flex', justifyContent:'space-between', padding:'5px', flexGrow:0}}>
-                        <IconButton disabled={allAgencyQueryStatus.isFetching} onClick={() => getAllAgencies()}><RefreshIcon/></IconButton>
-                        <Button disabled={allAgencyQueryStatus.isFetching} sx={{ m:0, p:0 }} onClick={() => setEditAgency({...newAgency})} >Add Organization</Button>
+                        <IconButton disabled={allAgencyQueryResults.isFetching} onClick={() => refetch()}><RefreshIcon/></IconButton>
+                        <Button disabled={allAgencyQueryResults.isFetching} sx={{ m:0, p:0 }} onClick={() => setEditAgency({...newAgency})} >Add Organization</Button>
                     </Box>
-                    <Grid columnHeadings={columnHeadings} columnTypes={columnTypes} rowValues={agencyList} isFetching={allAgencyQueryStatus.isFetching}/>
+                    <Grid columnHeadings={columnHeadings} columnTypes={columnTypes} rowValues={agencyList} isFetching={allAgencyQueryResults.isFetching}/>
                     { editAgency && <AddEditAgencyDialog agency={editAgency} successFn={successFn} closeFn={()=>setEditAgency(undefined)} />}
                 </Box> 
             </Content>

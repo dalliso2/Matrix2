@@ -17,6 +17,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.dca.matrix.api.ApiResponse;
 import com.dca.matrix.api.ApiResponseUtil;
+import com.dca.matrix.authentication.AuthenticationService;
 
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
@@ -24,6 +25,7 @@ import lombok.extern.slf4j.Slf4j;
 
 @RestController
 @RequestMapping(path="/api/user",produces="application/json")
+@PreAuthorize("isAuthenticated()")
 @RequiredArgsConstructor
 @Slf4j
 public class MatrixUserController
@@ -31,66 +33,60 @@ public class MatrixUserController
 	private final MatrixUserService userService;
 	private final AuthenticationService authService;
 
-	@PreAuthorize("isAuthenticated()")
-	@GetMapping("/all")
-	@ResponseStatus(HttpStatus.OK)
-	public List<MatrixUserDTO> getAll()
-	{	
-		return this.userService.findAll().stream().map(user->this.createDTO(user)).toList();
-	}
+//	@GetMapping("/all")
+//	@ResponseStatus(HttpStatus.OK)
+//	public List<MatrixUserDTO> getAll()
+//	{	
+//		return this.userService.findAll().stream().map(user->this.createDTO(user)).toList();
+//	}
 	
-	@PreAuthorize("isAuthenticated()")
-	@GetMapping("/current")
-	public ResponseEntity<ApiResponse<MatrixUserDTO>> getCurrentUser(HttpServletRequest request) throws Exception
-	{
-		return new ResponseEntity<>(ApiResponseUtil.success(this.createDTO(this.authService.getCurrentUser()), 
-															"Retrieved current user.", 
-															request.getRequestURI()),
-									HttpStatus.OK);
-	}
+//	@GetMapping("/current")
+//	public ResponseEntity<ApiResponse<MatrixUserDTO>> getCurrentUser(HttpServletRequest request) throws Exception
+//	{
+//		return new ResponseEntity<>(ApiResponseUtil.success(this.createDTO(this.authService.getCurrentUser()), 
+//															"Retrieved current user.", 
+//															request),
+//									HttpStatus.OK);
+//	}
 	
-	@PreAuthorize("isAuthenticated()")
-	@GetMapping( "/{id}")
-	@ResponseStatus(HttpStatus.OK)
-	public MatrixUserDTO loadUser(@PathVariable("id") Long id)
-	{
-		return this.createDTO(this.userService.findById(id));
-	}
+//	@GetMapping( "/{id}")
+//	@ResponseStatus(HttpStatus.OK)
+//	public MatrixUserDTO loadUser(@PathVariable("id") Long id)
+//	{
+//		return this.createDTO(this.userService.findById(id));
+//	}
 	
 	public MatrixUserDTO createDTO(MatrixUser user)
 	{
 		return new MatrixUserDTO(user);
 	}
 	
-	@PreAuthorize("isAuthenticated()")
 	@GetMapping("/search/{q}")
 	@ResponseStatus(HttpStatus.OK)
 	public ResponseEntity<ApiResponse<List<MatrixUserDTO>>> searchUsers(@PathVariable("q") String searchString, HttpServletRequest request) throws Exception
 	{
-		authService.getCurrentUser().getAuthorities().forEach(ga->log.debug(ga.getAuthority()));
 		List<MatrixUser> users = this.userService.search(searchString);
 		
 		List<MatrixUserDTO> userDTOs = users.stream().map(matrixUser->createDTO(matrixUser)).toList();
 		return new ResponseEntity<>(ApiResponseUtil.success(userDTOs, 
-														userDTOs.size() + " users found.", 
-														request.getRequestURI()),
-								HttpStatus.OK);
+															userDTOs.size() + " users found.", 
+															request),
+													HttpStatus.OK);
 	}
 	
-	@PreAuthorize("isAuthenticated()")
 	@GetMapping("/case_list")
 	@ResponseStatus(HttpStatus.OK)
 	public ResponseEntity<ApiResponse<List<UserCaseRecord>>> getUserCaseList(HttpServletRequest request) throws Exception
 	{
 		return new ResponseEntity<>(ApiResponseUtil.success(this.userService.getUserCaseRecords(), 
 															"Retrieved user's case list", 
-															request.getRequestURI()),
-									HttpStatus.OK);
-	}	
+															request),
+													HttpStatus.OK);
+	}
+	
 //////////////////////////////////////////////////////////////////////
 //			POST MAPPTINGS
 //////////////////////////////////////////////////////////////////////
-	
 	
 	@PostMapping(path="/store", consumes="application/json")
 	@ResponseStatus(HttpStatus.OK)
@@ -101,14 +97,13 @@ public class MatrixUserController
 		MatrixUser savedUser = this.userService.updateUser(user);
 		return new ResponseEntity<>(ApiResponseUtil.success(this.createDTO(savedUser), 
 															"Created/Updated user", 
-															request.getRequestURI()), HttpStatus.OK);
+															request), HttpStatus.OK);
 	}
 
 //////////////////////////////////////////////////////////////////////
 //PUT MAPPTINGS
 //////////////////////////////////////////////////////////////////////
 	
-	@PreAuthorize("isAuthenticated()")
 	@PatchMapping(path="/password", consumes="application/json")
 	@ResponseStatus(HttpStatus.OK)
 	public MatrixUserDTO updatePassword(@RequestBody ChangePasswordMessage msg)
@@ -116,18 +111,14 @@ public class MatrixUserController
 		return this.createDTO(this.userService.updatePassword(msg));
 	}
 	
-	@PreAuthorize("isAuthenticated()")
 	@PatchMapping(path="/theme", consumes="application/json")
 	@ResponseStatus(HttpStatus.OK)
 	public ResponseEntity<ApiResponse<MatrixUserDTO>> setTheme(@RequestBody SetThemeMessage msg, HttpServletRequest request)
 	{
 		MatrixUser u = this.userService.setTheme(msg);
-		u.setDarkTheme(!msg.darkTheme());
 		return new ResponseEntity<>(ApiResponseUtil.success(new MatrixUserDTO(u), 
 										"Changed user theme to " + (msg.darkTheme()?"dark.":"light."), 
-										request.getRequestURI()),
-HttpStatus.OK);
+										request),
+									HttpStatus.OK);
 	}
-	
-
 }

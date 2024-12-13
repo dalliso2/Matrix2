@@ -79,7 +79,7 @@ public class FileController
 	@ResponseStatus(HttpStatus.OK)
 	public ResponseEntity<ApiResponse<Collection<MFile>>> updateFiles(@RequestBody Collection<MFile> files, HttpServletRequest request)
 	{
-		return new ResponseEntity<>(ApiResponseUtil.success(this.storageService.updateFiles(files), "Successfully updated files.", request.getRequestURI()), HttpStatus.OK);
+		return new ResponseEntity<>(ApiResponseUtil.success(this.storageService.updateFiles(files), "Successfully updated files.", request), HttpStatus.OK);
 		//return this.storageService.updateFiles(files);
 	}
 	
@@ -116,7 +116,7 @@ public class FileController
 	{
 		return new ResponseEntity<>(ApiResponseUtil.success(this.storageService.searchFilesNotLinkedToEntity(entityId, searchString),
 														"Search files not linked to entity completed successfully.",
-														request.getRequestURI()),
+														request),
 														HttpStatus.OK);
 	}
 	

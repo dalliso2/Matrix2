@@ -6,15 +6,13 @@ import './DisplayComponentFactory.css';
 
 const RETRIEVE_FILE_URL = "/api/file/";
 
-export default function Image({id, className})
+export default function Image({id, className, style})
 {
     const authToken = useSelector(selectAuthToken);
     const imgRef = useRef(null);
 
-    console.log("Image id: " + id);
-    console.log(authToken);
     return (
-        <img ref={imgRef} id={'img_' + id} className={className} 
+        <img ref={imgRef} id={'img_' + id} className={className} style={{...style}}
                 src={RETRIEVE_FILE_URL + id + "?t=" + authToken} />
     );
 }

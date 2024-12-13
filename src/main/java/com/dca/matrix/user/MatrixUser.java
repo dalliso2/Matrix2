@@ -1,12 +1,13 @@
 package com.dca.matrix.user;
 
 import java.util.Collection;
+import java.util.List;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.Objects;
 import java.util.Set;
 
-import org.hibernate.mapping.List;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -16,9 +17,11 @@ import com.dca.matrix.agency.Agency;
 import com.dca.matrix.agency.AgencyDeserializer;
 import com.dca.matrix.file.MFile;
 import com.dca.matrix.file.MFileDeserializer;
+import com.dca.matrix.matrix_case.CaseAuthorityEnum;
 import com.dca.matrix.matrix_case.MatrixCase;
 import com.dca.matrix.user_case_role.CaseRoleEnum;
 import com.dca.matrix.user_case_role.UserCaseRole;
+import com.dca.matrix.user_case_role.UserCaseRoleService;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
@@ -129,8 +132,19 @@ public class MatrixUser extends EntityBase implements UserDetails, Cloneable
 		if (this.isAdmin)
 			authorities.add(new SimpleGrantedAuthority(ROLE_ADMIN));
 				
-		this.userCaseRoles.forEach(ucr->
-			authorities.add(new SimpleGrantedAuthority("CASE_" + ucr.getMatrixCase().getId() + "_" + ucr.getCaseRole())));
+		this.userCaseRoles.forEach(ucr->{
+			Long caseId = ucr.getMatrixCase().getId();
+			switch (ucr.getCaseRole())
+			{
+				// no break statements, each role has all authorities beneath it
+				case CaseRoleEnum.Owner:
+					authorities.add(new SimpleGrantedAuthority("CASE_" + caseId + "_" + CaseAuthorityEnum.ADMIN));
+				case CaseRoleEnum.Participant:
+					authorities.add(new SimpleGrantedAuthority("CASE_" + caseId + "_" + CaseAuthorityEnum.EDIT));
+				case CaseRoleEnum.Reviewer:
+					authorities.add(new SimpleGrantedAuthority("CASE_" + caseId + "_" + CaseAuthorityEnum.VIEW));
+			}
+		});
 		
 		return authorities;
 	}
@@ -194,19 +208,28 @@ public class MatrixUser extends EntityBase implements UserDetails, Cloneable
 		return caseRole;
 	}
 	
-	public boolean isCaseOwner(MatrixCase mCase)
-	{
-		return this.isAdmin || this.getCaseRole(mCase).equals(CaseRoleEnum.Owner);
+	public void isCaseAdmin(MatrixCase matrixCase)
+	{		
+		if (!this.hasAuth(matrixCase, CaseAuthorityEnum.ADMIN))
+			throw new AccessDeniedException("You do not have administrative rights for this case.");
 	}
 	
-	public boolean isCaseParticipant(MatrixCase mCase)
+	public void canView(MatrixCase matrixCase)
 	{
-		return this.isCaseOwner(mCase) || this.getCaseRole(mCase).equals(CaseRoleEnum.Participant);
+		if (!this.hasAuth(matrixCase, CaseAuthorityEnum.VIEW))
+			throw new AccessDeniedException("You do not have the authority to view this case.");
 	}
 	
-	public boolean isCaseReviewer(MatrixCase mCase)
+	public void canModify(MatrixCase matrixCase)
+	{		
+		if (!this.hasAuth(matrixCase, CaseAuthorityEnum.EDIT))
+			throw new AccessDeniedException("You do not have the authority to modify this case.");
+	}
+	
+	private boolean hasAuth(MatrixCase matrixCase, CaseAuthorityEnum authVal)
 	{
-		return this.isCaseParticipant(mCase) || this.getCaseRole(mCase).equals(CaseRoleEnum.Reviewer);
+		String caseAuthority = "CASE_" + matrixCase.getId() + authVal;
+		return this.getAuthorities().stream().anyMatch(auth->auth.getAuthority().equals(caseAuthority));
 	}
 	
 	public String toString()

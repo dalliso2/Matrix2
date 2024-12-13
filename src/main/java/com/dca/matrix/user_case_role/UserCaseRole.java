@@ -8,8 +8,8 @@ import org.hibernate.annotations.UpdateTimestamp;
 
 import com.dca.matrix.ApplicationContextProvider;
 import com.dca.matrix.EntityBase;
+import com.dca.matrix.authentication.AuthenticationService;
 import com.dca.matrix.matrix_case.MatrixCase;
-import com.dca.matrix.user.AuthenticationService;
 import com.dca.matrix.user.MatrixUser;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 

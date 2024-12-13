@@ -51,7 +51,7 @@ public class MatrixEntityController
 	{
 		return new ResponseEntity<>(ApiResponseUtil.success(this.matrixEntityService.findById(matrixEntityId), 
 				"Found entity with id " + matrixEntityId + ".", 
-				request.getRequestURI()),
+				request),
 			HttpStatus.OK);
 	}
 	
@@ -60,7 +60,7 @@ public class MatrixEntityController
 	{ 
 		return new ResponseEntity<>(ApiResponseUtil.success(this.matrixEntityService.findByIds(matrixEntityIds), 
 				"Found entities with ids " + matrixEntityIds, 
-				request.getRequestURI()),
+				request),
 			HttpStatus.OK);
 	}
 //
@@ -137,7 +137,7 @@ public class MatrixEntityController
 	{
 		return new ResponseEntity<>(ApiResponseUtil.success(this.matrixEntityService.searchEntities(searchMessage), 
 																"Search succeeded.", 
-																request.getRequestURI()),
+																request),
 															HttpStatus.OK);
 	}
 	
@@ -148,7 +148,7 @@ public class MatrixEntityController
 	{
 		return new ResponseEntity<>(ApiResponseUtil.success(this.matrixEntityService.searchEntitiesNotLinked(searchMessage), 
 				"Search succeeded.", 
-				request.getRequestURI()),
+				request),
 				HttpStatus.OK);
 	}
 	
@@ -165,7 +165,7 @@ public class MatrixEntityController
 	{
 		return new ResponseEntity<>(ApiResponseUtil.success(this.matrixEntityService.removeRelationship(idMessage), 
 										"Removed link", 
-										request.getRequestURI()),HttpStatus.OK);
+										request),HttpStatus.OK);
 	}
 	
 	@GetMapping("/children/{parentId}")
@@ -175,7 +175,7 @@ public class MatrixEntityController
 		//return this.matrixEntityService.getRelatedEntities(id);
 		return new ResponseEntity<>(ApiResponseUtil.success(this.matrixEntityService.getRelatedEntities(id), 
 															"Retrieved related entities for entity " + id, 
-															request.getRequestURI()),
+															request),
 														HttpStatus.OK);
 	}
 
@@ -185,7 +185,7 @@ public class MatrixEntityController
 	{
 		return new ResponseEntity<>(ApiResponseUtil.success(this.matrixEntityService.getCaseEntityProjections(caseId),
 															"Retrieved all entities for case: " + caseId,
-															request.getRequestURI()),
+															request),
 														HttpStatus.OK);
 	}
 	
@@ -195,7 +195,7 @@ public class MatrixEntityController
 	{
 		return new ResponseEntity<>(ApiResponseUtil.success(this.matrixEntityService.getAllForCase(caseId),
 															"Retrieved all entities for case: " + caseId,
-															request.getRequestURI()),
+															request),
 														HttpStatus.OK);
 	}
 	
@@ -205,7 +205,7 @@ public class MatrixEntityController
 	{
 		return new ResponseEntity<>(ApiResponseUtil.success(this.matrixEntityService.getCaseEntityRelationships(caseId),
 															"Retrieved entity relationships.",
-															request.getRequestURI()),
+															request),
 															HttpStatus.OK);
 															
 	}
@@ -216,7 +216,7 @@ public class MatrixEntityController
 	{
 		return new ResponseEntity<>(ApiResponseUtil.success(this.matrixEntityService.getTimelineEntitiesForCase(caseId),
 															"Retrieved entities for timeine.",
-															request.getRequestURI()),
+															request),
 															HttpStatus.OK);
 	}
 	
@@ -225,7 +225,7 @@ public class MatrixEntityController
 	{
 		return new ResponseEntity<>(ApiResponseUtil.success(this.matrixEntityService.findMatrixEntityTitlesByCase(caseId),
 				"Retrieved all entities for case: " + caseId,
-				request.getRequestURI()),
+				request),
 				HttpStatus.OK);	
 	}
 }

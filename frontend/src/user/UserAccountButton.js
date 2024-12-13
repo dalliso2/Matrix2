@@ -1,20 +1,19 @@
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import AccountCircle from "@mui/icons-material/AccountCircle";
 import IconButton from "@mui/material/IconButton";
 import Popover from "@mui/material/Popover";
 import Switch from "@mui/material/Switch";
 import Box from "@mui/system/Box";
 import { Button } from "@mui/material";
-import { useSetUserDarkThemeMutation, useLazyRefreshCredentialsQuery } from '../api/UserApi';
+import { useSetUserDarkThemeMutation } from '../api/UserApi';
 import ChangePasswordDialog from "./ChangePasswordDialog";
 import { useDispatch } from 'react-redux';
-import { selectCurrentUser, selectDarkTheme, setStateDarkTheme, setAuthToken, selectAuthToken, resetState } from '../state/AppSlice';
+import { selectCurrentUser } from '../state/AppSlice';
 import { useSelector } from "react-redux";
 import { handleMutationResults } from "../api/ApiUtils";
 import { enqueueSnackbar } from "notistack";
 import { useNavigate } from "react-router-dom";
-import { handleQueryError } from "../api/ApiUtils";
-import { api } from "../api/BaseApi";
+import { setAuthToken } from "../state/AppSlice";
 
 export default function UserAccountButton()
 {
@@ -24,8 +23,7 @@ export default function UserAccountButton()
     const [showChangePasswordDialog, setShowChangePasswordDialog] = useState(false);
 
     const currentUser = useSelector(selectCurrentUser);  
-    const authToken = useSelector(selectAuthToken);
-    const darkTheme = useSelector(selectDarkTheme);
+    //const darkTheme = useSelector(selectDarkTheme);
 
     const [apiSetDarkTheme,mutationState] = useSetUserDarkThemeMutation();
     handleMutationResults(mutationState, 
@@ -34,37 +32,24 @@ export default function UserAccountButton()
                             // false, 
                             // "",
                             // "", 
-                            ()=>{ enqueueSnackbar("Set theme to " + (darkTheme?"dark.":"light."), {variant:'success'});},
+                            ()=>{ 
+                                console.log("setDarkTheme user", mutationState.data.payload);
+                                enqueueSnackbar("Set theme to " + ((currentUser?.darkTheme)?"dark.":"light."), {variant:'success'});
+                            },
                             ()=>{ closeFn();});
-
-    const [refreshCredentials, { data:credentialsEnvelope, ...refreshCredentialsStatus }] = useLazyRefreshCredentialsQuery();
-    const credentials = credentialsEnvelope?.payload;
-    handleQueryError(refreshCredentialsStatus, 
-                        dispatch, 
-                        navigate,
-                        ()=>{
-                        });
-
-    useEffect(() => {
-        if (refreshCredentialsStatus?.isSuccess)
-        {
-            dispatch(setAuthToken(credentials.accessToken));
-        }
-    }, [refreshCredentialsStatus?.isFetching]);
-
-    // refresh token every 10 minutes
-    setTimeout(()=>refreshCredentials({token:authToken}), 10*60*1000);
 
     async function logout()
     {
-        dispatch(api.util.resetApiState());
-        dispatch(resetState());
+        // dispatch(api.util.resetApiState());
+        // dispatch(resetState());
+        dispatch(setAuthToken(null));
     }
 
-    function setDarkTheme(event)
+    function setDarkTheme(val)
     {
-        dispatch(setStateDarkTheme(event.target.checked));
-        apiSetDarkTheme(event.target.checked);
+        //dispatch(setStateDarkTheme(event.target.checked));
+        console.log("setDarkTheme",val);
+        apiSetDarkTheme(val);
     }
 
     function changePassword()
@@ -92,7 +77,7 @@ export default function UserAccountButton()
                     <Button onClick={()=>logout()} sx={{}}>Logout</Button>
                 </Box>
                 <Box>
-                    Dark Theme <Switch checked={currentUser && darkTheme} onChange={(event)=>setDarkTheme(event)}/>
+                    Dark Theme <Switch checked={currentUser?.darkTheme} onChange={(event)=>setDarkTheme(event.target.checked)}/>
                 </Box>
             </Box>
             </Popover>

@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { Box } from "@mui/material";
 import Button from "@mui/material/Button";
 import EntityDefinitionBasic from "./EntityDefinitionBasic";
@@ -9,43 +9,32 @@ import { useDispatch } from "react-redux";
 import { handleMutationResults } from "../../api/ApiUtils";
 import { setSelectedEntityDefinitionId } from "../../state/AppSlice";
 import RestorePropertyDialog from "./RestorePropertyDialog";
-import { enqueueSnackbar } from 'notistack';
 import { useNavigate } from "react-router-dom";
+import { useBlocker } from "react-router";
 
 export default function EntityDefinition({selectedEntityDefinition})
 {
     const dispatch = useDispatch();
     const navigate = useNavigate();
     const [entityDefinition, setEntityDefinition] = useState(selectedEntityDefinition && JSON.parse(JSON.stringify(selectedEntityDefinition))); 
+    const [modified, setModified] = useState(false);    
+    const [nextRoute, setNextRoute] = useState(undefined);
 
-    const [modified, setModified] = useState(false);
     const [validateFields, setValidateFields] = useState(false);
     const [saveChangesMessageBoxOpen, setSaveChangesMessageBoxOpen] = useState(false);
     const [restorePropertyDialogOpen, setRestorePropertyDialogOpen] = useState(false);
 
-    const updatingCreating = selectedEntityDefinition?.id?"Upating ":"Creating ";
-
     const [storeEntityDefinition, mutationState] = useStoreEntityDefinitionMutation();
-    handleMutationResults(mutationState, 
-                            dispatch, 
-                            navigate,
-                            true, 
-                            updatingCreating + " entity definition...", 
-                            "Error" +  updatingCreating + " entity definition",
-                            ()=>{
-                                setModified(()=>false);
-                                enqueueSnackbar( (selectedEntityDefinition.id?"Upated ":"Created ") + entityDefinition.name + " entity definition.", 
-                                                    {variant:'success'}); 
-                            });
+    handleMutationResults(mutationState, dispatch, ()=>{setModified(()=>false);});
 
     function saveEntityDefinition()
     { 
+        setSaveChangesMessageBoxOpen(()=>false);
         const edCopy = JSON.parse(JSON.stringify(entityDefinition));
         // check entity definition, it can't be saved without a name
         if (!edCopy.name || edCopy.name === "")
         {
             setValidateFields(()=>true);
-            setSaveChangesMessageBoxOpen(()=>false);
             dispatch(setSelectedEntityDefinitionId(edCopy.id));
         }
         else
@@ -69,25 +58,35 @@ export default function EntityDefinition({selectedEntityDefinition})
         setModified(()=>true);
     }
 
+    // user has cancelled edits, reset validation flag, close the save confirmation message box
+    // and set modified to false.  This will trigger the useEffect to reset the entity definition
     function cancelEdits()
     {
-        setModified(()=>false);
         setValidateFields(()=>false);
         setSaveChangesMessageBoxOpen(()=>false);    
-        setEntityDefinition(selectedEntityDefinition && JSON.parse(JSON.stringify(selectedEntityDefinition)));
+        setModified(()=>false);
     }
 
-    const enityDefinitionChange = (!!selectedEntityDefinition !== !!entityDefinition) || (selectedEntityDefinition?.id !== entityDefinition?.id);
-    if (enityDefinitionChange)
-    {
+    // if user selects a different entity definition ask if they want to save the changes.
+    useEffect(() => {
         if (modified)
+            setSaveChangesMessageBoxOpen(()=>true);
+        else if (selectedEntityDefinition)
+            setEntityDefinition(JSON.parse(JSON.stringify(selectedEntityDefinition)));
+    }, [selectedEntityDefinition]);
+
+    // if user tries to navigate away from the page with unsaved changes
+    // block the navigation and ask the user if they want to save the changes
+    useBlocker((tx) => {
+        if (modified && !nextRoute)
         {
-            if  (!saveChangesMessageBoxOpen)
-                setSaveChangesMessageBoxOpen(()=>true);
+            setSaveChangesMessageBoxOpen(()=>true);
+            setNextRoute(tx.nextLocation.pathname);
+            return true;
         }
-        else
-            setEntityDefinition(selectedEntityDefinition);
-    }
+        else 
+            return false;
+    });
     
     return (
         <>            
@@ -109,12 +108,12 @@ export default function EntityDefinition({selectedEntityDefinition})
                     </Box>
                     <Box sx={{ display:'flex', justifyContent:'center' }}>
                         <Button disabled={!modified} onClick={()=>saveEntityDefinition()}>Save</Button>
-                        <Button disabled={!modified} onClick={()=>cancelEdits()}>Cancel</Button>
+                        <Button disabled={!modified} onClick={()=>setSaveChangesMessageBoxOpen(true)}>Cancel</Button>
                     </Box>
                 </Box>
             </Box>
             {saveChangesMessageBoxOpen && <BinaryChoiceMessageBox title="Save Changes" message={"Do you want to save your changes?"} 
-                                    onYes={()=>saveEntityDefinition(entityDefinition)} onNo={cancelEdits} />}
+                                    onYes={()=>saveEntityDefinition()} onNo={()=>{cancelEdits();setEntityDefinition(JSON.parse(JSON.stringify(selectedEntityDefinition)));}} />}
             {restorePropertyDialogOpen && <RestorePropertyDialog properties={entityDefinition.props} updatePropertiesFn={updateProperties} closeFn={()=>setRestorePropertyDialogOpen(false)}/>}
         </>
     );

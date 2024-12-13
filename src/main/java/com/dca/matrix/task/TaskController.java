@@ -40,7 +40,7 @@ public class TaskController
 	public ResponseEntity<ApiResponse<Task>> getTask(@PathVariable("id") Long id, HttpServletRequest request)
 	{
 		Task t = this.taskService.getTask(id);
-		return new ResponseEntity<>(ApiResponseUtil.success(t, "Retrieved task " + t.getId(), request.getRequestURI()), HttpStatus.OK);
+		return new ResponseEntity<>(ApiResponseUtil.success(t, "Retrieved task " + t.getId(), request), HttpStatus.OK);
 	}
 	
 //////////////////////////////////////////////////////////////////////
@@ -52,14 +52,14 @@ public class TaskController
 	public ResponseEntity<ApiResponse<Task>> storeTask(@RequestBody Task task, HttpServletRequest request)
 	{
 		Task t = this.taskService.createUpdateTask(task);
-		return new ResponseEntity<>(ApiResponseUtil.success(t, "Created task " + t.getId(), request.getRequestURI()),HttpStatus.OK);
+		return new ResponseEntity<>(ApiResponseUtil.success(t, "Created task " + t.getId(), request),HttpStatus.OK);
 	}
 
 	@PostMapping(path = "/search", consumes = "application/json")
 	@ResponseStatus(HttpStatus.OK)
 	public ResponseEntity<ApiResponse<Iterable<Task>>> queryTasks(@RequestBody TaskQueryParameters queryParameters, HttpServletRequest request)
 	{
-		ApiResponse<Iterable<Task>> response = ApiResponseUtil.success(this.taskService.searchTasks(queryParameters), "success", request.getRequestURI());
+		ApiResponse<Iterable<Task>> response = ApiResponseUtil.success(this.taskService.searchTasks(queryParameters), "success", request);
 		return new ResponseEntity<>(response, HttpStatus.OK);
 	}	
 	

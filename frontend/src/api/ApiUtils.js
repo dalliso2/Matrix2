@@ -1,10 +1,22 @@
-import { setMessageBoxData, setWaitMessage, removeWaitMessage, resetState } from "../state/AppSlice";
-import { api } from "../api/BaseApi";
+import { setMessageBoxData, setWaitMessage, removeWaitMessage, setAuthToken } from "../state/AppSlice";
 import { router } from "../router/MatrixRouter";
+
+function getTags(tagName, results)
+{
+    console.log("getTags");
+    console.log("tagName: ", tagName); 
+    console.log("results: ", results);
+    if (!results)
+        return [];
+
+    if (Array.isArray(results))
+        return results.map(({id})=>({type: tagName, id}));
+    else
+        return [{type: tagName, id: results.id}];
+}
 
 function handleQueryError(queryResults, dispatch, navigate, errorFn)
 {
-    //console.log(queryResults);
     if (!queryResults)
         return;
     if (queryResults.data?.api_error)
@@ -23,23 +35,17 @@ function handleQueryError(queryResults, dispatch, navigate, errorFn)
 
 function handleMutationResults(mutationResults, 
                                 dispatch, 
-                                // navigate,
-                                // waitForResults=false, 
-                                // waitMessage = "Please wait...", 
-                                // errorMsgBoxTitle = "Error ", 
                                 successFn=()=>{}, 
                                 failureFn=()=>{})
 {
-    // console.log("handleMutationResults");
-    // console.log(mutationResults);
     if (mutationResults.data?.api_error)
     {
         const errorList = (mutationResults.data.errors?.length)?("\n\n" + mutationResults.data.errors.join("\n")):"";
-        console.log(errorList);
         dispatch(setMessageBoxData( mutationResults.requestId, 
                                     "Error",
                                     mutationResults.data.message + errorList));
-        failureFn();
+        if (failureFn)
+            failureFn();
         mutationResults.reset();
     }
     else if (mutationResults.isSuccess && mutationResults.requestId)
@@ -50,72 +56,84 @@ function handleMutationResults(mutationResults,
     }
 }
 
-function handleQueryResultsWithWaitMessage(queryResults, dispatch, navigate, waitMessage = "Please wait...", successFn)
+// this method should be called with the useEffect hook with queryResults.isFetching as the dependency
+// waitMessage, successFn, and failurFn are optional
+function handleQueryResultsWithWaitMessage(queryResults, dispatch, waitMessage, successFn, failurFn)
 {
-    if (queryResults.error)
-    {
-        if (queryResults.error?.data?.api_error)
-        {
-            dispatch(   (queryResults.requestId, 
-                                        "Error",
-                                        queryResults.error.data.message + " " + 
-                                            queryResults.error.data?.errors.map(error=>"\n"+error.field+" - "+error.message).join("")));
-        }
-        else if (queryResults.error?.data?.error)
-        {
-            dispatch(setMessageBoxData(queryResults.requestId, queryResults.error.data.error, queryResults.error.data.message)); 
-        }
-        else if (queryResults.error?.status === 401)
-        {        
-            dispatch(api.util.resetApiState());
-            dispatch(resetState());
-            navigate("/login");
-        }
-        else
-        {
-            dispatch(setMessageBoxData(queryResults.requestId, "Unexpected Error", queryResults?.error?.data || "An unexpected error occurred"));
-        }
+    if (!queryResults)
+        return;
 
-        dispatch(removeWaitMessage(queryResults.requestId));
-    }
-    else if (queryResults.isLoading && queryResults.requestId)
-        dispatch(setWaitMessage(queryResults.requestId, waitMessage));
-    else if (queryResults.isSuccess && queryResults.requestId)
+    if (queryResults.isFetching && waitMessage)
     {
-        dispatch(removeWaitMessage(queryResults.requestId));
+        dispatch(setWaitMessage(waitMessage, waitMessage));
+        return;
+    }   
+    
+    if (waitMessage)
+        dispatch(removeWaitMessage(waitMessage));
+
+    // This method handles api errors, not http status code errors (400+)
+    // isSuccces should be true if the query was successful, even if there was an api error
+    if (!queryResults.isSuccess)
+        return ;
+
+    if (queryResults.data.api_error)
+    {
+        dispatch(setMessageBoxData (queryResults.requestId, 
+            "Error",
+            queryResults.data.message + 
+            (queryResults.data.errors?("\n" + queryResults.data.errors.map(error=>"\n" + error).join("")):"")
+        ));
+
+        if (failurFn)
+            failurFn();
+    }
+    else
+    {
         if (successFn)
             successFn();
     }
 }
 
-async function onQueryStartedHandler(queryFullfilledPromise, dispatch, mutatedObj, waitMessage)
+// this method handles HTTP errors (400+)
+const HTTP_ERROR = "HTTP_ERROR";
+async function onQueryStartedHandler(queryFullfilledPromise, dispatch, requestId, waitMessage, successFn, failFn)
 {
-    const messageId = JSON.stringify(mutatedObj);
     if (waitMessage)
-        dispatch(setWaitMessage(messageId, waitMessage));
+        dispatch(setWaitMessage(requestId, waitMessage));
 
     queryFullfilledPromise.then((response) => {
-        dispatch(removeWaitMessage(messageId));
+        dispatch(removeWaitMessage(requestId));
+        if (response.data.authToken)
+            dispatch(setAuthToken(response.data.authToken));
+        if (successFn)
+            successFn();
     })
     .catch((error) => {
-        dispatch(removeWaitMessage(messageId));
+        dispatch(removeWaitMessage(requestId));
+        if (failFn)
+            failFn();
         router.navigate("/login");
 
+        console.log(error);
         if (error.meta.response.status === 401)
-            dispatch(setMessageBoxData(messageId, "Session expired", "Your session expired.  Please login again."));
+            dispatch(setMessageBoxData(HTTP_ERROR, "Session expired", "Your session expired.  Please login again."));
+        else if (error.meta.response.status === 403)
+            dispatch(setMessageBoxData(HTTP_ERROR, "Access Denied", error.error.data.message));
         else
-            dispatch(setMessageBoxData(messageId, "Unexpected Error", error.meta.response.status + " - " + error.meta.response.statusText));
+            dispatch(setMessageBoxData(HTTP_ERROR, "Unexpected Error", error.meta.response.status + " - " + error.meta.response.statusText));
+    })
+    .finally(() => {
+        dispatch(removeWaitMessage(HTTP_ERROR));
     });
+    
 }
 
 function showApiErrorMessageBox(queryStatus, dispatch)
 {
-    //console.log("showApiErrorMessageBox");
     const error = queryStatus.error;
     if (error.data)
     {
-        // console.log(error);
-        // console.log(error.data.errors.length);
         if (error.data.api_error)
         {
             const message =  error.data.message
@@ -134,4 +152,9 @@ function showApiErrorMessageBox(queryStatus, dispatch)
 
 }
 
-export { handleQueryResultsWithWaitMessage, handleMutationResults, onQueryStartedHandler, handleQueryError, showApiErrorMessageBox };
+export {    getTags,
+            handleQueryResultsWithWaitMessage, 
+            handleMutationResults, 
+            onQueryStartedHandler, 
+            handleQueryError, 
+            showApiErrorMessageBox };

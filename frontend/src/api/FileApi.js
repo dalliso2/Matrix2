@@ -1,4 +1,5 @@
 import { api } from './BaseApi';
+import { onQueryStartedHandler } from './ApiUtils';
 
 const fileApi = api.injectEndpoints({
     entityTypes: ['file'],
@@ -9,20 +10,14 @@ const fileApi = api.injectEndpoints({
                 method: 'POST',
                 body: fileDataArray,
             }),
-            transformResponse: (response, meta, arg) => 
-            {
-                // if (!response.api_error)
-                //     store.dispatch(replaceSearchResult(response));
-                return response;
-            },
+            async onQueryStarted(fileDataArray, { dispatch, queryFulfilled, requestId }) {
+                onQueryStartedHandler(queryFulfilled, dispatch, requestId, "Saving file(s)..." );
+            }
         }),
         searchFilesNotLinkedToEntity: builder.query({
             query: (params) => ({ url:`/file/search_not_linked_to_entity?entity_id=${params.entityId}&search_string=${params.searchString}`, method: 'GET' }),
-            transformResponse: (response, meta, arg) => 
-            {
-                // if (!response.api_error)
-                //     store.dispatch(replaceSearchResult(response));
-                return response;
+            async onQueryStarted(fileDataArray, { dispatch, queryFulfilled, requestId }) {
+                onQueryStartedHandler(queryFulfilled, dispatch, requestId, );
             },
             providesTags: ['file'],
             keepUnusedDataFor: 300

@@ -56,7 +56,7 @@ public class AuthenticationController
 																						user);
 			responseEntity = new ResponseEntity<>(ApiResponseUtil.success(authResponse, 
 												"Authenticated user " + authRequest.username(), 
-												request.getRequestURI()),
+												request),
 												HttpStatus.OK);
 		}
 		else
@@ -64,7 +64,7 @@ public class AuthenticationController
 			responseEntity = new ResponseEntity<>(ApiResponseUtil.fail("Invalid credentials", 
 					new LinkedList<>(), 
 					ApiErrorCode.INVALID_CREDENTIALS, 
-					request.getRequestURI()), HttpStatus.UNAUTHORIZED);
+					request), HttpStatus.UNAUTHORIZED);
 		}
 		
 		return responseEntity;
@@ -80,7 +80,7 @@ public class AuthenticationController
 		
 		return new ResponseEntity<>(ApiResponseUtil.success(authResponse, 
 															"Authenticated user " + userDTO.username(), 
-															request.getRequestURI()),
+															request),
 															HttpStatus.OK);
 	}
 }

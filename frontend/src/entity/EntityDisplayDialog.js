@@ -4,12 +4,12 @@ import Button from "@mui/material/Button";
 import Entity from "../entity/Entity";
 import { useEffect } from "react";
 import { useGetEntityQuery } from "../api/EntityApi";
-import { handleQueryError } from "../api/ApiUtils";
 import { useGetAllEntityDefinitionsQuery } from "../api/EntityDefinitionApi";
 import { getTitle } from "../util/utils";
 import { useTheme } from "@mui/material/styles";
 import { useDispatch } from "react-redux";
 import { useNavigate } from "react-router-dom";
+import { handleQueryResultsWithWaitMessage } from "../api/ApiUtils";
 
 export default function EntityDisplayDialog({entityId, entityUpdatedCallback, onClose})
 {
@@ -17,18 +17,16 @@ export default function EntityDisplayDialog({entityId, entityUpdatedCallback, on
     const navigate = useNavigate();
     const dispatch = useDispatch();
 
-    const { data:entityDefsEnvelope, refetch, ...entityDefinitionQueryStatus } = useGetAllEntityDefinitionsQuery();
-    const entityDefinitions = entityDefsEnvelope?entityDefsEnvelope.payload:[];
-
-    const {currentData:envelope, refetch:refetchEntity, ...getEntityStatus} = useGetEntityQuery(entityId);
-    const entity = envelope?.payload;  
+    const { refetch, ...entityDefinitionQueryResults } = useGetAllEntityDefinitionsQuery();
+    const entityDefinitions = entityDefinitionQueryResults?.data?.payload;
+ 
+    const { refetch:refetchEntity, ...getEntityResults} = useGetEntityQuery(entityId);
+    const entity = getEntityResults?.data?.payload; 
 
     useEffect(() => {
-        if (getEntityStatus.isError) 
-            handleQueryError(getEntityStatus, dispatch, navigate);
-        if (entityDefinitionQueryStatus.isError) 
-            handleQueryError(entityDefinitionQueryStatus, dispatch, navigate);
-    }, [getEntityStatus.isError,entityDefinitionQueryStatus.isError]);
+        handleQueryResultsWithWaitMessage(entityDefinitionQueryResults, dispatch);
+        handleQueryResultsWithWaitMessage(getEntityResults, dispatch);
+    }, [entityDefinitionQueryResults.isFetching, getEntityResults.isFetching]);
 
     return (
         <Dialog open={true} onClose={()=>{}}>

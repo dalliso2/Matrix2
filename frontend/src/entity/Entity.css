@@ -27,6 +27,18 @@
     color:grey; */
   }
 
+  .label-profile-image-small
+{
+    max-height: 150px;
+    max-width: 150px;
+    /* border-width: 2px;
+    border-radius: 1rem;
+    border-style: groove;
+    border-color: grey;
+    background-color: white;
+    color:grey; */
+  }
+
   .entity-array-image-container
   {
     display: flex;

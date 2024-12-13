@@ -35,7 +35,7 @@ public class EntityDefinitionController
 	{
 		return new ResponseEntity<>(ApiResponseUtil.success(this.entityDefinitionService.getAll(), 
 															"Entity definition list",
-															request.getRequestURI()), 
+															request), 
 															HttpStatus.OK);
 	}	
 	
@@ -45,7 +45,7 @@ public class EntityDefinitionController
 	{
 		return new ResponseEntity<>(ApiResponseUtil.success(this.entityDefinitionService.createUpdateEntityDefinition(entityDefinition), 
 									"Created entity definition.",
-									request.getRequestURI()), 
+									request), 
 									HttpStatus.OK);
 	}
 }

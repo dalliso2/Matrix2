@@ -29,7 +29,7 @@ export default function AddEditCaseDialog({caseObj, closeFn})
     const [caseData, setCaseData] = useState(caseObj);
 
     const [storeCase, mutationState] = useStoreCaseMutation();
-    handleMutationResults(mutationState, dispatch, navigate, true, "Updating case...", "Error Updating Case", ()=>closeFn());
+    handleMutationResults(mutationState, dispatch, ()=>closeFn());
 
     async function onSave()
     {

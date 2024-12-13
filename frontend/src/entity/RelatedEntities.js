@@ -1,13 +1,10 @@
 import React from "react";
-// import { apiGetChildren, apiUnlinkEntities } from "../api/entity";
 import { useDispatch } from "react-redux";
-// import { addEntityTab, selectReRender, setReRender } from "../state/EntityTabsSlice";
 import { useTheme } from "@mui/material";
 import Grid from '../util/Grid';
-//import { getListComponent } from "../util/DisplayComponentFactory";
 import Box from "@mui/material/Box";
 import { useGetRelatedEntitiesQuery } from "../api/EntityApi";
-import { handleQueryError } from "../api/ApiUtils";
+import { handleQueryResultsWithWaitMessage } from "../api/ApiUtils";
 import { IconButton } from "@mui/material";
 import LinkOffTwoToneIcon from '@mui/icons-material/LinkOffTwoTone';
 import { getEntityDefinitionColumnHeadings } from "../util/utils";
@@ -43,8 +40,8 @@ export default function RelatedEntities({unlink=true, entityDefinitions, entityI
     //
     // retrieve the entity from store/server
     //
-    const {data:envelope, refetch:refetchEntity, ...getEntityStatus} = useGetEntityQuery(entityId);
-    const entity = envelope?.payload;   
+    const { refetch:refetchEntity, ...getEntityResults} = useGetEntityQuery(entityId);
+    const entity = getEntityResults?.data?.payload;   
 
     //
     // code to retrieve related entities
@@ -53,11 +50,9 @@ export default function RelatedEntities({unlink=true, entityDefinitions, entityI
     const relatedEntities = relatedEntitiesQueryResults?.currentData?.payload || [];
 
     useEffect(() => {
-        if (getEntityStatus.isError) 
-            handleQueryError(getEntityStatus, dispatch, navigate);
-        if (relatedEntitiesQueryResults.isError)
-            handleQueryError(relatedEntitiesQueryResults, dispatch, navigate);
-    }, [getEntityStatus.isError,relatedEntitiesQueryResults.isError]);
+        handleQueryResultsWithWaitMessage(relatedEntitiesQueryResults, dispatch);
+        handleQueryResultsWithWaitMessage(getEntityResults, dispatch);
+    }, [getEntityResults.isFetching,relatedEntitiesQueryResults.isFetching]);
 
     const entityObjName = getTitle(entityDefinitions, entity);
     const entityToLinkName = linkDialogRelatedEntity && getTitle(entityDefinitions, linkDialogRelatedEntity.child);
@@ -65,14 +60,16 @@ export default function RelatedEntities({unlink=true, entityDefinitions, entityI
     //
     // code to link entities
     //
-    const [linkEntities, linkEntitiesMutationStatus] = useLinkEntitiesMutation();
-    handleMutationResults(linkEntitiesMutationStatus, dispatch, navigate, false, "Linking entities...",
-        "Error creating link between entities", 
+    const [linkEntities, linkEntitiesMutationResults] = useLinkEntitiesMutation();
+    handleMutationResults(linkEntitiesMutationResults, dispatch, 
         ()=> enqueueSnackbar("Successfully linked " 
                                 + entityObjName 
                                 + " and " 
-                                + linkEntitiesMutationStatus.originalArgs.entityToLinkName, {variant:'success'}),
-        ()=>{});
+                                + linkEntitiesMutationResults.originalArgs.entityToLinkName, {variant:'success'}),
+        ()=>enqueueSnackbar("Unable to link " 
+            + entityObjName 
+            + " and " 
+            + linkEntitiesMutationResults.originalArgs.entityToLinkName, {variant:'error'}));
 
     function createEntityLink(parentChildRelationshipDescription,childParentRelationshipDescription)
     {
@@ -91,9 +88,9 @@ export default function RelatedEntities({unlink=true, entityDefinitions, entityI
     const undoRemove = (snackbarId)=>(
         <Button onClick={()=>{
                                 linkEntities({parentId:entity?.id, 
-                                            childId:deleteEntityLinkMutationState.originalArgs.child.id, 
-                                            parentChildRelationshipDescription:deleteEntityLinkMutationState.originalArgs.parentToChildDescription, 
-                                            childParentRelationshipDescription:deleteEntityLinkMutationState.originalArgs.childToParentDescription,
+                                            childId:deleteEntityLinkMutationResults.originalArgs.child.id, 
+                                            parentChildRelationshipDescription:deleteEntityLinkMutationResults.originalArgs.parentToChildDescription, 
+                                            childParentRelationshipDescription:deleteEntityLinkMutationResults.originalArgs.childToParentDescription,
                                             entityToLinkName});
                                 closeSnackbar(snackbarId);            
                             }}>Undo</Button>
@@ -102,17 +99,16 @@ export default function RelatedEntities({unlink=true, entityDefinitions, entityI
     // 
     // code to unlink entities
     //
-    const [deleteEntityLink, deleteEntityLinkMutationState] = useUnlinkEntitiesMutation();
-    handleMutationResults(deleteEntityLinkMutationState, 
-                            dispatch, 
-                            navigate,
-                            false, 
-                            "Removing link...", 
-                            "Error removing link",
+    const [deleteEntityLink, deleteEntityLinkMutationResults] = useUnlinkEntitiesMutation();
+    handleMutationResults(deleteEntityLinkMutationResults, dispatch, 
                             ()=>{
-                                enqueueSnackbar( "Removed link to " + getTitle(entityDefinitions,deleteEntityLinkMutationState.data.payload.child), 
+                                enqueueSnackbar( "Removed link to " + getTitle(entityDefinitions,deleteEntityLinkMutationResults.data.payload.child), 
                                 {variant:'success', action:undoRemove});
-                            }
+                            },
+                            ()=>{
+                                enqueueSnackbar( "Unable to remove link to " + getTitle(entityDefinitions,deleteEntityLinkMutationResults.data.payload.child), 
+                                {variant:'error'});
+                            },
                         );
                         
     function unlinkEntity(event, relationship)

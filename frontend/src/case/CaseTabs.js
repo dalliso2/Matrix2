@@ -1,6 +1,5 @@
 import React, { useEffect } from "react";
 import { useDispatch } from "react-redux";
-import { useLocation } from "react-router-dom";
 import { useGetUserCaseListQuery } from "../api/CaseApi";
 import TabbedContentArea from "../util/TabbedContentArea";
 import TabWrapper from "../util/TabWrapper";
@@ -14,7 +13,7 @@ import UserCaseList from "./UserCaseList";
 import CaseTabContent from "./CaseTabContent";
 import { useSelector } from "react-redux";
 import { addCaseTab, selectCurrentCaseTabIndex, setCurrentCaseTab, removeCaseTab, selectCaseTabCaseIds } from "../state/AppSlice";
-import { setMessageBoxData } from "../state/AppSlice";
+import { handleQueryResultsWithWaitMessage } from "../api/ApiUtils";
 
 function a11yProps(index) 
 {
@@ -27,16 +26,13 @@ function a11yProps(index)
 export default function CaseTabs()
 {
     const dispatch = useDispatch();
-    const location = useLocation();
- 
-    const currentTabIndex = useSelector(selectCurrentCaseTabIndex);
-    const { data:envelope, refetch, isFetching, isError, isSuccess } = useGetUserCaseListQuery();
 
-    const caseList = envelope?.payload;
-    useEffect(() => { 
-        if (isError) 
-            dispatch(setMessageBoxData("CaseTabs", "Error", "An error occurred while retrieving case list")); 
-    }, [isError]);
+    const currentTabIndex = useSelector(selectCurrentCaseTabIndex);
+    const { refetch, ...getUserCaseListResult } = useGetUserCaseListQuery();
+    const caseList = getUserCaseListResult?.data?.payload;
+    useEffect(() => {
+        handleQueryResultsWithWaitMessage(getUserCaseListResult, dispatch);
+    }, [getUserCaseListResult?.isFetching]);
 
     function addTab(caseInfo)
     {

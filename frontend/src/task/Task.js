@@ -11,27 +11,22 @@ import { useSelector } from "react-redux";
 import { selectActiveCase } from "../state/AppSlice";
 import LoadingSkeleton from "../util/LoadingSkeleton";
 import { handleQueryResultsWithWaitMessage } from "../api/ApiUtils";
-import { handleQueryError } from "../api/ApiUtils";
 import { useEffect } from "react";
 import TaskEntities from "./TaskEntities";
 import Paper from "@mui/material/Paper";
 import { Table, TableBody, TableCell, TableRow, Typography } from "@mui/material";
 import { api } from "../api/BaseApi";
-import { useTheme } from "@mui/material/styles";
 import TaskFiles from "./TaskFiles";
 import RefreshIcon from '@mui/icons-material/Refresh';
-import { useNavigate } from "react-router-dom";
 
 export const TaskStatus = ["NOT_STARTED", "IN_PROGRESS", "COMPLETED", "CLOSED", "DISCONTINUED"];
 
 const dateFormat = 'M/D/YYYY HH:mm';
-export const tableCellStyle = {display: 'table-cell', border:'none', p:0, verticalAlign:'top',};
+export const tableCellStyle = {display: 'table-cell', border:'none', p:0, verticalAlign:'top', whiteSpace:'normal', wordWrap:'break-word', overflowWrap:'break-word',};
 export const tableCellBoldStyle ={...tableCellStyle, fontWeight:'bold', p:0, pr:1, verticalAlign:'top',};
 
 export default function Task({taskId}) 
 {
-    const theme = useTheme();
-    const navigate = useNavigate();
     const dispatch = useDispatch();
     const [editTaskData, setEditTaskData] = useState();
 
@@ -40,15 +35,17 @@ export default function Task({taskId})
     //
     // load case users
     //
-    const { data:currentCaseUsers, ...currentCaseUsersQueryStatus } = useGetCaseUsersQuery(activeCase.id);
-    handleQueryResultsWithWaitMessage(currentCaseUsersQueryStatus, dispatch, navigate, "Loading case users...", ()=>{});
+    const currentCaseUsersQueryResults = useGetCaseUsersQuery(activeCase.id);
+    const currentCaseUsers = currentCaseUsersQueryResults?.data?.payload;   
+    useEffect(() => {
+        handleQueryResultsWithWaitMessage(currentCaseUsersQueryResults, dispatch);
+    }, [currentCaseUsersQueryResults?.isFetching]);
 
-    const { refetch:refetchTaskData, data:taskEnvelope, ...getTaskQueryStatus } = useGetTaskQuery(taskId);
-    const task = taskEnvelope?.payload;
+    const { refetch:refetchTaskData, ...getTaskQueryResults } = useGetTaskQuery(taskId);
+    const task = getTaskQueryResults?.data?.payload;
     useEffect(() => {  
-        if (getTaskQueryStatus.isError)
-            handleQueryError(getTaskQueryStatus, dispatch, navigate);
-    } ,[getTaskQueryStatus.isError]);
+        handleQueryResultsWithWaitMessage(getTaskQueryResults, dispatch);
+    } ,[getTaskQueryResults.isFetching]);
 
     function optimisticTaskUpdate(taskData)
     {
@@ -76,14 +73,16 @@ export default function Task({taskId})
                     <Box sx={{p:0,m:1}}>
                     <Paper>
                         <Box sx={{display:'flex',justifyContent:'flex-end',}}>
-                            <IconButton onClick={() => refetchTaskData()}><RefreshIcon/></IconButton>
-                            <IconButton onClick={()=>setEditTaskData({...task})}>
+                            <IconButton disabled={getTaskQueryResults.isFetching} onClick={() => refetchTaskData()}><RefreshIcon/></IconButton>
+                            <IconButton disabled={getTaskQueryResults.isFetching} onClick={()=>setEditTaskData({...task})}>
                                 <EditTwoToneIcon/>
                             </IconButton>
                         </Box>
-                        {task?
-                        (
-                        <>
+                        {getTaskQueryResults.isFetching?(
+                            <Box sx={{height:'320px', width:'100%', display:'flex', justifyContent:'center', alignItems:'center'}}>
+                                <LoadingSkeleton/>
+                            </Box>):
+                        (<>
                             <Box sx={{display:'flex', gap:'3px', justifyContent:'space-around'}}>
                                 <Box sx={{ width:'100%', display:'flex'}}>
                                     <Table>
@@ -130,8 +129,8 @@ export default function Task({taskId})
                                     <Typography>{task.coverageDescription}</Typography>
                                 </Box>
                             </Box>
-                        </>
-                        ):(<LoadingSkeleton/>)}
+                        </>)
+                    }
                     </Paper>
                     <Paper>
                         <Box sx={{ display:'flex', flexDirection:'column', justifyContent:'space-around',m:2, mb:0}}>

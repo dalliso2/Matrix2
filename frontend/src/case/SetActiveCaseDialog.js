@@ -6,13 +6,16 @@ import DialogContent from "@mui/material/DialogContent";
 import DialogActions from "@mui/material/DialogActions";
 import Button from "@mui/material/Button";
 import Box from "@mui/material/Box";
-import { List, ListItemButton, ListItemText, ListItem } from "@mui/material";
 import { useSelector } from "react-redux";
-import { selectActiveCase, setActiveCase } from "../state/AppSlice";
+import { selectActiveCase } from "../state/AppSlice";
 import { useDispatch } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import { useGetUserCaseListQuery } from "../api/CaseApi";
 import { handleQueryResultsWithWaitMessage } from "../api/ApiUtils";
+import { useEffect } from "react";
+import LoadingSkeleton from "../util/LoadingSkeleton";
+import CaseGrid from "./CaseGrid";
+import { setActiveCase } from "../state/AppSlice";
 
 export default function SetActiveCaseDialog()
 {
@@ -23,53 +26,43 @@ export default function SetActiveCaseDialog()
     const activeCase = useSelector(selectActiveCase);   
     const [selectedCase, setSelectedCase] = useState(null);
 
-    const { data:envelope, ...userCaseListQueryStatus } = useGetUserCaseListQuery();
-    console.log(userCaseListQueryStatus);
-    handleQueryResultsWithWaitMessage(userCaseListQueryStatus, dispatch, navigate, "Loading cases...");
-    const caseList = envelope?.payload;
+    const userCaseListQueryResults = useGetUserCaseListQuery();
+    useEffect(() => {
+        handleQueryResultsWithWaitMessage(userCaseListQueryResults, dispatch);
+    }, [userCaseListQueryResults.isFetching]);
+    const caseList = userCaseListQueryResults?.data?.payload;
 
     return (
-        <>
-        { userCaseListQueryStatus.isSuccess?
-            <>
-            <Dialog open={!caseList?.length}>
+        <Dialog open={!activeCase} fullWidth={true} maxWidth={'sm'} sx={{'& .MuiDialogContent-root': {paddingTop:'24px'}}}>
+        {    
+            (caseList && !caseList.length)?
+            (
+                <>
                 <DialogTitle sx={{backgroundColor:theme.palette.primary.main, color:theme.palette.primary.contrastText }}>No Cases Available</DialogTitle>
                 <DialogContent>
-                    <Box>There are no cases available.  Click OK to be taken to the case management screen.</Box>
+                    <p>There are no cases available.  Click OK to be taken to the case management screen where you can create a new case.</p>
                 </DialogContent>
                 <DialogActions>
                     <Button onClick={()=>navigate("/cases")}>Ok</Button>
                 </DialogActions>
-            </Dialog>
-            <Dialog open={!activeCase && !!caseList?.length} onClose={()=>{}}>
-            <DialogTitle sx={{backgroundColor:theme.palette.primary.main, color:theme.palette.primary.contrastText }}>Set Active Case</DialogTitle>
-            <DialogContent sx={{'& .MuiDialogContent-root':{pt:24}}}>
-            <List >
-                {
-                    caseList && caseList.map((aCase, index) =>
-                    (
-                        <ListItem key={index} disablePadding>
-                            <ListItemButton key={index} selected={selectedCase?.id == aCase.id} onClick = {(event) => setSelectedCase({...aCase})}>
-                                <ListItemText>
-                                    <Box sx={{display:'flex'}}>
-                                        <Box sx={{width:'200px'}}>{aCase.caseNumber}</Box>
-                                        <Box sx={{whiteSpace:'pre-wrap',width:'300px'}}>{aCase.title}</Box>    
-                                    </Box>
-                                </ListItemText>
-                            </ListItemButton>
-                        </ListItem>
-                    ))
-                }
-            </List>
-            </DialogContent>
-            <DialogActions>
-                <Button disabled={!selectedCase} onClick={()=>dispatch(setActiveCase({...selectedCase}))}>Ok</Button>
-            </DialogActions>
-            </Dialog>
-            </>
+                </>
+            )
             :
-            undefined
+            (
+                <>
+                <DialogTitle sx={{backgroundColor:theme.palette.primary.main, color:theme.palette.primary.contrastText }}>Set Active Case</DialogTitle>
+                <DialogContent sx={{ display:'flex', maxHeight:'400px', overflow:'hidden',}}>
+                    <Box sx={{display:'flex', flexDirection:'column', flexGrow:1, overflow:'hidden', mt:3}}>
+                    {
+                        caseList?
+                        <CaseGrid cases={caseList} rowClickFn={(id)=> dispatch(setActiveCase(caseList.find(theCase=>theCase.id === id))) } isFetching={userCaseListQueryResults.isFetching} />
+                        :<Box sx={{overflow:'hidden', height:'200px'}}><LoadingSkeleton/></Box>
+                    }
+                    </Box>
+                </DialogContent>
+                </>
+            )
         }
-        </>
+        </Dialog>
     );
 }

@@ -21,9 +21,8 @@ import { useGetAllEntityDefinitionsQuery } from "../api/EntityDefinitionApi";
 import { setCurrentEntityTab, selectCurrentEntityTabIndex } from "../state/AppSlice";
 import { removeEntityTab } from "../state/AppSlice";
 import { useEffect } from "react";
-import { handleQueryError } from "../api/ApiUtils";
 import LoadingSkeleton from "../util/LoadingSkeleton";
-import { useNavigate } from "react-router-dom";
+import { handleQueryResultsWithWaitMessage } from "../api/ApiUtils";
 
 function a11yProps(index)  
 {
@@ -33,30 +32,20 @@ function a11yProps(index)
     };
   }
 
-// function getTabTitle(entityObj, entityDefinitions) 
-// {
-//     //property ids of field that should be displayed in the tab title
-//     const titlePropIds = entityDefinitions.find(def=>def.id === entityObj.entityDefinition).props.filter(prop=>prop.includeInTitle).map(prop=>prop.id);
-//     return entityObj.propertyValues.filter(propVal=>titlePropIds.includes(propVal.propertyDefinition)).map(propVal=>propVal.value).join(", ");
-// }
-
 export default function EntityTabs()
 {
     const dispatch = useDispatch();
-    const navigate = useNavigate();
     const [showAddEditEntityDialog, setShowAddEditEntityDialog] = React.useState(false);
-
-    const { data:envelope, refetch, ...entityDefinitionQueryStatus } = useGetAllEntityDefinitionsQuery();
-    const entityDefinitions = envelope?envelope.payload:[];
-    useEffect(() => {
-        if (entityDefinitionQueryStatus.isError) 
-            handleQueryError(entityDefinitionQueryStatus, dispatch, navigate);
-    }, [entityDefinitionQueryStatus.isError]);
 
     const tabEntityData = useSelector(selectEntityTabData); 
     const currentTabIndex = useSelector(selectCurrentEntityTabIndex);
 
-    // tabCaseObjs format - caseNumber, description, id, role, title
+    const { refetch, ...entityDefinitionQueryResults } = useGetAllEntityDefinitionsQuery();
+    const entityDefinitions = entityDefinitionQueryResults?.data?.payload;
+    useEffect(() => {
+        handleQueryResultsWithWaitMessage(entityDefinitionQueryResults, dispatch);
+    }, [entityDefinitionQueryResults.isFetching]);
+
     const tabData = [{title:"Search"}].concat(tabEntityData);
     
     return (
@@ -79,9 +68,7 @@ export default function EntityTabs()
                     {
                         index > 0 &&
                         <IconButton color="inherit" size="small" 
-                                    onClick={(event)=>{
-                                        dispatch(removeEntityTab(tabInfo.entityId))
-                                        event.stopPropagation()}} 
+                                    onClick={(event)=>{event.stopPropagation();dispatch(removeEntityTab(tabInfo.entityId))}} 
                                     onMouseDown={event=>event.stopPropagation()}
                                     sx={{p:0}}>
                             <CloseTwoTone color='inherit' fontSize='small'/>
@@ -99,13 +86,13 @@ export default function EntityTabs()
                 <Content sx={{width:'100%', display:'flex', alignItems:'stretch'}}>                
                     {
                         currentTabIndex === 0?<EntitySearch/>
-                            :entityDefinitionQueryStatus.isFetching?<LoadingSkeleton/>:<EntityTabContent entityId={tabData[currentTabIndex].entityId} />
+                            :entityDefinitionQueryResults.isFetching?<LoadingSkeleton/>:<EntityTabContent entityId={tabData[currentTabIndex].entityId} />
                     }
                 </Content>
             }
         </ContentWrapper> 
         {
-            entityDefinitionQueryStatus.isFetching || entityDefinitionQueryStatus.isError?undefined:
+            entityDefinitionQueryResults.isFetching || entityDefinitionQueryResults.isError?undefined:
             <Fab color="primary" aria-label="add" disabled={false}
                 onClick={()=>{setShowAddEditEntityDialog(true)}} sx={{ position: 'fixed', bottom: 16, left: 90 }}>
                 <AddIcon />

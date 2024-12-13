@@ -32,11 +32,15 @@ export default function AddEditTaskDialog({successFn, closeFn, taskDataProps})
     const [render, setRender] = useState(false);
     const activeCase = useSelector(selectActiveCase);
 
-    const { data:currentCaseUsers, ...currentCaseUsersQueryStatus } = useGetCaseUsersQuery(activeCase.id);
-    handleQueryResultsWithWaitMessage(currentCaseUsersQueryStatus, dispatch, navigate, "Loading case users...", ()=>{});
+    const currentCaseUsersQueryResults = useGetCaseUsersQuery(activeCase.id);
+    const currentCaseUsers = currentCaseUsersQueryResults?.data?.payload;
+    useEffect(() => {
+        handleQueryResultsWithWaitMessage(currentCaseUsersQueryResults, dispatch);
+    }, [currentCaseUsersQueryResults?.isFetching]);
 
     const [storeTask, mutationState] = useStoreTaskMutation();
-    handleMutationResults(mutationState, dispatch, navigate, true, "Saving task...", "Error saving task", ()=>successFn(mutationState.data.payload), ()=>{});
+    handleMutationResults(mutationState, dispatch, 
+        ()=>successFn(mutationState.data.payload), ()=>{});
 
     useEffect(() =>
     {

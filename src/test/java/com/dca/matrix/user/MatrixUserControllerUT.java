@@ -23,6 +23,7 @@ import org.springframework.http.MediaType;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.web.servlet.MockMvc;
 
+import com.dca.matrix.authentication.AuthenticationService;
 import com.dca.matrix.security.SecurityConfig;
 import com.fasterxml.jackson.databind.ObjectMapper;
 

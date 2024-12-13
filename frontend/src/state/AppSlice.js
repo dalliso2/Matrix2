@@ -28,7 +28,7 @@ const initialState =
     waitMessages: [],
     sysAdminTab: 0,
     // current user state
-    darkTheme: false,
+    //darkTheme: false,
     // case tabs
     caseTabCaseIds: [],
     currentCaseTabIndex: 0,
@@ -80,7 +80,7 @@ const appSlice = createSlice({
             reducer(state, action)
             {
                 state.currentUser = action.payload;
-                state.darkTheme = action.payload.darkTheme;
+                //state.darkTheme = action.payload.darkTheme;
             },
         },
         setSystemInErrorState:
@@ -150,10 +150,10 @@ const appSlice = createSlice({
         {
             state.sysAdminTab = action.payload;
         },
-        setStateDarkTheme: (state, action) =>
-        {
-            state.darkTheme = action.payload;
-        },
+        // setStateDarkTheme: (state, action) =>
+        // {
+        //     state.darkTheme = action.payload;
+        // },
         addCaseTab:
         {
             // payload is the case id
@@ -471,7 +471,7 @@ export const selectAuthToken = state => state.app.authToken;
 export const selectCurrentUser = state => state.app.currentUser;    
 export const selectSystemInErrorState = state => state.app.systemInErrorState;
 export const selectMessageBoxData = state => state.app.messageBoxData.values().next().value;
-export const selectDarkTheme = state => state.app.darkTheme;    
+//export const selectDarkTheme = state => state.app.darkTheme;    
 export const selectCurrentSysAdminTab = state => state.app.sysAdminTab;
 export const selectCaseTabCaseIds = state => state.app.caseTabCaseIds;
 export const selectCurrentCaseTabIndex = state => state.app.currentCaseTabIndex;
@@ -517,7 +517,7 @@ export const {
                 setMessageBoxData, 
                 removeMessageBoxData,
                 clearAllMessages,
-                setStateDarkTheme,
+                //setStateDarkTheme,
                 setSysAdminTab,
                 addCaseTab,
                 setCurrentCaseTab,

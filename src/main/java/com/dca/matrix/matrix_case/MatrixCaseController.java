@@ -21,6 +21,11 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.dca.matrix.api.ApiResponse;
+import com.dca.matrix.api.ApiResponseUtil;
+import com.dca.matrix.user.UserCaseRecord;
+
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
 
@@ -48,8 +53,13 @@ public class MatrixCaseController
 	
 	@GetMapping(path = "/users/{case_id}")
 	@ResponseStatus(HttpStatus.OK)
-	public List<CaseUserRecord> getCaseUsers(@PathVariable("case_id") Long caseId)
+	public ResponseEntity<ApiResponse<List<CaseUserRecord>>> getCaseUsers(@PathVariable("case_id") Long caseId, HttpServletRequest request)
 	{
-		return this.matrixCaseService.getUserList(caseId);
+		List<CaseUserRecord> ucrs = this.matrixCaseService.getUserList(caseId);
+		
+		return new ResponseEntity<>(ApiResponseUtil.success(ucrs, 
+															ucrs.size() + " users found for case " + caseId, 
+															request),
+															HttpStatus.OK);
 	}
 }

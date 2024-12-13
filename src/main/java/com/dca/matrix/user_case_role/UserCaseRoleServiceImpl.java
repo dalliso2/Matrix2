@@ -6,10 +6,10 @@ import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
 import com.dca.matrix.api.ApiErrorCode;
+import com.dca.matrix.authentication.AuthenticationService;
 import com.dca.matrix.exception.MatrixUncheckedException;
 import com.dca.matrix.matrix_case.MatrixCase;
 import com.dca.matrix.matrix_case.MatrixCaseRepository;
-import com.dca.matrix.user.AuthenticationService;
 import com.dca.matrix.user.MatrixUser;
 import com.dca.matrix.user.MatrixUserRepository;
 
@@ -30,6 +30,9 @@ public class UserCaseRoleServiceImpl implements UserCaseRoleService
 	@Transactional
 	public UserCaseRole storeUserCaseRole(UserCaseRoleMessage ucrMessage)
 	{		
+//		throw new MatrixUncheckedException("Case " + ucrMessage.caseId() + " not found.",
+//				null, ApiErrorCode.CASE_DOES_NOT_EXIST);
+				
 		// load case
 		MatrixCase mCase = this.matrixCaseRepository.findById(ucrMessage.caseId())
 				.orElseThrow(()-> new MatrixUncheckedException("Case " + ucrMessage.caseId() + " not found.",
@@ -37,18 +40,14 @@ public class UserCaseRoleServiceImpl implements UserCaseRoleService
 		
 		// ensure current user is a system admin or a case owner
 		MatrixUser currentUser = this.authenticationService.getCurrentUser();
-		if (!currentUser.isCaseOwner(mCase))
-					throw new MatrixUncheckedException("User " + currentUser.getUsername() 
-															+ " is not authorized to edit case " 
-															+ ucrMessage.caseId(),
-															null, ApiErrorCode.NOT_AUTHORIZED);
+		currentUser.isCaseAdmin(mCase);
 		
 		UserCaseRole ucr = null;
 		Optional<UserCaseRole> existingUcrOpt = this.ucrRepository.findById(new UserCaseKey(ucrMessage.userId(), ucrMessage.caseId()));
 		if (existingUcrOpt.isPresent())
 		{
 			ucr = existingUcrOpt.get();
-			ucr.setCaseRole(ucrMessage.role());
+			ucr.setCaseRole(ucrMessage.roleId());
 		}
 		else
 		{
@@ -56,7 +55,7 @@ public class UserCaseRoleServiceImpl implements UserCaseRoleService
 									.orElseThrow(()-> new MatrixUncheckedException("User " + ucrMessage.userId() + " not found.",
 																					null, ApiErrorCode.USER_DOES_NOT_EXIST));
 
-			ucr = new UserCaseRole(mUser, mCase, ucrMessage.role());
+			ucr = new UserCaseRole(mUser, mCase, ucrMessage.roleId());
 		}
 		return this.ucrRepository.save(ucr);
 	}
@@ -72,9 +71,7 @@ public class UserCaseRoleServiceImpl implements UserCaseRoleService
 		
 		// ensure current user is a system admin or a case owner
 		MatrixUser currentUser = this.authenticationService.getCurrentUser();
-		if (!currentUser.isCaseOwner(mCase))
-			throw new MatrixUncheckedException("User " + currentUser.getUsername() + " is not authorized to edit case " 
-												+ ucrMessage.caseId(),null, ApiErrorCode.NOT_AUTHORIZED);
+		currentUser.isCaseAdmin(mCase);
 
 
 		Optional<UserCaseRole> existingUcrOpt = this.ucrRepository.findById(new UserCaseKey(ucrMessage.userId(), ucrMessage.caseId()));

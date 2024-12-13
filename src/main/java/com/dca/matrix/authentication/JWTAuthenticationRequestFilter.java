@@ -28,7 +28,10 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 public class JWTAuthenticationRequestFilter extends OncePerRequestFilter
 {	
+	public static String BEARER_TOKEN_KEY = "com.dca.matrix.bearer_token_key";
+	
 	private final AuthenticationManager authenticationManager;
+	private final JWTTokenService tokenService;
 	
 	@Override
 	protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
@@ -38,8 +41,13 @@ public class JWTAuthenticationRequestFilter extends OncePerRequestFilter
 
 		if (!Strings.isBlank(authHeader) && authHeader.startsWith("Bearer "))
 		{
-			Authentication auth = this.authenticationManager.authenticate(new JWTAuthenticationToken(authHeader.substring(7)));
+			String token = authHeader.substring(7);
+			Authentication auth = this.authenticationManager.authenticate(new JWTAuthenticationToken(token));
 			SecurityContextHolder.getContext().setAuthentication(auth);
+			if (this.tokenService.expiresWithinMinutes(token, 10))
+			{
+				request.setAttribute(BEARER_TOKEN_KEY, this.tokenService.generateToken(auth.getName()));
+			}
 		} 
 		
 		filterChain.doFilter(request, response);

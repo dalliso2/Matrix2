@@ -1,100 +1,99 @@
 import { api } from './BaseApi';
+import { getTags, onQueryStartedHandler } from './ApiUtils';
 
-const taskApi = api.enhanceEndpoints({addTagTypes:['Task','TaskUnlinkedEntity']}).injectEndpoints({
+const taskApi = api.enhanceEndpoints({addTagTypes:['Task','TaskEntity', 'TaskFile']}).injectEndpoints({
     endpoints: (builder) => ({
         searchTasks: builder.query({
             query: (body) => ({url:`/task/search`, method: 'POST', body}),
-            transformResponse: (response, meta, arg) => 
-            {
-                return response || [];
+            async onQueryStarted(body, { dispatch, queryFulfilled, requestId }) {
+                onQueryStartedHandler(queryFulfilled, dispatch, requestId, );
             },
-            providesTags: (result, error, filter) => Array.isArray(result)?[...result.map(({id}) => ({type: 'Task', id}))]:[],
+            providesTags: (result, error, filter) => getTags('Task', result),
             keepUnusedDataFor: 300
         }),
         getTask: builder.query({
             query: (id) => ({url:`/task/${id}`}),
-            transformResponse: (response, meta, arg) => 
-            {
-                return response;
+            async onQueryStarted(id, { dispatch, queryFulfilled, requestId }) {
+                onQueryStartedHandler(queryFulfilled, dispatch, requestId, );
             },
-            providesTags: (result, error, id) => [{type: 'Task', id:result.id}],
+            providesTags: (result, error, id) => getTags('Task', result),
             keepUnusedDataFor: 300
         }),
         storeTask: builder.mutation({
-            query: (data) => ({url: '/task/store', method: 'POST', body: data}),
-            invalidatesTags: (result, error, data) => [{type: 'Task', id:result.id}],
-            //invalidatesTags: (result, error, data) => [{type: 'Task', id:result.id}],
+            query: (task) => ({url: '/task/store', method: 'POST', body: task}),
+            async onQueryStarted(data, { dispatch, queryFulfilled, requestId }) {
+                onQueryStartedHandler(queryFulfilled, dispatch, requestId, "Saving task..." );
+            },
+            invalidatesTags: (result, error, task) => getTags('Task', result),
         }),
         getEntitiesForTask: builder.query({
             query: (taskId) => ({url:`/task_entity/all_for_task/${taskId}`}),
-            transformResponse: (response, meta, arg) => 
-            {
-                return response;
+            async onQueryStarted(data, { dispatch, queryFulfilled, requestId }) {
+                onQueryStartedHandler(queryFulfilled, dispatch, requestId, );
             },
-            providesTags: (result, error, taskId) => [{type: 'TaskEntities', id:taskId}].concat(
-                                result.payload.map(taskEntity=>({type:'TaskEntity', id:taskEntity.id}))),
+            providesTags: (result, error, taskId) => getTags('TaskEntity', result),
+            keepUnusedDataFor: 300
         }),
         getTasksForEntity: builder.query({
             query: (entityId) => ({url:`/task_entity/all_for_entity/${entityId}`}),
-            transformResponse: (response, meta, arg) => 
-            {
-                return response;
+            async onQueryStarted(entityId, { dispatch, queryFulfilled, requestId }) {
+                onQueryStartedHandler(queryFulfilled, dispatch, requestId, );
             },
-            providesTags: (result, error, taskId) => [{type: 'EntityTasks', id:taskId}].concat(
-                                result.payload.map(taskEntity=>({type:'TaskEntity', id:taskEntity.id}))),
+            providesTags: (result, error, taskId) => getTags('TaskEntity', result),
+            keepUnusedDataFor: 300
         }),
         searchUnlinkedEntitiesForTask: builder.query({
             query: ({taskId, caseId , entityDefinitionIds, searchText}) => ({url:`/task_entity/search_unlinked_entities`, method: 'POST', body: {taskId, caseId, entityDefinitionIds, searchText}}),
-            transformResponse: (response, meta, arg) => 
-            {
-                return response;
+            async onQueryStarted(undefined, { dispatch, queryFulfilled, requestId }) {
+                onQueryStartedHandler(queryFulfilled, dispatch, requestId,);
             },
-            providesTags: (result, error, taskId) => result?
-                result.payload.flatMap(entityGroup=>entityGroup.map(entity=>({type: 'TaskUnlinkedEntity', id:entity.id})))
-                :[],
+            keepUnusedDataFor: 300
         }),
         storeTaskEntity: builder.mutation({
             query: ({taskId,entityId,description}) => ({url: '/task_entity/store', method: 'POST', body: {taskId,entityId,description}}),
-            invalidatesTags: (result, error, {taskId, entityId}) => 
-                [{type: 'TaskEntity', id:result.payload.id}, {type: 'TaskEntities', id:taskId}, {type: 'EntityTasks', id:entityId}],
+            async onQueryStarted(undefined, { dispatch, queryFulfilled, requestId }) {
+                onQueryStartedHandler(queryFulfilled, dispatch, requestId, "Saving task...");
+            },
+            invalidatesTags: (result, error, {taskId, entityId}) => getTags('TaskEntity', result),
         }),
         deleteTaskEntity: builder.mutation({
             query: (taskEntityId) => ({url: '/task_entity/delete', method: 'POST', body: {id:taskEntityId}}),
-            invalidatesTags: (result, error, data) => [{type: 'TaskEntity', id:result.payload.id}],
+            async onQueryStarted(undefined, { dispatch, queryFulfilled, requestId }) {
+                onQueryStartedHandler(queryFulfilled, dispatch, requestId, "Deleting task...");
+            },
+            invalidatesTags: (result, error, taskEntityId) => getTags('TaskEntity', result),
         }),
-
         getFilesForTask: builder.query({
             query: (taskId) => ({url:`/task_file/all_for_task/${taskId}`}),
-            transformResponse: (response, meta, arg) => 
-            {
-                return response;
+            async onQueryStarted(undefined, { dispatch, queryFulfilled, requestId }) {
+                onQueryStartedHandler(queryFulfilled, dispatch, requestId, );
             },
-            providesTags: (result, error, taskId) => [{type: 'TaskFiles', id:taskId}],
+            providesTags: (result, error, taskId) => getTags('TaskFile', result),
+            keepUnusedDataFor: 300
         }),
         searchFilesNotLinkedToTask: builder.query({
             query: ({taskId, searchText}) => ({ url:`/task_file/search_unlinked_files`, 
                                                             method: 'POST', 
                                                             body: {taskId, searchText}
                                                         }),
-            transformResponse: (response, meta, arg) => 
-            {
-                return response;
+            async onQueryStarted(undefined, { dispatch, queryFulfilled, requestId }) {
+                onQueryStartedHandler(queryFulfilled, dispatch, requestId, );
             },
             keepUnusedDataFor: 300
         }),
         addTaskFiles: builder.mutation({
             query: (taskFiles) => ({url: '/task_file/add', method: 'POST', body: taskFiles}),
-            invalidatesTags: (result, error, arg) => [{type: 'TaskFiles', id:arg[0].taskId}],
-            // invalidatesTags: (result, error, data) => [{type: 'TaskUnlinkedEntity', id:result.payload.matrixEntity.id},
-            //                                             {type: 'TaskEntity', id:result.payload.id},
-            //                                             {type: 'Task', id:result.payload.task.id}],
+            async onQueryStarted(undefined, { dispatch, queryFulfilled, requestId }) {
+                onQueryStartedHandler(queryFulfilled, dispatch, requestId, "Adding files to task...");
+            },
+            invalidatesTags: (result, error, arg) => getTags('TaskFile', result),
         }),
         removeTaskFile: builder.mutation({
             query: (taskFileId) => ({url: '/task_file/remove', method: 'POST', body: {id:taskFileId}}),
-            invalidatesTags: (result, error, data) => [{type: 'TaskFiles', id:taskFiles[0].taskId}],
-            // invalidatesTags: (result, error, data) => [{type: 'TaskUnlinkedEntity', id:result.payload.matrixEntity.id},
-            //                                             {type: 'TaskEntity', id:result.payload.id},
-            //                                             {type: 'Task', id:result.payload.task.id}],
+            async onQueryStarted(undefined, { dispatch, queryFulfilled, requestId }) {
+                onQueryStartedHandler(queryFulfilled, dispatch, requestId, "Removing files from task...");
+            },
+            invalidatesTags: (result, error, data) => getTags('TaskFile', result),
         }),
     }),
 });

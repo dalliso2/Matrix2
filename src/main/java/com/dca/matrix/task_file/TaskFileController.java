@@ -43,7 +43,7 @@ public class TaskFileController
 		Collection<TaskFile> taskFiles = this.taskFileService.save(taskFileMessages);
 		return new ResponseEntity<>(ApiResponseUtil.success(taskFiles, 
 															"Saved task files.", 
-															request.getRequestURI()),HttpStatus.OK);
+															request),HttpStatus.OK);
 	}
 
 	@PostMapping(path = "/remove")
@@ -52,7 +52,7 @@ public class TaskFileController
 	{	
 		return new ResponseEntity<>(ApiResponseUtil.success(this.taskFileService.delete(taskFileId.id()), 
 															"Deleted task file " + taskFileId, 
-															request.getRequestURI()),HttpStatus.OK);
+															request),HttpStatus.OK);
 	}
 
 	@GetMapping(path = "/all_for_task/{taskId}")
@@ -60,7 +60,7 @@ public class TaskFileController
 	public ResponseEntity<ApiResponse<List<TaskFile>>> getAllForTask(@PathVariable("taskId") Long taskId, HttpServletRequest request)
 	{
 		List<TaskFile> taskFiles = this.taskFileService.findAllForTaskId(taskId);
-		return new ResponseEntity<>(ApiResponseUtil.success(taskFiles, "Retrieved task files for task " + taskId, request.getRequestURI()), 
+		return new ResponseEntity<>(ApiResponseUtil.success(taskFiles, "Retrieved task files for task " + taskId, request), 
 																HttpStatus.OK);
 	}
 	
@@ -70,6 +70,6 @@ public class TaskFileController
 	{
 		return new ResponseEntity<>(ApiResponseUtil.success(this.taskFileService.searchFilesNotLinked(searchMessage), 
 				"Successfully loaded files not linked to task " + searchMessage.taskId(),
-				request.getRequestURI()), HttpStatus.OK);
+				request), HttpStatus.OK);
 	}
 }

@@ -22,8 +22,6 @@ import { handleMutationResults } from "../api/ApiUtils";
 import RefreshIcon from '@mui/icons-material/Refresh';
 import AddLinkSharp from '@mui/icons-material/AddLinkSharp';
 import { useDispatch } from "react-redux";
-import { useSelector } from "react-redux";
-import { selectActiveCase } from "../state/AppSlice";
 import { useDeleteTaskEntityMutation } from "../api/TaskApi";
 import { getTitle } from "../util/utils";
 import Button from "@mui/material/Button";
@@ -36,32 +34,28 @@ export default function TaskEntities({taskId})
     const dispatch = useDispatch();
     const navigate = useNavigate();
 
-    const activeCase = useSelector(selectActiveCase);
-
     const [entityLinkSearchDialogOpen, setEntityLinkSearchDialogOpen] = useState(false);
     const [entityToLink, setEntityToLink] = useState(undefined); 
     const [editTaskEntity, setEditTaskEntity] = useState(undefined);    
 
     // load entity definitions
-    const { data:envelope, refetch, ...entityDefinitionQueryStatus } = useGetAllEntityDefinitionsQuery();
-    const entityDefinitions = envelope?envelope.payload:[];
+    const { refetch, ...entityDefinitionQueryResults } = useGetAllEntityDefinitionsQuery();
+    const entityDefinitions = entityDefinitionQueryResults?.data?.payload || [];
     
     // load task entities
-    const { currentData:taskEntitiesEnvelope, refetch:refetchTaskEntities, ...getTaskEntitesQueryStatus } = useGetEntitiesForTaskQuery(taskId);
-    const taskEntities = taskEntitiesEnvelope?.payload;
+    const { refetch:refetchTaskEntities, ...getTaskEntitesQueryResults } = useGetEntitiesForTaskQuery(taskId);
+    const taskEntities = getTaskEntitesQueryResults?.data?.payload;
 
     useEffect(() => {  
-        if (getTaskEntitesQueryStatus.isError)
-            handleQueryError(getTaskEntitesQueryStatus, dispatch, navigate);
-        if (entityDefinitionQueryStatus.isError) 
-            handleQueryError(entityDefinitionQueryStatus, dispatch, navigate);
-    }, [getTaskEntitesQueryStatus.isError, entityDefinitionQueryStatus.isError]);
+        handleQueryError(getTaskEntitesQueryResults, dispatch);
+        handleQueryError(entityDefinitionQueryResults, dispatch);
+    }, [getTaskEntitesQueryResults.isFetching, entityDefinitionQueryResults.isFetching]);
     
     //
     // Save task-entity api function
     //
     const [storeTaskEntity, storeTaskEntityMutationState] = useStoreTaskEntityMutation();
-    handleMutationResults(storeTaskEntityMutationState, dispatch, navigate, false, "","Error linking task and entity",
+    handleMutationResults(storeTaskEntityMutationState, dispatch,
         ()=>enqueueSnackbar(storeTaskEntityMutationState.originalArgs.successDescription, {variant:'success'}),
         ()=>{});
         
@@ -73,7 +67,7 @@ export default function TaskEntities({taskId})
                                 storeTaskEntity({   taskId:deleteTaskEntityMutationState.data.payload.task.id,
                                                     entityId:deleteTaskEntityMutationState.data.payload.matrixEntity.id, 
                                                     description:deleteTaskEntityMutationState.data.payload.description,
-                                                    successDescription:"Successfully re-linked task to entity "
+                                                    successDescription:"Successfully re-linked task to "
                                                         + getTitle(entityDefinitions,deleteTaskEntityMutationState.data.payload.matrixEntity)});
                                 closeSnackbar(snackbarId);            
                             }}>Undo</Button>
@@ -85,10 +79,6 @@ export default function TaskEntities({taskId})
     const [deleteTaskEntity, deleteTaskEntityMutationState] = useDeleteTaskEntityMutation();
     handleMutationResults(deleteTaskEntityMutationState, 
                             dispatch, 
-                            navigate,
-                            true, 
-                            "",
-                            "Error removing link",
                             ()=>{
                                 enqueueSnackbar( "Removed link to: " + getTitle(entityDefinitions,deleteTaskEntityMutationState.data.payload.matrixEntity), 
                                 {   variant:'success', 
@@ -97,7 +87,7 @@ export default function TaskEntities({taskId})
                                                                 storeTaskEntity({   taskId:deleteTaskEntityMutationState.data.payload.task.id,
                                                                                     entityId:deleteTaskEntityMutationState.data.payload.matrixEntity.id, 
                                                                                     description:deleteTaskEntityMutationState.data.payload.description,
-                                                                                    successDescription:"Successfully re-linked task to entity "
+                                                                                    successDescription:"Successfully re-linked task to "
                                                                                         + getTitle(entityDefinitions,deleteTaskEntityMutationState.data.payload.matrixEntity)});
                                                                 closeSnackbar(snackbarId);            
                                                             }}>Undo</Button>
@@ -113,11 +103,13 @@ export default function TaskEntities({taskId})
         setEditTaskEntity(undefined);
     }
 
-    function unlinkTaskAndEntity(taskEntityId)
+    function unlinkTaskAndEntity(event, taskEntityId)
     {   
+        event.stopPropagation();
+        event.preventDefault();
         //optimistcally remove the linked entity from the task entities
         dispatch(api.util.updateQueryData('getEntitiesForTask',
-                                            getTaskEntitesQueryStatus.originalArgs,
+                                            getTaskEntitesQueryResults.originalArgs,
                                             cache=>
                                             {
                                                 cache.payload = cache.payload.map(entityGroup=>entityGroup.filter(ent=>ent.id!==taskEntityId));
@@ -161,8 +153,8 @@ export default function TaskEntities({taskId})
                                 ]}))]
                                 .concat({value:[taskEntity.description]},{sx:{width:'0px'},value:[
                                     <Box sx={{display:'flex'}}>
-                                        <IconButton onClick={(event)=>setEditTaskEntity(taskEntity)}><EditTwoToneIcon/></IconButton>
-                                        <IconButton onClick={(event)=>unlinkTaskAndEntity(taskEntity.id)}><LinkOffTwoToneIcon/></IconButton>
+                                        <IconButton onClick={(event)=>{event.stopPropagation();setEditTaskEntity(taskEntity);}}><EditTwoToneIcon/></IconButton>
+                                        <IconButton onClick={(event)=>unlinkTaskAndEntity(event, taskEntity.id)}><LinkOffTwoToneIcon/></IconButton>
                                     </Box>
                                 ]})
                             };
@@ -185,11 +177,11 @@ export default function TaskEntities({taskId})
                 {
                     relatedEntityGroupsRows.length===0?
                     <Box key={1} sx={{width:'100%', pb:3, 
-                                            overflow:getTaskEntitesQueryStatus.isFetching?'hidden':undefined}}>
+                                            overflow:getTaskEntitesQueryResults.isFetching?'hidden':undefined}}>
                         <Grid header={""} 
                                 columnHeadings={[]} 
                                 rowValues={[]} 
-                                isFetching={getTaskEntitesQueryStatus.isFetching}
+                                isFetching={getTaskEntitesQueryResults.isFetching}
                                 noResultsMessage={"No linked entities."}/>
                     </Box>
                     :
@@ -197,8 +189,8 @@ export default function TaskEntities({taskId})
                     {
                         return (
                             <Box key={index} sx={{width:'100%', pb:3, 
-                                overflow:getTaskEntitesQueryStatus.isFetching?'hidden':undefined}}>
-                                <Grid header={group.name} columnHeadings={group.headers} rowValues={group.rows} isFetching={getTaskEntitesQueryStatus.isFetching}/>
+                                overflow:getTaskEntitesQueryResults.isFetching?'hidden':undefined}}>
+                                <Grid header={group.name} columnHeadings={group.headers} rowValues={group.rows} isFetching={getTaskEntitesQueryResults.isFetching}/>
                             </Box>
                         );
                     })

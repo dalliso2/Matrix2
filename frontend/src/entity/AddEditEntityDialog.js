@@ -117,10 +117,6 @@ export default function AddEditEntityDialog({entity, entityDefinitions, closeFn,
     const [storeEntity,entityMutationState] = useStoreEntityMutation();
     handleMutationResults(entityMutationState, 
                             dispatch, 
-                            navigate,
-                            true, 
-                            "Saving entity...",
-                            "Error saving entity.", 
                             ()=>{ enqueueSnackbar( (entity?.id?"Updated ":"Created ") + " entity " + getTitle(entityDefinitions,entityMutationState.data), {variant:'success'}); closeFn();});
 
     // set the field values from the entity object
@@ -214,7 +210,7 @@ export default function AddEditEntityDialog({entity, entityDefinitions, closeFn,
     const nonImageFields = fields && fields.filter(field => field.type != PROFILE_IMAGE && field.type != IMAGE_ARRAY);
 
     return (
-        <Dialog open={true} fullWidth={true} maxWidth={'md'} sx={{height:'100%'}}>
+        <Dialog open={true}  maxWidth={'lg'} sx={{height:'100%'}}>
             <DialogTitle sx={{backgroundColor:theme.palette.primary.main,color:theme.palette.primary.contrastText, 
                                 borderColor: theme.palette.background.default, }}>Add/Edit Entity</DialogTitle>
             <DialogContent>
@@ -239,8 +235,8 @@ export default function AddEditEntityDialog({entity, entityDefinitions, closeFn,
                         <Box sx={{display:'flex',mt:2}}>
                         {
                         fields &&
-                            <Box sx={{display:'flex', width:'100%', justifyContent:'space-around'}}>
-                                <Box sx={{minWidth:'50%'}}>
+                            <Box sx={{display:'flex', gap: '30px', width:'100%', justifyContent:'space-around'}}>
+                                <Box sx={{}}> 
                                 { 
                                     nonImageFields.map((field,index) => 
                                     (
@@ -248,13 +244,11 @@ export default function AddEditEntityDialog({entity, entityDefinitions, closeFn,
                                     )) 
                                 }
                                 </Box>
-                                {imageFields.length > 0 && 
-                                    <>
-                                        <Box sx={{width:'20px'}} />
+                                {
+                                    imageFields.length > 0 && 
                                         <Box sx={{display:'flex', flexGrow:1, flexDirection:'column', alignContent:'flex-start', alignItems:'center'}}>
                                         { imageFields.map((field,index) => getInputComponent(field, index, dispatch)) }
                                         </Box>
-                                    </>
                                 }
                             </Box>
                         }

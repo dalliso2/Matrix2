@@ -11,9 +11,9 @@ import { useUpdatePasswordMutation } from "../api/UserApi";
 import { validate } from '../validation/validation';
 import { useDispatch } from "react-redux";
 import { handleMutationResults } from "../api/ApiUtils";
-import { setMessageBoxData } from "../state/AppSlice";
 import { enqueueSnackbar } from "notistack";
 import { useNavigate } from "react-router-dom";
+import { setMessageBoxData } from "../state/AppSlice";
 
 const fields = [
     { name: 'currentPassword', label: 'Current Password', type: PASSWORD, required: true, minLength: 8, value: '' },
@@ -31,18 +31,20 @@ const ChangePasswordDialog = ({ closeDialogFn }) =>
     const [passwordData, setPasswordData] = useState({currentPassword:'', newPassword:'', newPassword2:''});
 
     const [updatePassword, mutationState] = useUpdatePasswordMutation();
-    handleMutationResults(mutationState, dispatch, navigate, true, "Updating password...", "Error updating password",
-        // successFn
-        ()=>{   dispatch(setMessageBoxData("password-updated", "Success",'Password updated'));
+    handleMutationResults(mutationState, dispatch,
+        ()=>{   //dispatch(setMessageBoxData("password-updated", 'Password updated', 'Password updated'));
                 closeDialogFn();
                 enqueueSnackbar("Password updated", {variant:'success'});
             },
+        undefined
     );
     
     async function updatePasswordFn()
     {
         if (!validate(fields))
             setPasswordData(old=>({...old}));
+        else if ( passwordData.newPassword !== passwordData.newPassword2)
+            dispatch(setMessageBoxData("password-dont-match-key", 'Error', 'New passwords do not match.'));
         else
             updatePassword(passwordData);
     }

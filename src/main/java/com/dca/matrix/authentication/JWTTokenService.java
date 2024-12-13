@@ -18,7 +18,7 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 public class JWTTokenService
 {
-	private static final Duration TOKEN_VALID_DURATION = Duration.buildByMinutes(15);
+	private static final Duration TOKEN_VALID_DURATION = Duration.buildByMinutes(10);
 	
 	private final Algorithm hmac512;
 	private final JWTVerifier verifier;
@@ -35,7 +35,13 @@ public class JWTTokenService
 							.withIssuer("Matrix2")
 							.withIssuedAt(Instant.now())
 							.withExpiresAt(Instant.now().plusMillis(TOKEN_VALID_DURATION.getMilliseconds()))
+							//.withExpiresAt(Instant.now().plusMillis(5000))
 							.sign(hmac512);
+	}
+	
+	public boolean expiresWithinMinutes(String token, long minutes)
+	{
+		return JWT.decode(token).getExpiresAtAsInstant().isBefore(Instant.now().plusSeconds(60*minutes));
 	}
 	
 	public String validateTokenReturnUsername(final String token)

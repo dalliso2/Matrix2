@@ -98,11 +98,11 @@ export default function LinkDialog({entityOne, entityTwo, entity1Entity2Descript
                         </Box>
                     </Box>
                     <Box sx={{ display:'flex', justifyContent:'center', flexDirection:'column' }}>
-                        <Box>{entityTwoName}</Box>
+                        <Box sx={{maxWidth:'200px'}}>{entityTwoName}</Box>
                         <Box>
                             {
                                 imageId2 && 
-                                <Box sx={{ display:'flex', alignItems:'center', justifyContent:'center', height:'200px', width:'200px', border: imageId2?undefined:'1px solid grey', borderRadius: 5 }}>
+                                <Box sx={{ display:'flex', alignItems:'center', justifyContent:'center', border: imageId2?undefined:'1px solid grey', borderRadius: 5 }}>
                                     <Image className={"label-profile-image"} id={imageId2} />    
                                 </Box>
                             }

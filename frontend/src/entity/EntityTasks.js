@@ -10,7 +10,7 @@ import { IconButton } from "@mui/material";
 import RefreshIcon from '@mui/icons-material/Refresh';
 import { useGetTasksForEntityQuery } from "../api/TaskApi";
 import { useEffect } from "react";
-import { handleQueryError } from "../api/ApiUtils";
+import { handleQueryResultsWithWaitMessage } from "../api/ApiUtils";
 import LinkOffTwoToneIcon from '@mui/icons-material/LinkOffTwoTone';
 import EntityTaskSearchDialog from "./EntityTaskSearchDialog";
 import { useDeleteTaskEntityMutation, useStoreTaskEntityMutation } from "../api/TaskApi";
@@ -37,16 +37,18 @@ export default function EntityTasks({entityId})
     const {refetch:refetchRelatedTasks, ...relatedTasksQueryResults} = useGetTasksForEntityQuery(entityId);
     const taskEntities = relatedTasksQueryResults?.currentData?.payload || [];
     useEffect(() => {
-        if (relatedTasksQueryResults.isError)
-            handleQueryError(relatedTasksQueryResults, dispatch, navigate);
-    }, [relatedTasksQueryResults.isError]);
+        handleQueryResultsWithWaitMessage(relatedTasksQueryResults, dispatch);
+    }, [relatedTasksQueryResults.isFetching]);
 
     //
     // Save task-entity api function
     //
     const [storeTaskEntity, storeTaskEntityMutationState] = useStoreTaskEntityMutation();
-    handleMutationResults(storeTaskEntityMutationState, dispatch, navigate, false, "","Error linking task and entity",
-        ()=>enqueueSnackbar(storeTaskEntityMutationState.originalArgs.successDescription, {variant:'success'}),
+    handleMutationResults(storeTaskEntityMutationState, dispatch,
+        ()=>{
+            console.log("storeTaskEntityMutationState", storeTaskEntityMutationState);
+            enqueueSnackbar(storeTaskEntityMutationState.originalArgs.successDescription, {variant:'success'})
+        },
         ()=>{});
 
     //

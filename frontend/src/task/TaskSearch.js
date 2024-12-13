@@ -12,7 +12,7 @@ import dayjs from "dayjs";
 import { useTheme } from "@mui/material/styles";
 import { useGetCaseUsersQuery } from "../api/CaseApi";
 import { useLazySearchTasksQuery } from "../api/TaskApi";
-import { handleQueryError, handleQueryResultsWithWaitMessage } from "../api/ApiUtils";
+import { handleQueryResultsWithWaitMessage } from "../api/ApiUtils";
 import { useNavigate } from "react-router-dom";
 
 const dateFormat = 'M/D/YYYY HH:mm';
@@ -26,20 +26,20 @@ export default function TaskSearch({tabDataId})
     const currentTabData = useSelector(selectCurrentTabData);
 
     // get users for drop down
-    const { data:currentCaseUsers, ...currentCaseUsersQueryStatus } = useGetCaseUsersQuery(activeCase.id);
-    handleQueryResultsWithWaitMessage(currentCaseUsersQueryStatus, dispatch, navigate, "Loading case users...", ()=>{});
+    const currentCaseUsersQueryResults = useGetCaseUsersQuery(activeCase.id);
+    useEffect(() => {
+        handleQueryResultsWithWaitMessage(currentCaseUsersQueryResults, dispatch);
+    }, [currentCaseUsersQueryResults?.isFetching]);
+    const currentCaseUsers = currentCaseUsersQueryResults?.data?.payload;   
 
     // set up search function
-    const [ searchTasksFn, { data:results, ...searchTasksQueryStatus} ]  = useLazySearchTasksQuery();
+    const [ searchTasksFn, searchTasksQueryResults ]  = useLazySearchTasksQuery();
+    const results = searchTasksQueryResults?.data?.payload;
     useEffect(() => {  
-        if (searchTasksQueryStatus.isError)
-            handleQueryError(searchTasksQueryStatus, dispatch, navigate);
-    } ,[searchTasksQueryStatus.isError]);
-
-    useEffect(() => {  
-        if (!searchTasksQueryStatus.isFetching && searchTasksQueryStatus.isSuccess)
-            dispatch(updateTaskTabData(tabDataId, "results", results.payload));
-    } ,[searchTasksQueryStatus.isFetching]);
+        handleQueryResultsWithWaitMessage(searchTasksQueryResults, dispatch);
+        if (!searchTasksQueryResults.isFetching && searchTasksQueryResults.isSuccess)
+            dispatch(updateTaskTabData(tabDataId, "results", results));
+    } ,[searchTasksQueryResults.isFetching]);
 
     const searchText = getInputComponent({
         name: 'searchText', 
@@ -101,7 +101,7 @@ export default function TaskSearch({tabDataId})
                             <Grid  columnHeadings={["Task #","Title", "Status","Due Date/Time","Assigned To"]}
                                 columnType={[TEXT, TEXT, DATE_TIME, TEXT]}
                                 rowValues={rowValues}
-                                isFetching={searchTasksQueryStatus.isFetching}
+                                isFetching={searchTasksQueryResults.isFetching}
                             />
                     }
                 </Paper>

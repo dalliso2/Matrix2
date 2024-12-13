@@ -140,7 +140,6 @@ export function getFieldDisplay(propertyDefinition, prop, index)
  */
 export function getListComponent(type, values)
 {
-    //console.log(type,values);
     let returnVal = undefined;
     if (values?.length)
     {

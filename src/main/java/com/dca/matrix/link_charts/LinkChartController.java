@@ -36,7 +36,7 @@ public class LinkChartController
 	{
 		return new ResponseEntity<>(ApiResponseUtil.success(this.linkChartService.getAllForCase(matrixCaseId), 
 															"Loaded link charts for case " + matrixCaseId, 
-															request.getRequestURI()), HttpStatus.OK);
+															request), HttpStatus.OK);
 	}
 	
 	@GetMapping("/list/{matrixCaseId}")
@@ -44,7 +44,7 @@ public class LinkChartController
 	{
 		return new ResponseEntity<>(ApiResponseUtil.success(this.linkChartService.getLinkChartListItemsForCase(matrixCaseId), 
 															"Loaded link chart list for case " + matrixCaseId, 
-															request.getRequestURI()), HttpStatus.OK);
+															request), HttpStatus.OK);
 	}
 	
 	@GetMapping("/{id}")
@@ -52,7 +52,7 @@ public class LinkChartController
 	{
 		return new ResponseEntity<>(ApiResponseUtil.success(this.linkChartService.findById(linkChartId), 
 															"Loaded link chart with id " + linkChartId, 
-															request.getRequestURI()), HttpStatus.OK);
+															request), HttpStatus.OK);
 	}
 	
 	@PostMapping(path="/store")
@@ -60,7 +60,7 @@ public class LinkChartController
 	{	
 		return new ResponseEntity<>(ApiResponseUtil.success(this.linkChartService.store(linkChart), 
 															"Stored link chart " + linkChart.getName(), 
-															request.getRequestURI()), HttpStatus.OK);
+															request), HttpStatus.OK);
 	}
 	
 	@PostMapping(path="/remove",consumes="application/json")
@@ -68,7 +68,7 @@ public class LinkChartController
 	{
 		return new ResponseEntity<>(ApiResponseUtil.success(this.linkChartService.remove(linkChartId.id()), 
 															"Removed link chart " + linkChartId, 
-															request.getRequestURI()), HttpStatus.OK);
+															request), HttpStatus.OK);
 	}
 	
 	@PostMapping(path="/update_name_description",consumes="application/json")
@@ -77,6 +77,6 @@ public class LinkChartController
 	{
 		return new ResponseEntity<>(ApiResponseUtil.success(this.linkChartService.updateLinkChartNameDescription(linkChartNameDescriptionMessage), 
 															"Updated link chart name/description for link chart " + linkChartNameDescriptionMessage.name(), 
-															request.getRequestURI()), HttpStatus.OK);
+															request), HttpStatus.OK);
 	}
 }

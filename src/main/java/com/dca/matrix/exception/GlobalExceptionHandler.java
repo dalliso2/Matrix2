@@ -25,28 +25,28 @@ public class GlobalExceptionHandler
 	public ResponseEntity<ApiResponse<Void>> handleException(Exception ex, HttpServletRequest request)
 	{
 		ex.printStackTrace();
-		return new ResponseEntity<>(ApiResponseUtil.fail(ex.getMessage(), null, ApiErrorCode.INTERNAL_SERVER_ERROR, request.getRequestURI()),
+		return new ResponseEntity<>(ApiResponseUtil.fail(ex.getMessage(), null, ApiErrorCode.INTERNAL_SERVER_ERROR, request),
 				HttpStatus.INTERNAL_SERVER_ERROR);
 	}
 	
 //	@ExceptionHandler({MatrixUncheckedException.class})
 //	public ResponseEntity<ApiResponse<Void>> handleMatrixException(MatrixUncheckedException ex, HttpServletRequest request)
 //	{
-//		return new ResponseEntity<>(ApiResponseUtil.fail(ex.getMessage(), ex.getErrors(), ex.getErrorCode(), request.getRequestURI()),
+//		return new ResponseEntity<>(ApiResponseUtil.fail(ex.getMessage(), ex.getErrors(), ex.getErrorCode(), request),
 //									ex.getHttpStatus());
 //	}
 
 	@ExceptionHandler({MatrixValidationException.class})
 	public ResponseEntity<ApiResponse<Void>> handleMatrixValidationException(MatrixValidationException ex, HttpServletRequest request)
 	{
-		return new ResponseEntity<>(ApiResponseUtil.fail(ex.getMessage(), ex.getErrors(), ex.getErrorCode(), request.getRequestURI()),
+		return new ResponseEntity<>(ApiResponseUtil.fail(ex.getMessage(), ex.getErrors(), ex.getErrorCode(), request),
 									HttpStatus.OK);
 	}
 	
 	@ExceptionHandler({MatrixUncheckedException.class})
 	public ResponseEntity<ApiResponse<Void>> handleMatrixValidationException(MatrixUncheckedException ex, HttpServletRequest request)
 	{
-		return new ResponseEntity<>(ApiResponseUtil.fail(ex.getMessage(), ex.getErrors(), ex.getErrorCode(), request.getRequestURI()),
+		return new ResponseEntity<>(ApiResponseUtil.fail(ex.getMessage(), ex.getErrors(), ex.getErrorCode(), request),
 									HttpStatus.OK);
 	}
 	
@@ -54,7 +54,7 @@ public class GlobalExceptionHandler
 	@ResponseBody
 	public ResponseEntity<ApiResponse<Void>> handleAccessDeniedException(Exception ex, HttpServletRequest request)
 	{
-		return new ResponseEntity<>(ApiResponseUtil.fail(ex.getMessage(), null, ApiErrorCode.NOT_AUTHORIZED, request.getRequestURI()),
-										HttpStatus.NOT_ACCEPTABLE);
+		return new ResponseEntity<>(ApiResponseUtil.fail(ex.getMessage(), null, ApiErrorCode.NOT_AUTHORIZED, request),
+										HttpStatus.FORBIDDEN);
 	}
 }

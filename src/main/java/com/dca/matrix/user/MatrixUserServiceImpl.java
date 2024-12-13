@@ -12,6 +12,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import com.dca.matrix.api.ApiErrorCode;
+import com.dca.matrix.authentication.AuthenticationService;
 import com.dca.matrix.exception.MatrixUncheckedException;
 import com.dca.matrix.exception.MatrixValidationException;
 import com.dca.matrix.matrix_case.CaseUserRecord;
@@ -64,7 +65,7 @@ public class MatrixUserServiceImpl implements MatrixUserService
 		if (existingUser != null && !Objects.equals(user.getUsername(), existingUser.getUsername()))
 			throw new MatrixValidationException("Cannot change the name of an existing user ("+ user.getUsername() +")",
 					null, ApiErrorCode.VALIDATION_ERROR);
-			
+		
 		boolean updatingSelf = Objects.equals(currentUser.getId(), existingUser!=null?existingUser.getId():null);
 		
 		// A user may not update their own role
@@ -102,6 +103,12 @@ public class MatrixUserServiceImpl implements MatrixUserService
 		
 		if (fieldErrorList.size() > 0)
 			throw new MatrixValidationException("Please correct the following errors:", fieldErrorList, ApiErrorCode.VALIDATION_ERROR);
+			
+		// if new user, check and make sure username isn't taken
+		Optional<MatrixUser> existingUserName = this.MatrixUserRepository.findByUsername(user.getUsername());
+		if (existingUserName.isPresent() && !Objects.equals(existingUserName.get().getId(), user.getId()))
+			throw new MatrixValidationException("A user with username " + user.getUsername() + " already exists.", 
+													fieldErrorList, ApiErrorCode.VALIDATION_ERROR);
 			
 		// If an empty password is passed in then update all other fields of the user
 		// First load the existing password and set it in the object to be saved.
@@ -194,6 +201,9 @@ public class MatrixUserServiceImpl implements MatrixUserService
 	@Override
 	public List<UserCaseRecord> getUserCaseRecords()
 	{
+//		throw new MatrixValidationException("Test error.",
+//				null, ApiErrorCode.INCORRECT_CASE_FOR_ENTITY);
+				
 		MatrixUser currentUser = this.authenticationService.getCurrentUser();
 		StringBuilder sql = new StringBuilder("select " + MatrixCase.TABLE + "." + MatrixCase.ID + ","
 												+ MatrixCase.TABLE + "." + MatrixCase.CASE_NUMBER + ","
@@ -206,8 +216,6 @@ public class MatrixUserServiceImpl implements MatrixUserService
 												+ " and " + MatrixUser.TABLE + "." + MatrixUser.ID + "=" + currentUser.getId()
 												+ " order by " + MatrixCase.TABLE + "." + MatrixCase.CASE_NUMBER);
 												
-		
-		
 		return this.jdbcClient.sql(sql.toString()).query((resultSet, rowNum)->
 					new UserCaseRecord(resultSet.getLong(1),
 										resultSet.getString(2),

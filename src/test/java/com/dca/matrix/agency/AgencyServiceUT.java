@@ -13,8 +13,8 @@ import java.util.Optional;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
+import com.dca.matrix.authentication.AuthenticationService;
 import com.dca.matrix.exception.MatrixUncheckedException;
-import com.dca.matrix.user.AuthenticationService;
 import com.dca.matrix.user.MatrixUser;
 
 class AgencyServiceUT

@@ -36,7 +36,7 @@ public class EntityFileController
 	{	
 		return	new ResponseEntity<>(ApiResponseUtil.success(this.entityFileService.save(entityFiles), 
 				"Successfully created entity file(s).", 
-				request.getRequestURI()), HttpStatus.OK);
+				request), HttpStatus.OK);
 	}
 
 	@DeleteMapping(path = "/remove")
@@ -45,7 +45,7 @@ public class EntityFileController
 	{	
 		return	new ResponseEntity<>(ApiResponseUtil.success(this.entityFileService.remove(entityFile), 
 				"Successfully removed entity file(s).", 
-				request.getRequestURI()), HttpStatus.OK);
+				request), HttpStatus.OK);
 	}
 
 	@GetMapping(path = "/all_for_entity/{entityId}")
@@ -54,6 +54,6 @@ public class EntityFileController
 	{
 		return	new ResponseEntity<>(ApiResponseUtil.success(this.entityFileService.findForEntity(entityId), 
 				"Successfully retrieved entity file(s) for entity with id " + entityId, 
-				request.getRequestURI()), HttpStatus.OK);
+				request), HttpStatus.OK);
 	}
 }

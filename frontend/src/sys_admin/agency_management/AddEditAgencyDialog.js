@@ -38,12 +38,13 @@ const fields = [
 
 const messageKey = "ADD_EDIT_ORG_DIALOG";
 
-export default function AddEditAgencyDialog({ agency = {...newAgency, modified:false}, closeFn }) 
+export default function AddEditAgencyDialog({ agency = {...newAgency}, closeFn }) 
 {
     const theme = useTheme();  
     const dispatch = useDispatch();
     const navigate = useNavigate();
     const [agencyData, setAgencyData] = useState(agency);
+    const [modified, setModified] = useState(false);
 
     useEffect(() => {
         return ()=>clearErrors(fields);
@@ -52,15 +53,11 @@ export default function AddEditAgencyDialog({ agency = {...newAgency, modified:f
     const [storeAgency, mutationState] = useStoreAgencyMutation();
     handleMutationResults(mutationState, 
                             dispatch, 
-                            // navigate,  
-                            // true, 
-                            // (agencyData.id?"Updating":"Creating") + " agency - " + agencyData.name,
-                            // "Error " + agencyData.id?"updating":"creating" + " agency", 
                             ()=>{ enqueueSnackbar((agencyData.id?"Updated":"Created") + " agency: " + agencyData.name, {variant:'success'}); closeFn();},
                             ()=>{ } );
 
-    fields.forEach((field, index) => {
-        field.onChange=(event) => setAgencyData(prevData => ({...prevData, [field.name]:event.target.value, modified:true}));
+    fields.forEach((field, index) => {      
+        field.onChange=(event) => { setModified(true); setAgencyData(prevData => ({...prevData, [field.name]:event.target.value}));};
         field.value = agencyData[field.name];
         field.disabled = mutationState.isLoading;
     });
@@ -70,12 +67,7 @@ export default function AddEditAgencyDialog({ agency = {...newAgency, modified:f
         if (!validate(fields))
             setAgencyData(prev=>({...prev}));
         else
-        {
-            // remove the modified property and save
-            const {modified, ...tempAgencyData} = agencyData;
-            storeAgency(tempAgencyData);
-            //closeFn();
-        }
+            storeAgency(agencyData);
     }
 
     return (
@@ -93,7 +85,7 @@ export default function AddEditAgencyDialog({ agency = {...newAgency, modified:f
                 }
                 </DialogContent>
                 <DialogActions> 
-                    <Button disabled={!agencyData.modified || mutationState.isLoading} onClick={() => onSave()}>Save</Button>
+                    <Button disabled={!modified || mutationState.isLoading} onClick={() => onSave()}>Save</Button>
                     <Button disabled={mutationState.isLoading} onClick={() => closeFn()}>Cancel</Button>
                 </DialogActions>
             </Dialog>

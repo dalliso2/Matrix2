@@ -7,7 +7,6 @@ import IconButton from "@mui/material/IconButton";
 import EditTwoToneIcon from '@mui/icons-material/EditTwoTone';
 import AddEditEntityDialog from "./AddEditEntityDialog";
 import { useGetEntityQuery } from "../api/EntityApi";
-import { handleQueryError } from "../api/ApiUtils";
 import { useEffect } from "react";
 import { useDispatch } from "react-redux";
 import "./Entity.css";
@@ -17,6 +16,7 @@ import { Table, TableBody } from "@mui/material";
 import { useTheme } from "@mui/material/styles";
 import { useGetAllEntityDefinitionsQuery } from "../api/EntityDefinitionApi";
 import { useNavigate } from "react-router-dom";
+import { handleQueryResultsWithWaitMessage } from "../api/ApiUtils";
 
 export default function Entity( {entityId, entityUpdatedCallback } )
 {
@@ -25,18 +25,16 @@ export default function Entity( {entityId, entityUpdatedCallback } )
     const dispatch = useDispatch(); 
     const [editEntityDialogOpen, setEditEntityDialogOpen] = React.useState(false);
 
-    const { data:entityDefsEnvelope, refetch, ...entityDefinitionQueryStatus } = useGetAllEntityDefinitionsQuery();
-    const entityDefinitions = entityDefsEnvelope?entityDefsEnvelope.payload:[];
-
-    const {currentData:envelope, refetch:refetchEntity, ...getEntityStatus} = useGetEntityQuery(entityId);
-    const entity = envelope?.payload;    
+    const { refetch, ...entityDefinitionQueryResults } = useGetAllEntityDefinitionsQuery();
+    const entityDefinitions = entityDefinitionQueryResults?.data?.payload;
+ 
+    const { refetch:refetchEntity, ...getEntityResults} = useGetEntityQuery(entityId);
+    const entity = getEntityResults?.data?.payload;  
 
     useEffect(() => {
-        if (getEntityStatus.isError) 
-            handleQueryError(getEntityStatus, dispatch, navigate);
-        if (entityDefinitionQueryStatus.isError) 
-            handleQueryError(entityDefinitionQueryStatus, dispatch, navigate);
-    }, [getEntityStatus.isError,entityDefinitionQueryStatus.isError]);
+        handleQueryResultsWithWaitMessage(entityDefinitionQueryResults, dispatch);
+        handleQueryResultsWithWaitMessage(getEntityResults, dispatch);
+    }, [entityDefinitionQueryResults.isFetching, getEntityResults.isFetching]);
 
     const entityPropValues = entity && consolidatePropValues(entity);
     const entityDefinition = entity && entityDefinitions.find((def) => def.id === entity.entityDefinition);
@@ -45,23 +43,23 @@ export default function Entity( {entityId, entityUpdatedCallback } )
 
     return (
         <Box>
-            <Box sx={{display:'flex',flexDirection:'column', width:'100%'}}>
+            <Box sx={{display:'flex',flexDirection:'column', width:'100%', p:2}}>
                 <Box sx={{display:'flex', justifyContent:'flex-end', width:'100%'}}>
-                    <IconButton onClick={() => refetchEntity()}><RefreshIcon/></IconButton>
-                    <IconButton disabled={!entity} onClick={()=>setEditEntityDialogOpen(true)}>
+                    <IconButton disabled={getEntityResults.isFetching} onClick={() => refetchEntity()}><RefreshIcon/></IconButton>
+                    <IconButton disabled={getEntityResults.isFetching} onClick={()=>setEditEntityDialogOpen(true)}>
                         <EditTwoToneIcon/>
                     </IconButton> 
                 </Box>    
                 <Box sx={{ position:'relative', display:'flex', width:'100%', gap:'30px', justifyContent:'space-around', overflow:'hidden'}}>
                 {
-                    getEntityStatus.isFetching &&
+                    getEntityResults.isFetching &&
                         <Box sx={{position:entity?'absolute':'relative', 
                                     height:entity?undefined:'200px',
                                     width:'100%', 
                                     overflow:'hidden', 
                                     zIndex:1000, 
                                     backgroundColor:theme.palette.background.default}}>
-                            <LoadingSkeleton/>
+                            <Box sx={{p:1}}><LoadingSkeleton/></Box>
                         </Box>
                 }
                     <Box sx={{maxWidth:'50%'}}>

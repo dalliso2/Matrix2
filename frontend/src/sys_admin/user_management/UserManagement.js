@@ -18,6 +18,7 @@ import { useLazySearchUsersQuery } from '../../api/UserApi';
 import { useSelector } from 'react-redux';
 import { setUserSearchText, selectUserSearchText } from '../../state/AppSlice';
 import { useNavigate } from 'react-router-dom';
+import { handleQueryResultsWithWaitMessage } from '../../api/ApiUtils';
 
 const columnHeadings = ["Username", "Last Name", "First Name", "Email", "Cell Number", "Work Number", "Agency", "Admin"]
 const columnTypes = [TEXT,TEXT,TEXT,TEXT,TEXT,TEXT,TEXT,TEXT];
@@ -29,15 +30,15 @@ export default function UserManagement()
     const [editUser, setEditUser] = useState(undefined);
     const filterString = useSelector(selectUserSearchText);
 
-    const [searchUsersFn, {data:envelope, ...searchUsersQueryStatus}] = useLazySearchUsersQuery({filter:filterString});
-    const users = envelope?.payload;
+    const [searchUsersFn, searchUsersQueryResults] = useLazySearchUsersQuery({filter:filterString});
+    const users = searchUsersQueryResults?.currentData?.payload;
 
     useEffect(() => {
-        if (searchUsersQueryStatus.isError) 
-            handleQueryError(searchUsersQueryStatus, dispatch, navigate);
-    }, [searchUsersQueryStatus.isError]);
+        handleQueryResultsWithWaitMessage(searchUsersQueryResults, dispatch, "Searching Users...");
+    }, [searchUsersQueryResults?.isFetching]);
 
-
+    console.log("UserManagement");
+    console.log(searchUsersQueryResults);
 
     useEffect(() => {
         if (filterString.length)
@@ -53,7 +54,7 @@ export default function UserManagement()
                         <TextField label={"Search Users"} onChange={event=>dispatch(setUserSearchText(event.target.value))} fullWidth
                                     size="small" sx={{width:'40ch'}} value={filterString}/>                    
                     </Box><br></br>
-                    <UserDataGrid users={users} onClickUser={setEditUser} isFetching={searchUsersQueryStatus.isFetching}/>
+                    <UserDataGrid users={users} onClickUser={setEditUser} isFetching={searchUsersQueryResults?.isFetching}/>
                     { editUser && <AddEditUserDialog user={editUser} closeFn={()=>setEditUser(undefined) } /> }
             </Box>
         </Content>

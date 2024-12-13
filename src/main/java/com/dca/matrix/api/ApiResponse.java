@@ -18,4 +18,5 @@ public class ApiResponse<T>
 	private ApiErrorCode errorCode;
 	private long timestamp;
 	private String endpoint;
+	private String authToken;
 }

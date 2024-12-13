@@ -6,15 +6,18 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import org.apache.logging.log4j.util.Strings;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 
 import com.dca.matrix.api.ApiErrorCode;
+import com.dca.matrix.authentication.AuthenticationService;
 import com.dca.matrix.exception.MatrixUncheckedException;
 import com.dca.matrix.exception.MatrixValidationException;
 import com.dca.matrix.matrix_case.MatrixCase;
 import com.dca.matrix.matrix_case.MatrixCaseRepository;
 import com.dca.matrix.matrix_entity.MatrixEntity;
 import com.dca.matrix.matrix_entity.MatrixEntityRepository;
+import com.dca.matrix.user.MatrixUser;
 
 import lombok.AllArgsConstructor;
 
@@ -25,10 +28,32 @@ public class TimelineServiceImpl implements TimelineService
 	private TimelineRepository timelineRepository;
 	private MatrixEntityRepository matrixEntityRepository;
 	private MatrixCaseRepository matrixCaseRespository;
+	private final AuthenticationService authenticationService;
 	
 	@Override
 	public TimelineDTO store(TimelineDTO timelineDTO)
 	{
+		MatrixUser currentUser = this.authenticationService.getCurrentUser();
+		if (timelineDTO.matrixCaseId() != null)
+		{
+			MatrixCase mCase = this.matrixCaseRespository.findById(timelineDTO.matrixCaseId())
+									.orElseThrow(()->new MatrixUncheckedException("Case with id " + timelineDTO.matrixCaseId() + " does not exist.",
+										null, ApiErrorCode.TIMELINE_DOES_NOT_EXIST));
+			
+			currentUser.canModify(mCase);
+		}
+		
+		List<String> fieldErrorList = new LinkedList<String>();
+		
+		if (Strings.isBlank(timelineDTO.name()))
+			fieldErrorList.add("Timeline name cannot be blank.");
+
+		if (timelineDTO.matrixCaseId() == null)
+			fieldErrorList.add("Timleine case id cannot be blank.");
+		
+		if (fieldErrorList.size() > 0)
+			throw new MatrixValidationException("Please correct the following errors:", fieldErrorList, ApiErrorCode.VALIDATION_ERROR);
+		
 		// check to make sure name is not blank
 		if (Strings.isBlank(timelineDTO.name()))
 			throw new MatrixValidationException("Please correct the following errors:", 
@@ -68,6 +93,10 @@ public class TimelineServiceImpl implements TimelineService
 				new MatrixUncheckedException("Timeline with id " + id + " does not exist.",
 						null, ApiErrorCode.TIMELINE_DOES_NOT_EXIST));
 		
+		MatrixUser currentUser = this.authenticationService.getCurrentUser();
+		
+		currentUser.canModify(t.getMatrixCase());
+		
 		return new TimelineDTO(t);
 	}
 
@@ -76,6 +105,9 @@ public class TimelineServiceImpl implements TimelineService
 	{
 		MatrixCase mcase = new MatrixCase();
 		mcase.setId(caseId);
+		
+		MatrixUser currentUser = this.authenticationService.getCurrentUser();
+		currentUser.canView(mcase);
 		
 		return this.timelineRepository.findByMatrixCaseOrderByName(mcase).stream().map(t->new TimelineDTO(t)).toList();
 	}

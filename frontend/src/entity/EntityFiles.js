@@ -8,21 +8,18 @@ import { apiGetFile } from "../api/file";
 import { useGetEntityFilesQuery, useRemoveEntityFileMutation } from "../api/EntityApi";
 import FileSearchDialog from "../file/FileSearchDialog";
 import { useDispatch } from "react-redux";
-import { handleQueryError } from "../api/ApiUtils";
 import { useEffect } from "react";
 import AddLinkSharp from "@mui/icons-material/AddLinkSharp";
 import { handleMutationResults } from "../api/ApiUtils";
 import { enqueueSnackbar } from "notistack";
 import RefreshIcon from '@mui/icons-material/Refresh';
 import { api } from "../api/BaseApi";
-import { useNavigate } from "react-router-dom";
+import { handleQueryResultsWithWaitMessage } from "../api/ApiUtils";
 
 const headers = ["File name", "Description", "Download", "Unlink"];
 
 export default function EntityFiles({entityId, unlink=true, sx={}})
 {
-    //const theme = useTheme();   
-    const navigate = useNavigate();
     const dispatch = useDispatch();
     const [showFileSearchDialog, setShowFileSearchDialog] = React.useState(false);
 
@@ -30,20 +27,19 @@ export default function EntityFiles({entityId, unlink=true, sx={}})
     // function to fetch entity files
     //
     const {refetch:refetchEntityFiles, ...entityFilesQueryResults} = useGetEntityFilesQuery(entityId);
-    const entityFiles = entityFilesQueryResults?.currentData?.payload;
+    const entityFiles = entityFilesQueryResults?.data?.payload;
     useEffect(() => {
-        if (entityFilesQueryResults.isError) 
-            handleQueryError(entityFilesQueryResults, dispatch, navigate);
-    }, [entityFilesQueryResults.isError]);
+        handleQueryResultsWithWaitMessage(entityFilesQueryResults, dispatch);
+    }, [entityFilesQueryResults.isFetching]);
 
     //
     // code to unlink a file
     //
     const [removeEntityFile, removeEntityFileMutationState] = useRemoveEntityFileMutation();
-    handleMutationResults(removeEntityFileMutationState, dispatch, navigate, false, "Removing file link...",
-        "Error removing file link", 
+    handleMutationResults(removeEntityFileMutationState, dispatch,
         ()=>enqueueSnackbar("Removed link to file " + removeEntityFileMutationState.data.payload.mfile.name, {variant:'success'}),
-        ()=>refetchEntityFiles()); 
+        ()=>enqueueSnackbar("Unable to removed link to file " + removeEntityFileMutationState.data.payload.mfile.name, {variant:'error'})
+    );
 
     function unlinkFile(event, entityFileId)
     {

@@ -30,7 +30,6 @@ import CenteredCircularProgress from '../util/CenteredCircularProgress';
 import UnexpectedError from './UnexpectedError';
 import { useSelector } from 'react-redux';
 import { selectSystemInErrorState } from '../state/AppSlice';
-import { selectDarkTheme } from '../state/AppSlice';
 import { useDispatch } from 'react-redux';
 import { selectCurrentUser } from '../state/AppSlice';
 
@@ -84,8 +83,7 @@ export default function Main()
     // application state
     const systemInErrorState = useSelector(selectSystemInErrorState);
     const currentUser = useSelector(selectCurrentUser);
-console.log("=============================");
-console.log(currentUser);
+
     React.useEffect(() => {
         if (!currentUser)
             navigate('/login');
@@ -96,6 +94,7 @@ console.log(currentUser);
 
     var links = [];
 
+    console.log("currentUser",currentUser);
     if (currentUser) 
     {
         //if (currentUser.isAdmin)
@@ -122,8 +121,9 @@ console.log(currentUser);
     };
 
     //const theme = (currentUser && currentUser.darkTheme) ? darkTheme : lightTheme;
-    const theme =  useSelector(selectDarkTheme) ? darkTheme : lightTheme;
+    const theme =  currentUser?.darkTheme ? darkTheme : lightTheme;
 
+    console.log(theme);
     return (
         <ThemeProvider theme={theme}>
             {systemInErrorState && <UnexpectedError/>}

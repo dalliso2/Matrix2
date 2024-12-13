@@ -1,4 +1,6 @@
+import { setCurrentUser } from '../state/AppSlice';
 import { api } from './BaseApi';
+import { onQueryStartedHandler, getTags } from './ApiUtils';
 
 const userApi = api.enhanceEndpoints({addTagTypes:['User']}).injectEndpoints({
     //entityTypes: ['currentUser','user'],
@@ -10,18 +12,9 @@ const userApi = api.enhanceEndpoints({addTagTypes:['User']}).injectEndpoints({
                 console.log("login",response);
                 return response || [];
             },
-            providesTags: (result, error, arg) => {
-                console.log("login - providesTags",result.payload?.user?[{type: 'User', id:result.payload.user.id}]:[]);
-                return result.payload?.user?[{type: 'User', id:result.payload.user.id}]:[]
-            },
+            //providesTags: (result, error, arg) => result?.payload?[{type: 'User', id:result.payload.user.id}]:[],
+            providesTags: (result, error, arg) => getTags('User', result?.payload?.user?.id),
         }),   
-        refreshCredentials: builder.query({
-            query: (credentials) => ({url: '/refresh-credentials', method: 'POST', body: credentials}),
-            transformResponse: (response, meta, arg) => 
-            {
-                return response || [];
-            },
-        }),       
         searchUsers: builder.query({
             query: (filter) => ({url:`/user/search/${filter}`}),
             transformResponse: (response, meta, arg) => 
@@ -29,38 +22,43 @@ const userApi = api.enhanceEndpoints({addTagTypes:['User']}).injectEndpoints({
                 console.log("searchUsers",response);    
                 return response || [];
             },
-            providesTags: (result, error, arg) => 
-            {
-                console.log("searchUsers - providesTags",result.payload?.map(user => ({type: 'User', id:user.id})));
-                return result.payload?.map(user => ({type: 'User', id:user.id}))
-            },
+            providesTags: (result, error, arg) => result?.payload?result.payload.map(user => ({type: 'User', id:user.id})):[],
+            keepUnusedDataFor: 300,
+            async onQueryStarted(filter, { dispatch, queryFulfilled, requestId }) {
+                onQueryStartedHandler(queryFulfilled, dispatch, requestId, undefined);
+            }
         }),
-        getUser: builder.query({
-            query: (id) => ({url:`/user/${id}`}),
-            transformResponse: (response, meta, arg) => 
-            {
-                console.log("getUser",response);
-                return response;
-            },
-            providesTags: (result, error, id) => result?[{type: 'User', id:result.payload.id}]:[],
-            keepUnusedDataFor: 300
-        }),
-        getCurrentUser: builder.query({
-            query: () => '/user/current',
-            transformResponse: (response, meta, arg) => 
-            {
-                console.log("getCurrentUser",response);
-                return response;
-            },
-            providesTags: (result, error, id) => result?[{type: 'User', id:result.payload.id}]:[],
-        }),
+        // getUser: builder.query({
+        //     query: (id) => ({url:`/user/${id}`}),
+        //     transformResponse: (response, meta, arg) => 
+        //     {
+        //         console.log("getUser",response);
+        //         return response;
+        //     },
+        //     providesTags: (result, error, id) => result?[{type: 'User', id:result.payload.id}]:[],
+        //     async onQueryStarted(id , { dispatch, queryFulfilled, requestId }) {
+        //         onQueryStartedHandler(queryFulfilled, dispatch, requestId, undefined);
+        //     },
+        //     keepUnusedDataFor: 300
+        // }),
+        // getCurrentUser: builder.query({
+        //     query: () => '/user/current',
+        //     transformResponse: (response, meta, arg) => 
+        //     {
+        //         console.log("getCurrentUser",response);
+        //         return response;
+        //     },
+        //     async onQueryStarted(undefined , { dispatch, queryFulfilled, requestId }) {
+        //         onQueryStartedHandler(queryFulfilled, dispatch, requestId );
+        //     },
+        //     providesTags: (result, error, id) => result?.payload?.id?[{type: 'User', id:result.payload.id}]:[],
+        // }),
         storeUser: builder.mutation({
-            query: (data) => ({url: '/user/store', method: 'POST', body: data}),
-            invalidatesTags: (result, error, arg) => 
-            {
-                console.log("storeUser - invalidating tags ",result.payload?[{type: 'User', id:result.payload.id}]:[]);
-                return result.payload?[{type: 'User', id:result.payload.id}]:[];
+            query: (userData) => ({url: '/user/store', method: 'POST', body: userData}),
+            async onQueryStarted(userData , { dispatch, queryFulfilled, requestId }) {
+                onQueryStartedHandler(queryFulfilled, dispatch, requestId, "Saving user " + userData.username);
             },
+            invalidatesTags: (result, error, arg) => result?.payload?[{type: 'User', id:result.payload.id}]:[],
         }),
         setUserDarkTheme: builder.mutation({
             query: (darkThemeBoolean) => ({
@@ -68,15 +66,11 @@ const userApi = api.enhanceEndpoints({addTagTypes:['User']}).injectEndpoints({
                 method: 'PATCH',
                 body: { darkTheme: darkThemeBoolean },
             }),
-            transformResponse: (response, meta, arg) => 
-            {
-                console.log("setUserDarkTheme",response);
-                return response;
-            },
-            invalidatesTags: (result, error, arg) => 
-            {
-                console.log("setUserDarkTheme - invalidating tags ",result.payload?[{type: 'User', id:user.id}]:[]);
-                return result.payload?[{type: 'User', id:user.id}]:[]
+            invalidatesTags: (result, error, arg) => result?.payload?[{type: 'User', id:result.payload.id}]:[],
+            async onQueryStarted(arg,{queryFulfilled, dispatch, requestId, getState}) {
+                // optimistic update
+                dispatch(setCurrentUser({...getState().app.currentUser, darkTheme:arg}));
+                onQueryStartedHandler(queryFulfilled, dispatch, requestId);
             },
         }),
         updatePassword: builder.mutation({
@@ -85,24 +79,22 @@ const userApi = api.enhanceEndpoints({addTagTypes:['User']}).injectEndpoints({
                 method: 'PATCH',
                 body: data,
             }),
-            transformResponse: (response, meta, arg) => 
-            {
-                console.log("updatePassword",response);
-                return response;
-            },            
-            invalidatesTags: (result, error, arg) => result.payload?[{type: 'User', id:user.id}]:[],
+            async onQueryStarted(data,{queryFulfilled, dispatch, requestId, getState}) {
+                onQueryStartedHandler(queryFulfilled, dispatch, requestId);
+            },
+            invalidatesTags: (result, error, arg) => result?.payload?[{type: 'User', id:user.id}]:[],
         }),
     }),
     overrideExisting: false,
 });
 
 export const {  useLazySearchUsersQuery,
-                useLazyGetCurrentUserQuery, 
-                useGetCurrentUserQuery, 
+                //useLazyGetCurrentUserQuery, 
+                //useGetCurrentUserQuery, 
                 useSetUserDarkThemeMutation, 
                 useUpdatePasswordMutation,
                 useStoreUserMutation,
                 useGetUserQuery,
                 useLazyLoginQuery,
-                useLazyRefreshCredentialsQuery
+                //useLazyRefreshCredentialsQuery
                 } = userApi;

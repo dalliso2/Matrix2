@@ -16,7 +16,6 @@ import { useStoreUserMutation } from '../../api/UserApi';
 import { handleMutationResults, handleQueryResultsWithWaitMessage } from '../../api/ApiUtils';
 import { validate } from '../../validation/validation';
 import { enqueueSnackbar } from 'notistack';
-import { useNavigate } from 'react-router-dom';
 import { selectCurrentUser } from '../../state/AppSlice';
 import { useSelector } from 'react-redux';
 import { setCurrentUser } from '../../state/AppSlice';
@@ -43,27 +42,25 @@ const AddEditUserDialog = ({ user, closeFn }) =>
 {
     const theme = useTheme();
     const dispatch = useDispatch();
-    const navigate = useNavigate();
     const currentUser = useSelector(selectCurrentUser);
     const [userData, setUserData] = useState({...user, modified:false});
 
-    const { data:envelope, ...allAgenciesQueryStatus } = useGetAllAgenciesQuery();
+    const allAgenciesQueryResults = useGetAllAgenciesQuery();
     useEffect(() => {
-        handleQueryResultsWithWaitMessage(allAgenciesQueryStatus, dispatch, navigate, "Loading agencies...");
-    }, [allAgenciesQueryStatus.isSuccess, allAgenciesQueryStatus.isFetching, allAgenciesQueryStatus.isError]);
-    const allAgencies = envelope?.payload;
+        handleQueryResultsWithWaitMessage(allAgenciesQueryResults, dispatch, "Loading agencies...");
+    }, [allAgenciesQueryResults?.isFetching]);
+    console.log("AddEditUserDialog");
+    console.log(allAgenciesQueryResults);
+    const allAgencies = allAgenciesQueryResults?.currentData?.payload;
 
-    const [storeUser,mutationState] = useStoreUserMutation();
+    const [storeUser, mutationState] = useStoreUserMutation();
     handleMutationResults(mutationState, dispatch,
                             ()=>{
                                 const updatedUserData = mutationState.data.payload;
                                 if (updatedUserData.id === currentUser.id)
                                     dispatch(setCurrentUser(updatedUserData));
                                 enqueueSnackbar((userData.id?"Updated":"Created") + " user: " + userData.username, {variant:'success'}); closeFn(); 
-                            },
-                            ()=>{ closeFn(); });
-
-console.log("userData",userData);
+                            });
 
     function change(event)
     {
@@ -95,7 +92,7 @@ console.log("userData",userData);
                 field.disabled = !!userData.id;
                 break;
             case 'profileImage':
-                field.onChange = id=>{console.log("id",id);setUserData(prev=>({...prev, profileImage:id, modified:true}));};
+                field.onChange = id=>{setUserData(prev=>({...prev, profileImage:id, modified:true}));};
                 break;
             case 'password':
                 field.onKeyDown = id=>(event) => 
@@ -110,7 +107,6 @@ console.log("userData",userData);
     });
 
     const nonImageFields = fields.filter(field => field.type != 'PROFILE_IMAGE');
-    console.log("userData",userData);
     return (
         <div>
         <Dialog open={true} fullWidth maxWidth='md'>

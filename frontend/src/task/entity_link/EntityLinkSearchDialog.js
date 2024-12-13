@@ -13,7 +13,7 @@ import Dialog from "@mui/material/Dialog";
 import DialogTitle from "@mui/material/DialogTitle";
 import DialogContent from "@mui/material/DialogContent";
 import DialogActions from "@mui/material/DialogActions";
-import { handleQueryError } from "../../api/ApiUtils";
+import { handleQueryResultsWithWaitMessage } from "../../api/ApiUtils";
 import LoadingSkeleton from "../../util/LoadingSkeleton";
 import { useEffect } from "react";
 import { useGetAllEntityDefinitionsQuery } from "../../api/EntityDefinitionApi";
@@ -48,27 +48,25 @@ export default function EntityLinkSearchDialog({ taskId, closeFn})
     //
     // load entity definitions
     //
-    const { data:envelope, refetch, ...entityDefinitionQueryStatus } = useGetAllEntityDefinitionsQuery();
-    const entityDefinitions = envelope?envelope.payload:[];
+    const { refetch, ...entityDefinitionQueryResults } = useGetAllEntityDefinitionsQuery();
+    const entityDefinitions = entityDefinitionQueryResults?.data?.payload || [];
 
     //
     // Task Search function
     //
-    const [searchUnlinkedEntitiesFn, {data:unlinkedEntitiesData, isFetching, isSuccess, ...unlinkedEntitiesSearchResults}] = useLazySearchUnlinkedEntitiesForTaskQuery();
-    const unlinkedEntities = unlinkedEntitiesData?.payload || [];
+    const [searchUnlinkedEntitiesFn, unlinkedEntitiesSearchResults] = useLazySearchUnlinkedEntitiesForTaskQuery();
+    const unlinkedEntities = unlinkedEntitiesSearchResults?.data?.payload || [];
 
     useEffect(() => {
-        if (entityDefinitionQueryStatus.isError) 
-            handleQueryError(entityDefinitionQueryStatus, dispatch);
-        if (unlinkedEntitiesSearchResults.isError) 
-            handleQueryError(unlinkedEntitiesSearchResults, dispatch);
-    }, [entityDefinitionQueryStatus.isError,unlinkedEntitiesSearchResults.isError]);
+        handleQueryResultsWithWaitMessage(unlinkedEntitiesSearchResults, dispatch);
+        handleQueryResultsWithWaitMessage(entityDefinitionQueryResults, dispatch);
+    }, [entityDefinitionQueryResults.isFetching,unlinkedEntitiesSearchResults.isFetching]);
 
     //
     // Save task-entity api function
     //
     const [storeTaskEntity, storeTaskEntityMutationState] = useStoreTaskEntityMutation();
-    handleMutationResults(storeTaskEntityMutationState, dispatch, navigate, false, "","Error linking task and entity",
+    handleMutationResults(storeTaskEntityMutationState, dispatch,
         ()=>enqueueSnackbar("Successfully linked task to " + getTitle(entityDefinitions,storeTaskEntityMutationState.data.payload.matrixEntity), 
             {variant:'success'}),
         ()=>{});
@@ -179,9 +177,9 @@ export default function EntityLinkSearchDialog({ taskId, closeFn})
                         <Button onClick={()=>searchUnlinkedEntitiesFn({taskId, caseId:activeCase.id, entityDefinitionIds:selectedEntityDefIdArray, searchText})}>Search</Button>
                     </Box> 
                 </Box>
-                <Box sx={{display:'flex', flexDirection:'column', flexGrow:1, overflow:isFetching?'hidden':'auto'}}>
+                <Box sx={{display:'flex', flexDirection:'column', flexGrow:1, overflow:unlinkedEntitiesSearchResults.isFetching?'hidden':'auto'}}>
                     {
-                        isFetching?<LoadingSkeleton />
+                        unlinkedEntitiesSearchResults.isFetching?<LoadingSkeleton />
                         :relatedEntityGroupsRows?.length? 
                             relatedEntityGroupsRows.map(group=>
                             {
@@ -191,7 +189,7 @@ export default function EntityLinkSearchDialog({ taskId, closeFn})
                                     </Box>
                                 );
                             })
-                            :isSuccess &&   <Box sx={{display:'flex', flexDirection:'column', justifyContent:'center', flexGrow:1}}>
+                            :unlinkedEntitiesSearchResults.isSuccess &&   <Box sx={{display:'flex', flexDirection:'column', justifyContent:'center', flexGrow:1}}>
                                                 <h2 style={{p:0, textAlign:'center', opacity:0.5}}>No entities found.</h2>
                                             </Box> 
                     } 

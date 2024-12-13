@@ -11,8 +11,8 @@ import { Divider } from '@mui/material';
 import { useSelector } from 'react-redux';
 import { setSelectedEntityDefinitionId, selectSelectedEntityDefinitionId } from '../../state/AppSlice';
 import { useDispatch } from 'react-redux';
-import { handleQueryError } from '../../api/ApiUtils';
 import { useNavigate } from 'react-router-dom';
+import { handleQueryResultsWithWaitMessage } from '../../api/ApiUtils';
 
 export default function EntityDefinitionList({setSelectedEntityDefinition})
 {
@@ -20,13 +20,18 @@ export default function EntityDefinitionList({setSelectedEntityDefinition})
     const navigate = useNavigate();
     const selectedEntityDefinitionId = useSelector(selectSelectedEntityDefinitionId);
 
-    const { data:envelope, ...entityDefinitionQueryStatus } = useGetAllEntityDefinitionsQuery();
-    useEffect(() => {
-        if (entityDefinitionQueryStatus.isError) 
-            handleQueryError(entityDefinitionQueryStatus, dispatch, navigate);
-    }, [entityDefinitionQueryStatus.isError]);
+    const entityDefinitionQueryResults = useGetAllEntityDefinitionsQuery();
 
-    const entityDefinitions = envelope?.payload;
+    useEffect(() => {
+        handleQueryResultsWithWaitMessage(entityDefinitionQueryResults, dispatch);
+        if (!entityDefinitionQueryResults.isFetching && entityDefinitionQueryResults.isSuccess && selectedEntityDefinitionId)
+        {
+            const entityDef = entityDefinitionQueryResults?.currentData?.payload.find(entityDef=>entityDef.id === selectedEntityDefinitionId);
+            setSelectedEntityDefinition(JSON.parse(JSON.stringify(entityDef)));
+        }
+    }, [entityDefinitionQueryResults.isFetching]);
+
+    const entityDefinitions = entityDefinitionQueryResults?.currentData?.payload;
     
     return (
         <>
