@@ -58,9 +58,10 @@ export default function LinkChartsList()
     }
 
     const rowValues = linkCharts && linkCharts.map((chart) => 
-        ({rowProperties: {id:chart.id, onClick:()=>rowClickFn(chart)},
+        ({rowProperties: {id:chart.id, key:chart.id, onClick:()=>rowClickFn(chart)},
             sx:{cursor:'pointer', '&:hover':{backgroundColor:theme.palette.action.hover}},
-            values:[{value:[chart.name]}, {value:[chart.description]}]}));
+            values:[{value:[chart.name], cellProperties:{key:chart.id+"name"}}, 
+                    {value:[chart.description], cellProperties:{key:chart.id+"description"}}]}));
 
     return (
         <Box sx={{display:'flex', flexDirection:'column', width:'100%'}}>

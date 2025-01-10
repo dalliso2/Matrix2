@@ -32,6 +32,7 @@ import { enqueueSnackbar } from "notistack";
 import { getTitle } from "../../util/utils";
 import { api } from "../../api/BaseApi";
 import { useNavigate } from "react-router-dom";
+import Tooltip from "@mui/material/Tooltip";
 
 export default function EntityLinkDialog({entityObj, entityDefinitions, closeFn})
 {

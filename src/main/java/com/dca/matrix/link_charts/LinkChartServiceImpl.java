@@ -133,7 +133,7 @@ public class LinkChartServiceImpl implements LinkChartService
 		this.authService.verifyUserCanModify(matrixCase.getId());
 
 		linkChart.setName(nameDescriptionMessage.name());
-		linkChart.setDescription(nameDescriptionMessage.Description());
+		linkChart.setDescription(nameDescriptionMessage.description());
 		linkChart.setMatrixCase(matrixCase);
 		
 		linkChart = this.linkChartRepository.save(linkChart);

@@ -29,6 +29,7 @@ import Fab from '@mui/material/Fab';
 import MarginTwoToneIcon from '@mui/icons-material/MarginTwoTone';
 import coseBilkent from 'cytoscape-cose-bilkent';
 import cytoscape from 'cytoscape';
+import LinkChartRefreshDataButton from './LinkChartRefreshDataButton';
 
 cytoscape.use(coseBilkent);
 
@@ -116,12 +117,12 @@ export default function LinkChart({cyRef, linkChartModifiedRef, linkChartTabData
     }, [theme]);
 
     // get all possible link chart entities for the active case
-    const getAllLinkChartEntitiesForCaseResults = useGetAllLinkChartEntitiesForCaseQuery(activeCase.id);
+    const { refetch:refreshEntities, ...getAllLinkChartEntitiesForCaseResults } = useGetAllLinkChartEntitiesForCaseQuery(activeCase.id);
     const linkChartEntities = getAllLinkChartEntitiesForCaseResults?.data?.payload;
     // 
     // load all possible entity relationships for the active case
     //
-    const getAllEntityRelationshipsForCaseResults = useGetCaseEntityRelationshipsQuery(activeCase.id);
+    const { refetch:refreshRelationships, ...getAllEntityRelationshipsForCaseResults } = useGetCaseEntityRelationshipsQuery(activeCase.id);
     const linkChartRelationships = getAllEntityRelationshipsForCaseResults?.data?.payload;
     // load link chart data
     const getLinkChartResults = useGetLinkChartQuery(linkChartTabData.id);
@@ -174,16 +175,21 @@ export default function LinkChart({cyRef, linkChartModifiedRef, linkChartTabData
                             ()=>{
                                     linkChartModifiedRef.current=false;
                                     enqueueSnackbar( "Saved link chart " + linkChartData.name, {variant:'success'});
+                                    setNextRoute(undefined);
                             }
                         );
 
+
+    console.log("LinkChart 1", linkChartData);
     function saveLinkChartFn()
     {
+        console.log("LinkChart 2", linkChartData);
         saveTabChartData(); 
         linkChartModifiedRef.current=false;
         const ld = {
             id:linkChartTabData.id,
-            name: linkChartTabData?.title,
+            name: linkChartData?.name,
+            description: linkChartData?.description,
             matrixCase: activeCase.id, 
             pan:JSON.stringify(cyRef.current.pan()),
             zoom:cyRef.current.zoom(),
@@ -191,7 +197,9 @@ export default function LinkChart({cyRef, linkChartModifiedRef, linkChartTabData
             styleSheet:JSON.stringify(cyRef.current.style().json())
         };
 
+        console.log("storeLinkChart", ld);  
         storeLinkChart(ld);
+
     }
 
     // set the function reference so the link chart can be saved from the tab component
@@ -235,7 +243,7 @@ export default function LinkChart({cyRef, linkChartModifiedRef, linkChartTabData
                                     .filter(rel2 => !existingEdges.find(edge=> edge.source==rel2.parentId && edge.target == rel2.childId))
                                     .map(relationship => ( {data:    {  source: relationship.parentId.toString(), 
                                                                         target: relationship.childId.toString(),
-                                                                        label: relationship.description?.length && relationship.description,
+                                                                        label: relationship.description?.length?relationship.description:undefined,
                                                                     }} ));
 
         cyRef.current.add(elements);    
@@ -252,6 +260,12 @@ export default function LinkChart({cyRef, linkChartModifiedRef, linkChartTabData
         node.style('label', entity.__title);
     }
 
+    function refreshData()
+    {
+        refreshEntities();
+        refreshRelationships();
+    }
+
     const layout = {
         name: 'cose-bilkent',
         nodeDimensionsIncludeLabels: true,
@@ -259,7 +273,7 @@ export default function LinkChart({cyRef, linkChartModifiedRef, linkChartTabData
         fit:true,
         tile:true,
         randomize: true,
-        nodeRepulsion: 100000000,
+        nodeRepulsion: 1000000,
     }
 
     return  <>
@@ -273,6 +287,7 @@ export default function LinkChart({cyRef, linkChartModifiedRef, linkChartTabData
                                     />
                         <LinkChartButtonContainer>
                             <LinkChartEditEntitiesButton openFn={()=>setShowLinkChartEditEntitiesDialog(true)}/>
+                            <LinkChartRefreshDataButton refreshFn={refreshData}/>
                             <LinkChartEditButton linkChartObj={linkChartData}/>
                             <LinkChartSaveButton saveLinkChartFn={saveLinkChartFn}/>
                             <Fab color="primary" aria-label="Layout" 

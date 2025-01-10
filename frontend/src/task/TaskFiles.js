@@ -23,12 +23,15 @@ import { selectActiveCase } from "../state/AppSlice";
 import { useStoreFilesMutation } from "../api/FileApi";
 import { useNavigate } from "react-router-dom";
 import Tooltip from "@mui/material/Tooltip";
+import { apiGetFile } from "../api/file";
+import { selectAuthToken } from "../state/AppSlice";
 
 const headers = ["File name", "Description", "Download", "Unlink"];
 
 export default function TaskFiles({taskId, unlink=true, sx={}})
 {
     const dispatch = useDispatch();
+    const authToken = useSelector(selectAuthToken); 
     const navigate = useNavigate();
 
     //const [entityFiles,setEntityFiles] = useState([]);
@@ -88,7 +91,7 @@ export default function TaskFiles({taskId, unlink=true, sx={}})
 
     async function downloadFile(fileId, fileName)
     {
-        await apiGetFile(fileId,fileName);
+        await apiGetFile(authToken,fileId,fileName);
     }
 
     const rows = taskFiles && taskFiles.map((taskFile) => {

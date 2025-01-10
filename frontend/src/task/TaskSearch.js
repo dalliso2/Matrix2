@@ -79,14 +79,14 @@ export default function TaskSearch({tabDataId})
         {
             const assignedTo = currentCaseUsers && currentCaseUsers.find(user=>user.userId===task.assignedTo);
             const assignedToString = assignedTo?(assignedTo.lastName + ", " + assignedTo.firstName) : "Unassigned";
-            return { rowProperties:{id:task.id, onClick:()=>addTask(task)},     
+            return { rowProperties:{id:task.id, key:task.id+"row",onClick:()=>addTask(task)},     
                         sx:{cursor:'pointer', '&:hover':{backgroundColor:theme.palette.action.hover}},
                         values:[
-                        {sx:{textAlign:'center'},value:[task.caseTaskId],},
-                        {value:[task.title],}, 
-                        {value:[task.status && task.status.replaceAll('_', ' ')],},
-                        {value:[task.dueDateTime && dayjs(task.dueDateTime).format(dateFormat)],}, 
-                        {value:[assignedToString]}]} 
+                        {sx:{textAlign:'center'},value:[task.caseTaskId],cellProperties:{key:task.caseTaskId + "taskNumber"}},
+                        {value:[task.title],cellProperties:{key:task.caseTaskId + "taskTitle"}}, 
+                        {value:[task.status && task.status.replaceAll('_', ' ')],cellProperties:{key:task.caseTaskId + "taskStatus"}},
+                        {value:[task.dueDateTime && dayjs(task.dueDateTime).format(dateFormat)],cellProperties:{key:task.caseTaskId + "dueDateTime"}}, 
+                        {value:[assignedToString],cellProperties:{key:task.caseTaskId + "taskAssignedTo"}}]} 
         });
 
     return (

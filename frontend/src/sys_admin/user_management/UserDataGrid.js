@@ -10,6 +10,10 @@ import { TEXT, PROFILE_IMAGE } from "../../util/PropertyType";
 import Grid from "../../util/Grid";
 import { useTheme } from "@mui/material";
 import { getListComponent } from "../../util/DisplayComponentFactory";
+import { useGetAllAgenciesQuery } from '../../api/AgencyApi';
+import { handleQueryResultsWithWaitMessage } from '../../api/ApiUtils';
+import { useEffect } from 'react';
+import { useDispatch } from 'react-redux';
 
 const emptyEntity = 
 { 
@@ -24,6 +28,15 @@ const columnTypes = [TEXT,TEXT,TEXT,PROFILE_IMAGE, TEXT,TEXT,TEXT,TEXT,TEXT];
 
 export default function UserDataGrid({users, onClickUser}) 
 {
+    console.log("UserDataGrid: users=", users);
+    const dispatch = useDispatch();
+    const allAgencyQueryResults = useGetAllAgenciesQuery();
+    const allAgencies = allAgencyQueryResults?.data?.payload;
+
+    useEffect(() => {
+        handleQueryResultsWithWaitMessage(allAgencyQueryResults, dispatch);
+    }, [allAgencyQueryResults?.isFetching]);
+
     const theme = useTheme();
     const rowValues = users && users.map((user) => {
         return {rowProperties:{ id:user.id, onClick: ()=>onClickUser(user)},
@@ -31,7 +44,7 @@ export default function UserDataGrid({users, onClickUser})
                 values:[{value:[user.username]}, {value:[user.lastName]}, {value:[user.firstName]}, 
                 {value:user.profileImage && [getListComponent(PROFILE_IMAGE, [user.profileImage])]},
                 {value:[user.email]},{value:[user.cellNumber]}, {value:[user.workNumber]}, 
-                {value:[user.agency?.acronym]},{value:[user.isAdmin?"Yes":"No"]}]}});
+                {value:[allAgencies.find(agency=>agency.id === user.agency)?.name]},{value:[user.isAdmin?"Yes":"No"]}]}});
 
     return (
             <Grid columnHeadings={columnHeadings} rowValues={rowValues}/>

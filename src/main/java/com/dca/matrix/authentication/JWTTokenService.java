@@ -18,7 +18,7 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 public class JWTTokenService
 {
-	private static final Duration TOKEN_VALID_DURATION = Duration.buildByMinutes(10);
+	private static final Duration TOKEN_VALID_DURATION = Duration.buildByMinutes(15);
 	
 	private final Algorithm hmac512;
 	private final JWTVerifier verifier;

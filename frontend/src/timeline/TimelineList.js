@@ -16,6 +16,7 @@ import AddEditTimelineDialog from './AddEditTimelineDialog';
 import { addTimelineTab } from '../state/AppSlice';
 import { useNavigate } from 'react-router-dom';
 import { handleQueryResultsWithWaitMessage } from '../api/ApiUtils';
+import Tooltip from '@mui/material/Tooltip';
 
 const columnHeadings = ["Name", "Description"];
 const columnTypes = [TEXT, TEXT];

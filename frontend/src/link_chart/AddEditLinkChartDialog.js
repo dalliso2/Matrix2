@@ -13,11 +13,10 @@ import { useDispatch } from "react-redux";
 import { handleMutationResults } from "../api/ApiUtils";
 import { useUpdateLinkChartNameDescriptionMutation } from "../api/LinkChartApi";
 import { addLinkChartTab, updateLinkChartTabTitle } from "../state/AppSlice";
-import { useNavigate } from "react-router-dom";
 
 const fields = [
     {   name: 'id', label: 'id', type: 'hidden', required: false },
-    {   name: 'name', label: 'Name', type: TEXT, required: true, onChange: (event) => change(event) },
+    {   name: 'name', label: 'Name', type: TEXT, maxLength:40, required: true, onChange: (event) => change(event) },
     {   name: 'description', label: 'Description', type: MULTILINE_TEXT, rows:4, maxLength:255, required: false, onChange: (event) => change(event) }
 ];
 
@@ -25,9 +24,9 @@ export default function AddEditLinkChartDialog({linkChartObj, closeFn})
 { 
     const theme = useTheme();    
     const dispatch = useDispatch();
-    const navigate = useNavigate();
-    const [linkChartData, setLinkChartData] = useState({id:linkChartObj.id, matrixCase:linkChartObj.matrixCase, name:linkChartObj.name, description:linkChartObj.description});
     
+    const [linkChartData, setLinkChartData] = useState({id:linkChartObj.id, matrixCase:linkChartObj.matrixCase, name:linkChartObj.name, description:linkChartObj.description});
+    console.log(linkChartData);
     const [updateLinkChart, mutationState] = useUpdateLinkChartNameDescriptionMutation();
     handleMutationResults(mutationState, 
                             dispatch, 

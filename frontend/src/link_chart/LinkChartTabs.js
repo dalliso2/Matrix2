@@ -91,6 +91,11 @@ export default function LinkChartTabs()
 
         if (closeTabId >= 0)
             closeTab(closeTabId);
+        if (nextTab >= 0)
+        {
+            dispatch(setCurrentLinkChartTab(nextTab));
+            setNextTab(()=>-1);
+        }
     }
 
     function closeTab(tabId)
@@ -107,11 +112,17 @@ export default function LinkChartTabs()
 
     function dontSaveLinkChart()
     {
+        linkChartModifiedRef.current=false;
         if (closeTabId >= 0)
         {
             setCloseTabId(-1);
             closeTab(closeTabId);
         }
+        if (nextTab >= 0)
+        {
+            dispatch(setCurrentLinkChartTab(nextTab));
+            setNextTab(()=>-1);
+        }  
     }
 
     // first tab is always the list of link charts

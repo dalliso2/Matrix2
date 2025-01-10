@@ -43,7 +43,7 @@ export default function UserManagement()
     }, []);
 
     return (
-        <Content sx={{width:'90%'}}>
+        <Content sx={{width:'98%'}}>
             <Box sx={{ position:'relative', width:'100%', maxHeight:'100%', display: 'flex', flexDirection:'column' }}>
                 <Box sx={{ position:'relative',display:'flex', justifyContent:'flex-end', padding:'5px', flexGrow:0}}>
                     <Button sx={{ mr:1, p:0, alignSelf:'flex-end'}} onClick={() => setEditUser({}) } >Add User</Button>

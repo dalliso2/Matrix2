@@ -1,5 +1,6 @@
 import { api } from './BaseApi';
 import { onQueryStartedHandler } from './ApiUtils';
+import { current } from '@reduxjs/toolkit';
 
 const LinkChartApi = api.injectEndpoints({
     entityTypes: ['linkChart'],
@@ -20,6 +21,12 @@ const LinkChartApi = api.injectEndpoints({
                 return ({url: '/link_chart/update_name_description', method: 'POST', body: data})
             },
             async onQueryStarted(data, { dispatch, queryFulfilled, requestId }) {
+                const patchLinkChartCache = dispatch(api.util.updateQueryData('getLinkChart', data.id, (draft) => {
+                    console.log(current(draft));
+                    draft.payload.name = data.name;
+                    draft.payload.description = data.description;
+                }));
+
                 onQueryStartedHandler(queryFulfilled, dispatch, requestId, "Saving link chart..." );
             },
             invalidatesTags: (result, error, arg) => [{type: 'linkChartListItem', id:result?.id}],

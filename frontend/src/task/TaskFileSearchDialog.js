@@ -34,8 +34,7 @@ export default function TaskFileSearchDialog({taskId, closeFn})
 
     const [addTaskFiles, addFilesToTaskMutationState] = useAddTaskFilesMutation();
     
-    handleMutationResults(addFilesToTaskMutationState, dispatch, navigate, false, "Saving link to file..",
-        "Error linking file to task", 
+    handleMutationResults(addFilesToTaskMutationState, dispatch, 
         ()=>addFilesToTaskMutationState.data.payload.forEach(taskFile=>enqueueSnackbar("Added link to file: " + taskFile.matrixFile.name, {variant:'success'})),
         ()=>{ });
 

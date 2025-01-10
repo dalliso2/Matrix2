@@ -6,7 +6,8 @@ export default function NewLinkChartDialog({  })
 {
     return (
         <Dialog open={true} maxWidth='sm' fullWidth={true} >
-            <DialogTitle>New Link Chart</DialogTitle>
+            <DialogTitle sx={{backgroundColor:theme.palette.primary.main,color:theme.palette.primary.contrastText, 
+                borderColor: theme.palette.background.default, }}>New Link Chart</DialogTitle>
             <DialogContent>
                 <Box sx={{p:1}}>
                     <TextField label="Name" fullWidth/>
