@@ -54,9 +54,6 @@ function getItem(entityDefinitions, entity)
 
 function MTimeline({ timelineData, timelineEntities, entityDefinitions, storeTimeline, timelineTabData }) 
 {
-    console.log(timelineTabData);
-    console.log(timelineEntities);
-    console.log(entityDefinitions);
     const theme = useTheme();
     const dispatch = useDispatch();
     const navigate = useNavigate();
@@ -86,7 +83,6 @@ function MTimeline({ timelineData, timelineEntities, entityDefinitions, storeTim
             timelineRef.current = new Timeline(timelineBoxRef.current, items, options);
 
             return ()=>{
-                console.log("DESTROY"); 
                 timelineRef.current.destroy();
                 timelineRef.current = undefined;
             }

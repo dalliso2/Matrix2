@@ -15,11 +15,6 @@ public class TaskEntityUtils
 		List<TaskEntity> currentList = null;
 		for (TaskEntity taskEntity: taskEntityList)
 		{
-			System.out.println("----------------------------");
-			System.out.println("----------------------------");
-			System.out.println("----------------------------");
-			System.out.println("----------------------------");
-			System.out.println(taskEntity);
 			if (ed == null || !taskEntity.getMatrixEntity().getEntityDefinition().equals(ed))
 			{
 				ed = taskEntity.getMatrixEntity().getEntityDefinition();

@@ -8,14 +8,17 @@ import java.util.Optional;
 import org.apache.logging.log4j.util.Strings;
 import org.springframework.http.HttpStatus;
 import org.springframework.jdbc.core.simple.JdbcClient;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 
 import com.dca.matrix.api.ApiErrorCode;
 import com.dca.matrix.authentication.AuthenticationService;
+import com.dca.matrix.authorization.AuthorizationService;
 import com.dca.matrix.exception.MatrixUncheckedException;
 import com.dca.matrix.exception.MatrixValidationException;
 import com.dca.matrix.user.MatrixUser;
 import com.dca.matrix.user.MatrixUserRepository;
+import com.dca.matrix.user.MatrixUserService;
 import com.dca.matrix.user_case_role.CaseRoleEnum;
 import com.dca.matrix.user_case_role.UserCaseKey;
 import com.dca.matrix.user_case_role.UserCaseRole;
@@ -23,21 +26,24 @@ import com.dca.matrix.user_case_role.UserCaseRoleRepository;
 
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
 @Service
 @RequiredArgsConstructor
-public class MatrixCaseServiceImpl implements MatixCaseService
+@Slf4j
+@Transactional
+public class MatrixCaseServiceImpl implements MatrixCaseService
 {
-	// initialized in the constructor by @RequiredArgsConstructor
 	private final AuthenticationService authenticationService;
+	private final AuthorizationService authorizationService;
 	private final MatrixCaseRepository matrixCaseRepository;
-	private final MatrixUserRepository matrixUserRepository;
+	//private final MatrixUserRepository matrixUserRepository;
+	private final MatrixUserService matrixUserService;
 	private final UserCaseRoleRepository userCaseRoleRepository;
 	private final MatrixUserRepository userRepository;
 	private final JdbcClient jdbcClient;
 	
 	@Override
-	@Transactional
 	public MatrixCase createUpdateCase(final MatrixCase matrixCase)
 	{
 		MatrixUser currentUser = this.authenticationService.getCurrentUser();
@@ -46,8 +52,8 @@ public class MatrixCaseServiceImpl implements MatixCaseService
 		if (matrixCase.getId() !=null)
 		{
 			existingCaseForId = this.matrixCaseRepository.findById(matrixCase.getId()).orElseThrow(()->
-			new MatrixValidationException("Case with id " + matrixCase.getId() + " does not exist.",
-					null, ApiErrorCode.CASE_DOES_NOT_EXIST));
+										new MatrixValidationException("Case with id " + matrixCase.getId() + " does not exist.",
+												null, ApiErrorCode.CASE_DOES_NOT_EXIST));
 			
 			matrixCase.setCreatedBy(existingCaseForId.getCreatedBy());
 			matrixCase.setCreateTime(existingCaseForId.getCreateTime());
@@ -61,8 +67,10 @@ public class MatrixCaseServiceImpl implements MatixCaseService
 //			throw new MatrixValidationException("Only case owner may update a case.",
 //					null, ApiErrorCode.NOT_AUTHORIZED);		
 		// check to make sure user can edit case
-		if (existingCaseForId != null)
-			currentUser.isCaseAdmin(existingCaseForId);	
+		if (existingCaseForId != null && !currentUser.getIsAdmin())
+		{
+			this.authorizationService.verifyUserIsCaseAdmin(matrixCase.getId());
+		}
 		
 		Optional<MatrixCase> existingCaseForNumberOpt = this.matrixCaseRepository.findByCaseNumber(matrixCase.getCaseNumber());
 		
@@ -89,7 +97,7 @@ public class MatrixCaseServiceImpl implements MatixCaseService
 		// if new case set the current user to the owner
 		if (existingCaseForId == null)
 		{
-			UserCaseRole ucr = new UserCaseRole(this.userRepository.findById(currentUser.getId()).get(), updatedCase, CaseRoleEnum.Owner);
+			UserCaseRole ucr = new UserCaseRole(this.userRepository.findById(currentUser.getId()).get(), updatedCase, CaseRoleEnum.Admin);
 			this.userCaseRoleRepository.save(ucr);
 		}
 		
@@ -97,53 +105,57 @@ public class MatrixCaseServiceImpl implements MatixCaseService
 	}
 
 	@Override
-	public MatrixCase addUpdateUser(Long userId, Long caseId, CaseRoleEnum role)
+	public UserCaseRole addUpdateUserToCase(Long userId, Long caseId, CaseRoleEnum role)
 	{
 		MatrixCase matrixCase = this.matrixCaseRepository.findById(caseId).orElseThrow(()->
 										new MatrixValidationException("Specified case with id " + caseId + " does not exist.",
 												null, ApiErrorCode.CASE_DOES_NOT_EXIST));
 		
-		// make sure current user is a case admin
-		this.authenticationService.getCurrentUser().isCaseAdmin(matrixCase);
+		// if the role being assigned is the case owner then make sure the current user is a system admin
+		if (role.equals(CaseRoleEnum.Admin))
+			this.authorizationService.verifyUserIsSystemAdmin();
+		// else other role is being assigned so verify that the current user is a system admin or case owner
+		else
+			this.authorizationService.verifyUserIsCaseAdmin(caseId);
 		
+		// load the users current role, if any
 		Optional<UserCaseRole> ucrOpt = this.userCaseRoleRepository.findById(new UserCaseKey(userId, caseId));
-		UserCaseRole ucr = null;
+		
+		// if a role exists for the user then update it
 		if (ucrOpt.isPresent())
 		{
-			ucr = ucrOpt.get();
+			UserCaseRole ucr = ucrOpt.get();
 			ucr.setCaseRole(role);
+			return this.userCaseRoleRepository.save(ucr);
 		}
+		// if no role exists then create it
 		else
 		{
-			MatrixUser user = this.matrixUserRepository.findById(userId).orElseThrow(()->
-										new MatrixValidationException("Specified user with id " + userId + " does not exist.",
-												null, ApiErrorCode.USER_DOES_NOT_EXIST));
-			
-			ucr = new UserCaseRole(user, matrixCase, role);
+			UserCaseRole ucr = new UserCaseRole();
+			ucr.setUser(this.matrixUserService.findById(userId));
+			ucr.setMatrixCase(matrixCase);
+			ucr.setCaseRole(role);
+			return this.userCaseRoleRepository.save(ucr);
 		}
-		
-		this.userCaseRoleRepository.save(ucr);
-		return ucr.getMatrixCase();
 	}
 
 	@Override
-	public MatrixCase removeUser(Long userId, Long caseId)
+	public UserCaseRole removeUser(Long userId, Long caseId)
 	{
-		MatrixCase matrixCase = this.matrixCaseRepository.findById(caseId).orElseThrow(()->
-										new MatrixValidationException("Specified case with id " + caseId + " does not exist.",
-												null, ApiErrorCode.CASE_DOES_NOT_EXIST));
-
-		// make sure current user can modify this case
-		this.authenticationService.getCurrentUser().isCaseAdmin(matrixCase);
-		
 		UserCaseRole ucr = this.userCaseRoleRepository.findById(new UserCaseKey(userId, caseId))
-									.orElseThrow(()->new MatrixValidationException("User was not assigned to specified case.",
-											null, ApiErrorCode.USER_NOT_ASSIGNED_TO_CASE));
+				.orElseThrow(()->new MatrixValidationException("User was not assigned to specified case.",
+						null, ApiErrorCode.USER_NOT_ASSIGNED_TO_CASE));
 		
-		MatrixCase roleCase = ucr.getMatrixCase();
+		// if the role being removed is the case admin then make sure the current user is a system admin
+		if (ucr.getCaseRole().equals(CaseRoleEnum.Admin))
+			this.authorizationService.verifyUserIsSystemAdmin();
+		// else other role is being assigned so verify that the current user is a system admin or case owner
+		else
+			this.authorizationService.verifyUserIsCaseAdmin(caseId);
+		
 		this.userCaseRoleRepository.delete(ucr);
 		
-		return roleCase;
+		return ucr;
 	}
 
 	@Override
@@ -182,8 +194,20 @@ public class MatrixCaseServiceImpl implements MatixCaseService
 											new MatrixValidationException("Case with id " + caseId + " does not exist.",
 													null, ApiErrorCode.CASE_DOES_NOT_EXIST));
 		// verify current user has access to this case
-		this.authenticationService.getCurrentUser().canView(mCase);
+		this.authenticationService.getCurrentUser().canView(mCase.getId());
 		
 		return mCase;
+	}
+
+	@Override
+	public Optional<MatrixCase> getCaseOpt(Long caseId)
+	{
+		return this.matrixCaseRepository.findById(caseId);
+	}
+	
+	@Override
+	public List<MatrixCase> search(String searchText)
+	{
+		return this.matrixCaseRepository.searchCases(searchText);
 	}	
 }

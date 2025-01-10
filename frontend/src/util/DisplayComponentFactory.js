@@ -17,11 +17,12 @@ import {
     DATE,
     DATE_RANGE,
     DATE_TIME,
-    DATE_TIME_RANGE, SELECT
+    DATE_TIME_RANGE, SELECT,
+    SELECT_MULTIPLE
 } from './PropertyType';
 import { getDateString, getDateTimeString } from './utils';
 //import './Entity.css';
-import { TableCell, TableRow } from "@mui/material";
+import { Table, TableCell, TableRow } from "@mui/material";
 import Image from "./Image";
 
 const RETRIEVE_FILE_URL = "/api/file/";
@@ -34,6 +35,7 @@ export const tableCellBoldStyle ={...tableCellStyle, fontWeight:'bold'};
 
 export function getFieldDisplay(propertyDefinition, prop, index)
 {
+    console.log("getFieldDisplay: ", propertyDefinition, prop, index);
     let component = undefined;
     
     if (prop)
@@ -42,19 +44,23 @@ export function getFieldDisplay(propertyDefinition, prop, index)
             case TEXT:
             case SELECT:
                 component = 
-                    (<TableRow key={index}><TableCell sx={tableCellBoldStyle}>{propertyDefinition.name}:</TableCell><TableCell sx={tableCellStyle}>{prop?.values[0]}</TableCell></TableRow>);
+                    (<TableRow key={propertyDefinition.id}><TableCell sx={tableCellBoldStyle}>{propertyDefinition.name}:</TableCell><TableCell sx={tableCellStyle}>{prop?.values[0]}</TableCell></TableRow>);
                 // component = 
                 //     prop.values.length?
                 //     (<tr key={index}><td className="td-no-wrap td-bold" >{propertyDefinition.name}:</td><td>{prop?.values[0]}</td></tr>)
                 //     :(<tr><td></td><td></td></tr>);
                 break;
+            case SELECT_MULTIPLE:
+                component =
+                    (<TableRow key={propertyDefinition.id}><TableCell sx={tableCellBoldStyle}>{propertyDefinition.name}:</TableCell><TableCell sx={tableCellStyle}>{prop?.values.join(', ')}</TableCell></TableRow>);
+                    break;
             case PROFILE_IMAGE:
                 component = (
                     <Box key={index} id="profile_image_container">
                         {
                             prop?.values?.length && prop.values[0]?
                             (
-                                <Image key={index} className={"label-profile-image"} id={prop.values[0]} />
+                                <Image key={propertyDefinition.id} className={"label-profile-image"} id={prop.values[0]} />
                             ):
                             (
                                 <Box className="entity-profile-image-empty">
@@ -66,10 +72,11 @@ export function getFieldDisplay(propertyDefinition, prop, index)
                 );
                 break;
             case MULTILINE_TEXT:
+                console.log("MULTILINE_TEXT: ", prop?.values[0]);
                 component = 
-                    (<TableRow key={index}>
+                    (<TableRow key={propertyDefinition.id}>
                         <TableCell  sx={{...tableCellBoldStyle, verticalAlign:'top'}}>{propertyDefinition.name}:</TableCell>
-                        <TableCell  sx={tableCellStyle}><div style={{ height: (propertyDefinition.numLines * 1.5) + 'rem', overflow: 'auto', width:'100%', whiteSpace:'pre', textWrap:'wrap' }}>{prop?.values[0]}</div></TableCell>
+                        <TableCell  sx={tableCellStyle}><div style={{ overflow: 'auto', width:'100%', whiteSpace:'pre', textWrap:'wrap' }}>{prop?.values[0]}</div></TableCell>
                     </TableRow>)                      
                 break;
                 // component = 
@@ -79,7 +86,7 @@ export function getFieldDisplay(propertyDefinition, prop, index)
                 // break;
             case IMAGE_ARRAY:
                 component = (
-                    <div key={index} style={{display:'flex', flexDirection:'column', alignItems:'center'}}>
+                    <div key={propertyDefinition.id} style={{display:'flex', flexDirection:'column', alignItems:'center'}}>
                     {
                         (prop.values && prop.values.length)?
                         prop.values.map((value,index2) => (<Image key={index + index2} className={"entity-array-image"} id={value} />))
@@ -91,42 +98,43 @@ export function getFieldDisplay(propertyDefinition, prop, index)
             case DATE:
                 const date = prop.values[0]?dayjs(prop.values[0]).format(dateFormat):'';
                 component = 
-                    (<TableRow key={index}><TableCell sx={tableCellBoldStyle}>{propertyDefinition.name}:</TableCell><TableCell sx={tableCellStyle}>{date}</TableCell></TableRow>);
+                    (<TableRow key={propertyDefinition.id}><TableCell sx={tableCellBoldStyle}>{propertyDefinition.name}:</TableCell><TableCell sx={tableCellStyle}>{date}</TableCell></TableRow>);
                 break;
             case DATE_RANGE:
                 const startDate = prop.values[0]?dayjs(prop.values[0]).format(dateFormat):'';
                 const endDate = prop.values[1]?dayjs(prop.values[1]).format(dateFormat):'';
                 component = 
-                    (<TableRow key={index}>
-                        <TableCell colSpan="2">
-                        <Box sx={{ marginBottom:2, borderBottom:1 }} className="td-no-wrap td-bold">{propertyDefinition.name}</Box>
-                        <Box>
-                            {startDate} - {endDate}
-                        </Box>
+                    (<TableRow key={propertyDefinition.id}>
+                        <TableCell sx={tableCellBoldStyle}>{propertyDefinition.name}:</TableCell>
+                        <TableCell sx={tableCellStyle}>
+                            <Box>
+                                {startDate} - {endDate}
+                            </Box>
                         </TableCell>
                     </TableRow>);
                 break;
             case DATE_TIME:
                 const dateTime = prop.values[0]?dayjs(prop.values[0]).format(dateTimeFormat):'';
                 component = 
-                    (<TableRow key={index}><TableCell sx={tableCellBoldStyle}>{propertyDefinition.name}:</TableCell><TableCell sx={tableCellStyle}>{dateTime}</TableCell></TableRow>);
+                    (<TableRow key={propertyDefinition.id}><TableCell sx={tableCellBoldStyle}>{propertyDefinition.name}:</TableCell><TableCell sx={tableCellStyle}>{dateTime}</TableCell></TableRow>);
                 break;
             case DATE_TIME_RANGE:
                 const startDateTime = prop.values[0]?dayjs(prop.values[0]).format(dateTimeFormat):'';
                 const endDateTime = prop.values[1]?dayjs(prop.values[1]).format(dateTimeFormat):'';
                 
                 component = 
-                (<TableRow key={index}>
-                    <TableCell colSpan="2" sx={tableCellStyle}>
-                    <Box sx={{ marginBottom:2, borderBottom:1 }} className="td-no-wrap td-bold">{propertyDefinition.name}</Box>
-                    <Box sx={{whiteSpace:"nowrap"}}>{startDateTime} - {endDateTime}</Box> 
-                    </TableCell>
-
-                </TableRow>);
+                    (<TableRow key={propertyDefinition.id}>
+                        <TableCell sx={tableCellBoldStyle}>{propertyDefinition.name}:</TableCell>
+                        <TableCell sx={tableCellStyle}>
+                            <Box>
+                                {startDateTime} - {endDateTime}
+                            </Box>
+                        </TableCell>
+                    </TableRow>);
                 break;
         }
     else
-        component = (<TableRow key={index}><TableCell sx={tableCellBoldStyle} >{propertyDefinition.name}:</TableCell><TableCell sx={tableCellStyle}>&nbsp;</TableCell></TableRow>);
+        component = (<TableRow key={propertyDefinition.id}><TableCell sx={tableCellBoldStyle} >{propertyDefinition.name}:</TableCell><TableCell sx={tableCellStyle}>&nbsp;</TableCell></TableRow>);
 
     return component;
 }
@@ -148,7 +156,7 @@ export function getListComponent(type, values)
             case PROFILE_IMAGE:
                 returnVal = values.length &&
                             (
-                                <Box style={{width:'100%', display:'flex', justifyContent:'center'}}>
+                                <Box key={type} style={{width:'100%', display:'flex', justifyContent:'center'}}>
                                     <Image key={undefined} className={"list-image"} id={values[0]} />
                                 </Box>
                             );
@@ -156,31 +164,44 @@ export function getListComponent(type, values)
             case IMAGE_ARRAY:
                 returnVal = !!values && values.length > 0 && 
                             (
-                                <Box style={{width:'100%', display:'flex', justifyContent:'center'}}>
+                                <Box key={type} style={{width:'100%', display:'flex', justifyContent:'center'}}>
                                     <Image key={undefined} className={"list-image"} id={values[0]} />
                                 </Box>
                             );
                 break;
             case DATE:
-                returnVal = ( <Box>{getDateString(values[0])}</Box> );            
+                returnVal = ( <Box key={type}>{getDateString(values[0])}</Box> );            
                 break; 
             case DATE_RANGE:
                     if (values.length > 1)
                         returnVal =  (
-                            <Box><Box sx={{whiteSpace:"nowrap"}}>{getDateString(values[0])} - {getDateString(values[1])}</Box></Box>
+                            <Box key={type}>
+                                <Box sx={{whiteSpace:"nowrap"}}>Begin: {getDateString(values[0])}</Box>
+                                <Box sx={{whiteSpace:"nowrap"}}>End: {getDateString(values[1])}</Box>
+                            </Box>
                     );
                 break; 
             case DATE_TIME:
-                    returnVal = (<Box sx={{whiteSpace:"nowrap"}}>{getDateTimeString(values[0])}</Box>);
+                    returnVal = (<Box  key={type} sx={{whiteSpace:"nowrap"}}>{getDateTimeString(values[0])}</Box>);
                 break; 
             case DATE_TIME_RANGE:
                     if (values.length > 1) 
                         returnVal = (
-                        <Box sx={{display:'flex'}}><Box sx={{whiteSpace:"nowrap"}}>{getDateTimeString(values[0])} - {getDateTimeString(values[1])}</Box></Box>
+                            <Table>
+                                <TableRow>
+                                    <TableCell sx={{...tableCellBoldStyle, whiteSpace:"nowrap"}}>Start:</TableCell><TableCell sx={tableCellStyle}>{getDateTimeString(values[0])}</TableCell>
+                                </TableRow>
+                                <TableRow>
+                                    <TableCell sx={{...tableCellBoldStyle, whiteSpace:"nowrap"}}>End:</TableCell><TableCell sx={tableCellStyle}>{getDateTimeString(values[1])}</TableCell>
+                                </TableRow>
+                            </Table>
                     );      
                 break;
+            case SELECT_MULTIPLE:
+                    returnVal = (<Box key={type}>{values.join(', ')}</Box>);   
+                    break;
             default:
-                    returnVal =  (<Box>{values[0]}</Box>);
+                    returnVal =  (<Box key={type}>{values[0]}</Box>);
                     break;    
         }
     }   

@@ -41,6 +41,8 @@ export default function EntityDefinition({selectedEntityDefinition})
         {
             edCopy.props.forEach((prop)=>{if (typeof prop.id === "string") delete prop.id;});
             storeEntityDefinition(edCopy);
+            if (nextRoute)
+                navigate(nextRoute);
         }
     }
     

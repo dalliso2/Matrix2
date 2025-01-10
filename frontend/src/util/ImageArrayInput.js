@@ -15,6 +15,8 @@ import DeleteTwoToneIcon from '@mui/icons-material/DeleteTwoTone';
 import { DragDropContext, Droppable, Draggable } from "react-beautiful-dnd";
 /////////// Matrix2 imports //////////
 import DragDropTarget from "./dragdrop/DragDropTarget";
+import Image from "./Image";
+import { Tooltip } from "@mui/material";
 
 const RETRIEVE_FILE_URL = "/api/file/";
 
@@ -83,15 +85,17 @@ export default function ImageArrayInput({field, caseId})
                                         {...provided.draggableProps} 
                                         {...provided.dragHandleProps} 
                                         >
-                                        <img className="image_array_image" src={RETRIEVE_FILE_URL + value} />
-                                        <IconButton onClick={() => handleDelete(value)} sx={{ cursor: "pointer", 
-                                                                                                position:'absolute', 
-                                                                                                right:15, bottom: 15, 
-                                                                                                bgcolor: 'primary.main',
-                                                                                                ':hover': {bgcolor: 'primary.main', color: 'white',}
-                                                                                            }}>
-                                            <DeleteTwoToneIcon />
-                                        </IconButton>    
+                                        <Image key={undefined} className={"image_array_image"} id={value} />
+                                        <Tooltip title="Delete Image">
+                                            <IconButton onClick={() => handleDelete(value)} sx={{ cursor: "pointer", 
+                                                                                                    position:'absolute', 
+                                                                                                    right:15, bottom: 15, 
+                                                                                                    bgcolor: 'primary.main',
+                                                                                                    ':hover': {bgcolor: 'primary.main', color: 'white',}
+                                                                                                }}>
+                                                <DeleteTwoToneIcon />
+                                            </IconButton>    
+                                        </Tooltip>
                                     </div>
                                 )}
                                 </Draggable>))

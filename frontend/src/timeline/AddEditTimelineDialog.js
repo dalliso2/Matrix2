@@ -11,7 +11,7 @@ import { TEXT, MULTILINE_TEXT } from "../util/PropertyType";
 import { validate } from "../validation/validation";
 import { useDispatch } from "react-redux";
 import { handleMutationResults } from "../api/ApiUtils";
-import { addTimelineTab, updateTimelineTabTitle } from "../state/AppSlice";
+import { addTimelineTab } from "../state/AppSlice";
 import { useStoreTimelineMutation } from "../api/TimelineApi";
 import { useNavigate } from "react-router-dom";
 
@@ -28,17 +28,12 @@ export default function AddEditTimelineDialog({timelineObj, closeFn})
     const navigate = useNavigate(); 
     const [timelineData, setTimelineData] = useState({id:timelineObj.id, matrixCaseId:timelineObj.matrixCaseId, name:timelineObj.name, description:timelineObj.description});
     
-    console.log("timelineData", timelineData);  
     const [updateTimeline, mutationState] = useStoreTimelineMutation();
     handleMutationResults(mutationState, 
-                            dispatch, 
-                            navigate,
-                            true, 
-                            "Updating timeline...", "Error updating timeline", 
+                            dispatch,  
                             ()=>{
                                 const payload = mutationState.data.payload;
                                 dispatch(addTimelineTab({id:payload.id, title:payload.name}));
-                                dispatch(updateTimelineTabTitle({id:timelineData.id, title:timelineData.name}));
                                 closeFn();
                             }
                         );
@@ -48,9 +43,7 @@ export default function AddEditTimelineDialog({timelineObj, closeFn})
         if (!validate(fields))
             setTimelineData(prev=>({...prev}));
         else
-        {
             updateTimeline(timelineData);
-        }
     }
 
     timelineData && fields.forEach(field => 

@@ -11,14 +11,14 @@ import Grid from "../util/Grid";
 import IconButton from "@mui/material/IconButton";
 import { AddLinkSharp } from "@mui/icons-material";
 import { useEffect } from "react";
-import { handleMutationResults } from "../api/ApiUtils";
+import { handleMutationResults, handleQueryResultsWithWaitMessage } from "../api/ApiUtils";
 import { useDispatch } from "react-redux";
 import { enqueueSnackbar } from "notistack";
 import { useLazySearchFilesNotLinkedToTaskQuery } from "../api/TaskApi";
-import { handleQueryError } from "../api/ApiUtils";
 import { api } from "../api/BaseApi";
 import { useAddTaskFilesMutation } from "../api/TaskApi";
 import { useNavigate } from "react-router-dom";
+import Tooltip from "@mui/material/Tooltip";
 
 export default function TaskFileSearchDialog({taskId, closeFn})
 {
@@ -26,12 +26,11 @@ export default function TaskFileSearchDialog({taskId, closeFn})
     const navigate = useNavigate();
     const [filterString, setFilterString] = useState('');
 
-    const [searchFilesFn, searchTaskFilesQueryStatus] = useLazySearchFilesNotLinkedToTaskQuery();
-    const searchResults = searchTaskFilesQueryStatus?.currentData?.payload;
+    const [searchFilesFn, searchTaskFilesQueryResults] = useLazySearchFilesNotLinkedToTaskQuery();
+    const searchResults = searchTaskFilesQueryResults?.currentData?.payload;
     useEffect(() => {  
-        if (searchTaskFilesQueryStatus.isError)
-            handleQueryError(searchTaskFilesQueryStatus, dispatch, navigate);
-    } ,[searchTaskFilesQueryStatus.isError]);
+        handleQueryResultsWithWaitMessage(searchTaskFilesQueryResults, dispatch,);
+    } ,[searchTaskFilesQueryResults.isFetching]);
 
     const [addTaskFiles, addFilesToTaskMutationState] = useAddTaskFilesMutation();
     
@@ -46,7 +45,7 @@ export default function TaskFileSearchDialog({taskId, closeFn})
 
         // remove from cached search results
         dispatch(api.util.updateQueryData('searchFilesNotLinkedToTask',
-            searchTaskFilesQueryStatus.originalArgs,
+            searchTaskFilesQueryResults.originalArgs,
             (cache)=>{
                 cache.payload = cache.payload.filter(file=>file.id!==fileId);
                 return cache;
@@ -54,16 +53,10 @@ export default function TaskFileSearchDialog({taskId, closeFn})
             
     }
 
-    function removeFileFromResults(fileId)
-    {
-        // setSearchResults((oldResults)=>oldResults.filter(file=>file.id!==fileId));
-        // addFilesToEntityFn([{matrixEntity:entity.id, mFile:fileId}]);
-    }
-
     const rows = searchResults && searchResults.map(file=>(
         {   rowProperties:{id:file.id}, 
             sx:{},
-            values: [{value:<IconButton onClick={()=>onClickLink(file.id)}><AddLinkSharp/></IconButton>},
+            values: [{value:<Tooltip title="Add link to file"><IconButton onClick={()=>onClickLink(file.id)}><AddLinkSharp/></IconButton></Tooltip>},
                         {value:file.name}, 
                         {value:file.description}, 
                         {value:file.originalName}]
@@ -90,9 +83,9 @@ export default function TaskFileSearchDialog({taskId, closeFn})
                 {
                     <Box sx={{display:'flex', height:'100%', flexGrow:1, overflow:'auto'}}>
                         <Grid columnHeadings={['Link','Name', 'Description', 'Original Name']} 
-                                rowValues={searchTaskFilesQueryStatus?.isFetching?[]:rows || []}
-                                isFetching={searchTaskFilesQueryStatus.isFetching}
-                                noResultsMessage={searchTaskFilesQueryStatus.isSuccess && rows?.length===0 && "No results found"}/>
+                                rowValues={searchTaskFilesQueryResults?.isFetching?[]:rows || []}
+                                isFetching={searchTaskFilesQueryResults.isFetching}
+                                noResultsMessage={searchTaskFilesQueryResults.isSuccess && rows?.length===0 && "No results found"}/>
                     </Box>
                 }
             </DialogContent>

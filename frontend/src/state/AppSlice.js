@@ -30,7 +30,9 @@ const initialState =
     // current user state
     //darkTheme: false,
     // case tabs
-    caseTabCaseIds: [],
+    adminCaseSearchText: "",
+    adminCaseSearchList: [],
+    caseTabData: [],
     currentCaseTabIndex: 0,
     activeCase: undefined,
     // user tabs
@@ -159,15 +161,15 @@ const appSlice = createSlice({
             // payload is the case id
             reducer(state, action)
             {
-                const caseIdIndex = state.caseTabCaseIds.findIndex(caseId => caseId === action.payload);
-                if (caseIdIndex < 0)
+                const caseDataIndex = state.caseTabData.findIndex(tabData => tabData.id === action.payload.id);
+                if (caseDataIndex < 0)
                 {
-                    state.caseTabCaseIds.push(action.payload);
-                    state.currentCaseTabIndex = state.caseTabCaseIds.length;
+                    state.caseTabData.push(action.payload);
+                    state.currentCaseTabIndex = state.caseTabData.length;
                 }
                 else
                 {
-                    state.currentCaseTabIndex = caseIdIndex + 1;    
+                    state.currentCaseTabIndex = caseDataIndex + 1;    
                 }
             }
         },
@@ -176,9 +178,9 @@ const appSlice = createSlice({
             // payload is the id of the case to remove
             reducer(state, action)
             {
-                if (state.currentCaseTabIndex == state.caseTabCaseIds.length)
+                if (state.currentCaseTabIndex == state.caseTabData.length)
                     state.currentCaseTabIndex = state.currentCaseTabIndex - 1;
-                state.caseTabCaseIds = state.caseTabCaseIds.filter(caseId => caseId !== action.payload);
+                state.caseTabData = state.caseTabData.filter(caseTabData => caseTabData.id !== action.payload);
             },
         },
         setCurrentCaseTab:
@@ -193,6 +195,20 @@ const appSlice = createSlice({
             reducer(state, action)
             {
                 state.activeCase = action.payload;
+            },
+        },
+        setAdminCaseSearchText:
+        {
+            reducer(state, action)
+            {
+                state.adminCaseSearchText = action.payload;
+            },
+        },
+        setAdminCaseSearchList:
+        {
+            reducer(state, action)
+            {
+                state.adminCaseSearchList = action.payload;
             },
         },
         setUserSearchText:
@@ -305,16 +321,16 @@ const appSlice = createSlice({
         {
             reducer(state, action)
             {
-                const existingTabIndex = state.taskTabData.findIndex(tab=>tab.tabType===TAB_TYPE_TASK && tab.id === action.payload.taskId);
+                const existingTabIndex = state.taskTabData.findIndex(tab=>tab.tabType===TAB_TYPE_TASK && tab.taskId === action.payload.taskId);
 
                 if (existingTabIndex < 0)
                 {
-                    state.taskTabData.push(action.payload);
+                    state.taskTabData.push({...action.payload, tabType: TAB_TYPE_TASK});
                     state.currentTaskTabIndex = state.taskTabData.length-1;// subtract 1 because of permanent search tab
                 }
                 else
                 {
-                    state.taskTabData[existingTabIndex] = action.payload;
+                    //state.taskTabData[existingTabIndex] = action.payload;
                     state.currentTaskTabIndex = existingTabIndex;
                 }
             },
@@ -408,7 +424,6 @@ const appSlice = createSlice({
         /////////////////////////////////////////////////////
         addTimelineTab:
         {
-            // payload: {id: id, name: name, zoom:, pan:{x:,y:}}
             reducer(state, action)
             {
                 const timelineIndex = state.timelineTabsData.findIndex(tabData => tabData.id === action.payload.id);
@@ -473,9 +488,11 @@ export const selectSystemInErrorState = state => state.app.systemInErrorState;
 export const selectMessageBoxData = state => state.app.messageBoxData.values().next().value;
 //export const selectDarkTheme = state => state.app.darkTheme;    
 export const selectCurrentSysAdminTab = state => state.app.sysAdminTab;
-export const selectCaseTabCaseIds = state => state.app.caseTabCaseIds;
+export const selectCaseTabData = state => state.app.caseTabData;
 export const selectCurrentCaseTabIndex = state => state.app.currentCaseTabIndex;
 export const selectActiveCase = state => state.app.activeCase;
+export const selectAdminCaseSearchText = state => state.app.adminCaseSearchText;
+export const selectAdminCaseSearchList = state => state.app.adminCaseSearchList;
 export const selectUserSearchText = state => state.app.userSearchText;
 export const selectEntitySearchText = state => state.app.entitySearchText;
 export const selectEntityTabData = state => state.app.entityTabEntityData;
@@ -522,6 +539,8 @@ export const {
                 addCaseTab,
                 setCurrentCaseTab,
                 removeCaseTab,
+                setAdminCaseSearchText,
+                setAdminCaseSearchList,
                 setUserSearchText,
                 setActiveCase,
                 setEntitySearchEntityDefIdArray,

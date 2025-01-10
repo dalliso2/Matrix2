@@ -11,8 +11,6 @@ import { useState } from "react";
 export default function TimelineEditEntitiesDialog({ timelineRef, timelineEntities,
                                                         addEntitiesFn, removeEntitiesFn, closeFn })
 {
-    console.log("TimelineEditEntitiesDialog");
-    console.log(timelineRef);
     const theme = useTheme();
     const activeCase = useSelector(selectActiveCase);
 

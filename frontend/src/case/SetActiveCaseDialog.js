@@ -19,7 +19,6 @@ import { setActiveCase } from "../state/AppSlice";
 
 export default function SetActiveCaseDialog()
 {
-    console.log("SetActiveCaseDialog");
     const theme = useTheme();
     const dispatch = useDispatch();
     const navigate = useNavigate();
@@ -55,7 +54,7 @@ export default function SetActiveCaseDialog()
                     <Box sx={{display:'flex', flexDirection:'column', flexGrow:1, overflow:'hidden', mt:3}}>
                     {
                         caseList?
-                        <CaseGrid cases={caseList} rowClickFn={(id)=> dispatch(setActiveCase(caseList.find(theCase=>theCase.id === id))) } isFetching={userCaseListQueryResults.isFetching} />
+                        <CaseGrid cases={caseList} rowClickFn={(caseObj)=> dispatch(setActiveCase(caseList.find(theCase=>theCase.id === caseObj.id))) } isFetching={userCaseListQueryResults.isFetching} />
                         :<Box sx={{overflow:'hidden', height:'200px'}}><LoadingSkeleton/></Box>
                     }
                     </Box>

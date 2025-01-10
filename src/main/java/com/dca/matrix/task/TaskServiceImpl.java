@@ -18,8 +18,11 @@ import org.springframework.jdbc.core.simple.JdbcClient;
 import org.springframework.stereotype.Service;
 
 import com.dca.matrix.api.ApiErrorCode;
+import com.dca.matrix.authentication.AuthenticationService;
+import com.dca.matrix.authorization.AuthorizationService;
 import com.dca.matrix.exception.MatrixUncheckedException;
 import com.dca.matrix.exception.MatrixValidationException;
+import com.dca.matrix.matrix_case.MatrixCaseService;
 import com.dca.matrix.matrix_case.MatrixCase;
 import com.dca.matrix.user.MatrixUser;
 
@@ -31,6 +34,9 @@ import static com.dca.matrix.task.TaskSpecifications.*;
 @RequiredArgsConstructor
 public class TaskServiceImpl implements TaskService
 {
+	private final AuthorizationService authorizationService;
+	private final AuthenticationService authenticationService;
+	private final MatrixCaseService caseService;
 	private final TaskRepository taskRepository;
 	private final JdbcClient jdbcClient;
 	
@@ -43,6 +49,8 @@ public class TaskServiceImpl implements TaskService
 			existingTask = taskRepository.findById(updatingTask.getId()).orElseThrow(()->
 						new MatrixValidationException("Task with id " + updatingTask.getId() + " does not exist.",
 														null, ApiErrorCode.TASK_DOES_NOT_EXIST));
+		
+		this.authorizationService.verifyUserCanModify(updatingTask.getMatrixCase().getId());
 		
 		List<String> errors = new LinkedList<>();
 		
@@ -81,25 +89,38 @@ public class TaskServiceImpl implements TaskService
 	@Override
 	public Task getTask(Long id)
 	{
-		return this.taskRepository.findById(id).orElseThrow(()->
-				new MatrixValidationException("Task with id " + id + " does not exist.", null, ApiErrorCode.TASK_DOES_NOT_EXIST));
+		Task task = this.taskRepository.findById(id).orElseThrow(()->
+						new MatrixValidationException("Task with id " + id + " does not exist.", null, ApiErrorCode.TASK_DOES_NOT_EXIST));
+
+		this.authorizationService.verifyUserCanView(task.getMatrixCase().getId());
+		
+		return task;
 	}
 	
 	@Override
 	public List<Task> getTasksForCase(Long caseId)
 	{
+		this.authorizationService.verifyUserCanView(this.caseService.getCase(caseId).getId());
 		return this.taskRepository.findByMatrixCaseId(caseId);
 	}
 
 	@Override
 	public List<Task> getTasksAssignedToUser(Long userId)
 	{
+		MatrixUser currentUser = this.authenticationService.getCurrentUser();
+		// should only be called by an admin or the user
+		if (!currentUser.getId().equals(userId) && !currentUser.getIsAdmin())
+			throw new MatrixUncheckedException("Not authorized to view this task list.",
+					null, ApiErrorCode.NOT_AUTHORIZED);
+			
 		return this.taskRepository.findByAssignedToId(userId);
 	}
 	
 	@Override
 	public Iterable<Task> searchTasks(TaskQueryParameters queryParameters)
 	{
+		this.authorizationService.verifyUserCanView(queryParameters.caseId());
+		
 		Specification<Task> spec = caseEquals(queryParameters.caseId());
 		
 		if (!Strings.isBlank(queryParameters.searchString()))
@@ -116,6 +137,8 @@ public class TaskServiceImpl implements TaskService
 	
 	private Long getNextTaskIdForCase(Long caseId)
 	{
+		this.authorizationService.verifyUserCanView(caseId);		
+		
 		String sql = """
                     select max(task.case_task_id) + 1 \
                      from task where task.case_id = ? \

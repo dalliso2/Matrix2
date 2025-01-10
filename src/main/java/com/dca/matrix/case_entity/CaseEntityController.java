@@ -21,15 +21,15 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class CaseEntityController 
 {
-	private final CaseEntityService caseEntityService;
-	
-	@PostMapping(path = "/add", consumes = "application/json")
-	@ResponseStatus(HttpStatus.CREATED)
-	public ResponseEntity<ApiResponse<CaseEntity>> save(@RequestBody CaseEntity caseEntity, HttpServletRequest request)
-	{	
-		return new ResponseEntity<>(ApiResponseUtil.success(this.caseEntityService.addCaseEntity(caseEntity),
-										"Successfully created case-entity.",
-										request), HttpStatus.CREATED);
-	}
+//	private final CaseEntityService caseEntityService;
+//	
+//	@PostMapping(path = "/add", consumes = "application/json")
+//	@ResponseStatus(HttpStatus.CREATED)
+//	public ResponseEntity<ApiResponse<CaseEntity>> save(@RequestBody CaseEntity caseEntity, HttpServletRequest request)
+//	{	
+//		return new ResponseEntity<>(ApiResponseUtil.success(this.caseEntityService.addCaseEntity(caseEntity),
+//										"Successfully created case-entity.",
+//										request), HttpStatus.CREATED);
+//	}
 
 }

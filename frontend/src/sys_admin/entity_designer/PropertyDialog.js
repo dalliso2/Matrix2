@@ -159,6 +159,8 @@ export default function PropertyDialog({property, savePropertyFn, closeFn})
         {
             case TEXT:
                 maxLengthProp.disabled = false;
+                maxLengthProp.maxLength = 255;
+                maxLengthProp.minLength = 0;
                 maskProp.disabled = false;
                 includeInTitle.disabled = false;
                 includeInList.disabled = false;  

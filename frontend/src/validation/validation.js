@@ -1,4 +1,5 @@
-import { DATE_RANGE, DATE_TIME_RANGE, SWITCH } from "../util/PropertyType";
+import { DATE_RANGE, DATE, DATE_TIME, DATE_TIME_RANGE, SWITCH } from "../util/PropertyType";
+import dayjs from "dayjs";
 
 const errorTextSuffix = '-errorText';
 
@@ -19,13 +20,33 @@ function validate(fields)
                 field.helperText = new Array(arraySize);
                 field.value.forEach((value,index) => 
                 {
-                    const results = checkValue(field, value);
+                    const results = checkDates(field, value);
                     field.error[index] = results.error;
                     field.helperText[index] = results.helperText;
                     valid &&= !field.error[index];
                 });
+                if (valid)
+                {
+                    const startDate = field.value[0];
+                    const endDate = field.value[1];
+                    if (dayjs(startDate).isAfter(dayjs(endDate)))
+                    {
+                        field.error[1] = true;
+                        field.helperText[1] = "End date must be after start date";
+                        valid = false;
+                    }
+                }
+                break;
+            case DATE_TIME:
+            case DATE:
+                const dateResults = checkDates(field, field.value);
+                field.error = dateResults.error;
+                field.helperText = dateResults.helperText;
+                valid &&= !field.error;
                 break;
             case SWITCH:
+                break;
+            case 'hidden':
                 break;
             default:
                 const results = checkValue(field, field.value);
@@ -43,20 +64,40 @@ function isEmpty(value)
             || (Array.isArray(value) && value.length === 0);
 }
 
-function checkValue(field, value)
+function checkDates(field, value)
 {
     const results = {error: false, helperText: ' '};
-    if (field.minLength && value?.length < field.minLength)
-    {
-        results.helperText = "(Minimum 8 characters)";
-        results.error = true;
-    }
-    else if (field.required && isEmpty(value))
+    if (!value && field.required)
     {
         results.helperText = "(required)";            
         results.error = true;
     }
-    else if (field.maxLength && value?.length > field?.maxLength)
+    else if (!dayjs(value).isValid())
+    {
+        results.helperText = "Invalid date/time";
+        results.error = true;
+    }
+    return results; 
+}
+
+function checkValue(field, value)
+{
+    const results = {error: false, helperText: ' '};
+
+    if (!value || (typeof value === "string" && value.trim().length === 0))
+    {
+        if (field.required)
+        {
+            results.helperText = "(required)";            
+            results.error = true;
+        }
+    }
+    else if (field.minLength && (typeof value === "string" && value.length < field.minLength))
+    {
+        results.helperText = "(Minimum " + field.minLength + " characters)";
+        results.error = true;
+    }
+    else if (field.maxLength && (typeof value === "string" && value.length > field.maxLength))
     {
         results.helperText = "(Maximum " + field.maxLength + " characters)";
         results.error = true;
@@ -69,6 +110,33 @@ function checkValue(field, value)
 
     return results;
 }
+
+// function checkValue(field, value)
+// {
+//     const results = {error: false, helperText: ' '};
+//     if (field.minLength && value < field.minLength)
+//     {
+//         results.helperText = "(Minimum " + field.minLength + " characters)";
+//         results.error = true;
+//     }
+//     else if (field.required && isEmpty(value))
+//     {
+//         results.helperText = "(required)";            
+//         results.error = true;
+//     }
+//     else if (field.maxLength && value > field.maxLength)
+//     {
+//         results.helperText = "(Maximum " + field.maxLength + " characters)";
+//         results.error = true;
+//     }    
+//     else if (field.mask && value.includes('_'))
+//     {
+//         results.helperText = "Invalid " + field.label;
+//         results.error = true;
+//     }
+
+//     return results;
+// }
 
 function clearErrors(fields)
 {

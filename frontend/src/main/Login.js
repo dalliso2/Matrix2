@@ -53,7 +53,6 @@ export default function Login()
     }, [loginStatus.status]);   
 
     useEffect(() => {
-        console.log("authToken",authToken);
         if (authToken) 
             navigate('/home');
     }, [authToken]);

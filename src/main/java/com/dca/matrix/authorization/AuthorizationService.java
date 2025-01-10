@@ -7,6 +7,8 @@ import com.dca.matrix.user.MatrixUser;
 
 public interface AuthorizationService
 {
-	void canView(MatrixCase mCase) throws AccessDeniedException;
-	void canModify(MatrixCase mCase) throws AccessDeniedException;
+	void verifyUserIsSystemAdmin() throws AccessDeniedException;
+	void verifyUserIsCaseAdmin(Long caseId) throws AccessDeniedException;
+	void verifyUserCanView(Long mCaseId) throws AccessDeniedException;
+	void verifyUserCanModify(Long mCaseId) throws AccessDeniedException;
 }

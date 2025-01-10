@@ -25,6 +25,7 @@ import {
     DATE_TIME_RANGE,
     typeDescriptionsMap
 } from '../../util/PropertyType';
+import { Tooltip } from '@mui/material';
 
 const dateTimeIcon = (<Avatar><CalendarMonthTwoToneIcon sx={{position:"absolute", top: 2, left: 2}} />
                         <AccessTimeTwoToneIcon sx={{position:"absolute", bottom: 2, right: 2}}/></Avatar>);
@@ -121,15 +122,21 @@ const Property = ({property, dragHandleProps, setEditProperty, removeProperty, u
             }
             secondaryAction={
                 <div>
-                    <IconButton edge="end" aria-label="edit" onClick={()=>setEditProperty(property)}>
-                        <EditTwoTone />
-                    </IconButton>
-                    <IconButton edge="end" aria-label="delete"  onClick={()=>removeProperty()}>
-                        <DeleteTwoTone />
-                    </IconButton>
-                    <IconButton edge="end" aria-label="drag" {...dragHandleProps}>
-                        <DragHandleTwoTone />
-                    </IconButton>
+                    <Tooltip title="Edit Property">
+                        <IconButton edge="end" aria-label="edit" onClick={()=>setEditProperty(property)}>
+                            <EditTwoTone />
+                        </IconButton>
+                    </Tooltip>
+                    <Tooltip title="Delete Property">
+                        <IconButton edge="end" aria-label="delete"  onClick={()=>removeProperty()}>
+                            <DeleteTwoTone />
+                        </IconButton>
+                    </Tooltip>
+                    <Tooltip title="Drag Property">
+                        <IconButton edge="end" aria-label="drag" {...dragHandleProps}>
+                            <DragHandleTwoTone />
+                        </IconButton>
+                    </Tooltip>
                 </div>
             }/>
     );

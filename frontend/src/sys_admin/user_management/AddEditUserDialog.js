@@ -49,8 +49,6 @@ const AddEditUserDialog = ({ user, closeFn }) =>
     useEffect(() => {
         handleQueryResultsWithWaitMessage(allAgenciesQueryResults, dispatch, "Loading agencies...");
     }, [allAgenciesQueryResults?.isFetching]);
-    console.log("AddEditUserDialog");
-    console.log(allAgenciesQueryResults);
     const allAgencies = allAgenciesQueryResults?.currentData?.payload;
 
     const [storeUser, mutationState] = useStoreUserMutation();

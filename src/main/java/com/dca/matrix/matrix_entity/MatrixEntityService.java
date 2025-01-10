@@ -13,6 +13,7 @@ public interface MatrixEntityService
 	public List<List<MatrixEntity>> searchEntities(MatrixEntitySearchMessage searchMessage);
 	public List<List<MatrixEntity>> searchEntitiesNotLinked(MatrixEntitySearchMessage searchMessage);
 	public EntityRelationship createRelationship(EntityRelationshipMessage message);
+	public EntityRelationship createRelationshipInternal(EntityRelationshipMessage message);	
 	public List<EntityRelationshipProjection2> getRelatedEntities(Long parentId);
 	public EntityRelationship removeRelationship(LongIdMessage idMessage);
 	public Collection<EntityRelationshipProjection> getCaseEntityRelationships(Long caseId);

@@ -26,11 +26,6 @@ export default function EntityDesigner()
             dispatch(setSelectedEntityDefinitionId(selectedEntityDefinition.id));
     }, [selectedEntityDefinition]);
 
-    // const { data:envelope, refetch, error, isLoading } = useGetAllEntityDefinitionsQuery();
-    // const entityDefinitions = envelope?.payload;
-    // const selectedEntityDefinition = selectedEntityDefinitionId === 'new' ? {...defaultEntityDefinition} 
-    //                                     :entityDefinitions?.find(entityDef=>entityDef.id === selectedEntityDefinitionId);
-
     return (
         <Content sx={{ display:'flex', gap:'10px', alignItems:'stretch'}}>
             <EntityDefinitionList setSelectedEntityDefinition={setSelectedEntityDefinition}/>

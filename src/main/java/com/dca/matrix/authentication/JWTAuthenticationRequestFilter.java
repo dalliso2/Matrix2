@@ -37,18 +37,28 @@ public class JWTAuthenticationRequestFilter extends OncePerRequestFilter
 	protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
 			throws ServletException, IOException
 	{
+		String token = null;
+		
+		// check for jwt token in AUTHORIZATION header
 		final String authHeader = request.getHeader(HttpHeaders.AUTHORIZATION);
 
 		if (!Strings.isBlank(authHeader) && authHeader.startsWith("Bearer "))
+			token = authHeader.substring(7);
+		else
+			// the token may be included as a URL query string identified by the parameter "t" for file download requests
+			token = request.getParameter("t");
+	
+		log.debug("token : " + token);
+		
+		if (token != null)
 		{
-			String token = authHeader.substring(7);
 			Authentication auth = this.authenticationManager.authenticate(new JWTAuthenticationToken(token));
 			SecurityContextHolder.getContext().setAuthentication(auth);
 			if (this.tokenService.expiresWithinMinutes(token, 10))
 			{
 				request.setAttribute(BEARER_TOKEN_KEY, this.tokenService.generateToken(auth.getName()));
 			}
-		} 
+		}
 		
 		filterChain.doFilter(request, response);
 	}

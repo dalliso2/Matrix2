@@ -43,8 +43,6 @@ public class AgencyController
 		return	new ResponseEntity<>(ApiResponseUtil.success(this.agencyService.createUpdateAgency(agency), 
 				"Successfully updated agency", 
 				request), HttpStatus.OK);
-//		return	new ResponseEntity<>(ApiResponseUtil.fail("Failed", new LinkedList(), ApiErrorCode.CASE_DOES_NOT_EXIST, ""),
-//									HttpStatus.OK);
 	}
 	
 	@DeleteMapping(path = "/delete/{agencyId}")

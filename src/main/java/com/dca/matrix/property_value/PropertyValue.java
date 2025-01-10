@@ -15,14 +15,14 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
+import lombok.Data;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 @Entity
 @Table(name="PROPERTY_VALUE")
-@Getter
-@Setter
+@Data
 @NoArgsConstructor
 @AllArgsConstructor
 public class PropertyValue extends EntityBase
@@ -35,7 +35,7 @@ public class PropertyValue extends EntityBase
 	private MatrixEntity matrixEntity;
 	
 	@ManyToOne
-	@JoinColumn(name = "PROPERTY_DEFINITION_ID", nullable = false)
+	@JoinColumn(name = "PROPERTY_DEFINITION_ID")
 	//@JsonIdentityReference(alwaysAsId = true)
 	@JsonDeserialize(using = PropertyDefinitionDeserializer.class)
 	@JsonSerialize(using = PropertyDefinitionSerializer.class)

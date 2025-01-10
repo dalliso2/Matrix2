@@ -1,12 +1,24 @@
 import dayjs from "dayjs";
 
-const OWNER = 0;
+const ADMIN = 0;
 const PARTICIPANT = 1;
 const REVIEWER = 2;
 
 import { PROFILE_IMAGE, IMAGE_ARRAY } from '../util/PropertyType';
 
-const CaseRoles = ['Owner','Participant','Reviewer'];
+const CaseRoles = ['Admin','Participant','Reviewer'];
+
+function userCanModifyCase(user, caseId)
+{
+    if (!caseId || !user)
+        return false;
+
+    if (user.isAdmin)
+        return true;
+
+    return user.authorities.findIndex(auth => auth === 'CASE_' + caseId + 'ADMIN' 
+                                                || auth === 'CASE_' + caseId + 'EDIT') >= 0;
+}
 
 function getMessageBoxAPIError(apiError)
 {
@@ -32,6 +44,7 @@ export function consolidatePropValues(entityObj)
             entityPropValues[entityPropValues.length-1].values.push(prop.value);
       
     }
+
     return entityPropValues;
 }
 
@@ -164,6 +177,6 @@ function copyFields(fields)
      return fieldsCopy;
 }
 
-export { getMessageBoxAPIError, getRoleText, CaseRoles, getDateString, getDateTimeString,
-    OWNER, PARTICIPANT, REVIEWER, getUniqueId, trimObjectValues,duplicateObject, getTitle, copyFields, getImageId, 
+export { userCanModifyCase, getMessageBoxAPIError, getRoleText, CaseRoles, getDateString, getDateTimeString,
+    ADMIN, PARTICIPANT, REVIEWER, getUniqueId, trimObjectValues,duplicateObject, getTitle, copyFields, getImageId, 
     getEntityDefinitionColumnHeadings}

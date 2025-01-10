@@ -20,7 +20,8 @@ import {
     DATE_TIME,
     DATE_TIME_RANGE,
     CHECKBOX,
-    SELECT
+    SELECT,
+    SELECT_MULTIPLE
 } from '../util/PropertyType';
 import dayjs from 'dayjs';
 import { Button, DialogActions } from "@mui/material";
@@ -33,7 +34,6 @@ import { selectActiveCase, updateEntityTabTitle } from "../state/AppSlice";
 import { getTitle } from "../util/utils";
 import { enqueueSnackbar } from "notistack";
 import { useTheme } from "@emotion/react";
-import { useNavigate } from "react-router-dom";
 
 function getFields(entityDefinition)
 {
@@ -79,16 +79,20 @@ function getFields(entityDefinition)
             case SELECT: 
                 newField.selectData = propDef.options.split("\n").map(prop => ({id:prop,name:prop}));
                 break;
+            case SELECT_MULTIPLE:
+                newField.value = [];
+                newField.selectData = propDef.options.split("\n").map(prop => ({id:prop,name:prop}));
+                break;
         }
         
         return newField;
     });
 }
 
-function setValue(setEntityProps, entityId, propDefId,valOrder,value)
+function setValue(setEntityProps, entityId, propDefId, valOrder, value)
 {
     setEntityProps(prevData => {
-        const newData = (prevData && prevData.map((element) => ({...element}))) || [];
+        const newData = JSON.parse(JSON.stringify(prevData));
         const prop = newData.find((element) => element.propertyDefinition === propDefId && element.valOrder === valOrder);
         if (prop)
             prop.value = value;
@@ -103,9 +107,8 @@ export default function AddEditEntityDialog({entity, entityDefinitions, closeFn,
 {
     const theme = useTheme();
     const dispatch = useDispatch();
-    const navigate = useNavigate();
     const [selectedEntityDefId, setSelectedEntityDefId] = useState(entity && entity.entityDefinition);
-    const [entityProps, setEntityProps] = useState(entity && entity.propertyValues);
+    const [entityProps, setEntityProps] = useState(entity && entity.propertyValues || []);
     const [reRender, setReRender] = useState(false);
     const activeCase = useSelector(selectActiveCase);
     const [buttonsDisabled, setButtonsDisabled] = useState(false);
@@ -113,14 +116,18 @@ export default function AddEditEntityDialog({entity, entityDefinitions, closeFn,
     // generate field array for entity definition
     const fields = useMemo(() => getFields(entityDefinitions.find(def=>def.id === selectedEntityDefId)), [selectedEntityDefId]);
 
-    // mutation to store entity
+    // mutation to store entityselectedEntityDefId
     const [storeEntity,entityMutationState] = useStoreEntityMutation();
     handleMutationResults(entityMutationState, 
                             dispatch, 
                             ()=>{ enqueueSnackbar( (entity?.id?"Updated ":"Created ") + " entity " + getTitle(entityDefinitions,entityMutationState.data), {variant:'success'}); closeFn();});
 
+    fields?.forEach(field => {
+        if (field.type === IMAGE_ARRAY || field.type === SELECT_MULTIPLE)
+            field.value = [];
+    });
+
     // set the field values from the entity object
-    fields && fields.forEach(field => field.type === IMAGE_ARRAY && (field.value = []));
     entityProps && entityProps.forEach(element => {
         const field = fields.find(e=>e.propDefId===element.propertyDefinition);
         if (field)
@@ -129,13 +136,14 @@ export default function AddEditEntityDialog({entity, entityDefinitions, closeFn,
             {
                 case DATE:
                 case DATE_TIME:
-                    field.value = dayjs(element.value);
+                    field.value = element.value && dayjs(element.value);
                     break;
                 case DATE_RANGE:
                 case DATE_TIME_RANGE:
-                    field.value[element.valOrder] = dayjs(element.value);
+                    field.value[element.valOrder] = element.value && dayjs(element.value);
                     break;
                 case IMAGE_ARRAY:
+                case SELECT_MULTIPLE:
                     field.value[element.valOrder] = element.value;
                     break;
                 default:
@@ -155,12 +163,14 @@ export default function AddEditEntityDialog({entity, entityDefinitions, closeFn,
                 break;
             case DATE:  
             case DATE_TIME:
-                field.onChange = (val) => setValue(setEntityProps, field.id, field.propDefId, 0, val);
+                // val is a dayjs object
+                field.onChange = (val) => setValue(setEntityProps, field.id, field.propDefId, 0, val.format());
                 break;
             case DATE_RANGE:
             case DATE_TIME_RANGE:
-                field.onChangeStartDate = (val) => setValue(setEntityProps, field.id, field.propDefId, 0, val);
-                field.onChangeEndDate = (val) => setValue(setEntityProps, field.id, field.propDefId, 1, val);
+                // val is a dayjs object
+                field.onChangeStartDate = (val) => setValue(setEntityProps, field.id, field.propDefId, 0, val.format());
+                field.onChangeEndDate = (val) => setValue(setEntityProps, field.id, field.propDefId, 1, val.format());
                 break;
             case PROFILE_IMAGE:
                 field.caseId = activeCase.id;
@@ -176,6 +186,18 @@ export default function AddEditEntityDialog({entity, entityDefinitions, closeFn,
                             newData.push({id:field.id, propertyDefinition: field.propDefId, valOrder: index, value:imageId});
                         })
                         return newData;
+                    });
+                }
+                break;
+            case SELECT_MULTIPLE:
+                field.onChange = (event) => {
+                    const val = event.target.value;
+                    setEntityProps(prevData => {
+                        const prevDataCopy = JSON.parse(JSON.stringify(prevData)).filter(element => element.propertyDefinition !== field.propDefId);
+                        val.forEach((selectVal, index) => {
+                            prevDataCopy.push({id:field.id, propertyDefinition: field.propDefId, valOrder: index, value:selectVal});
+                        })
+                        return prevDataCopy;
                     });
                 }
                 break;

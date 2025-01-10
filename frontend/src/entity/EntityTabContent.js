@@ -18,13 +18,16 @@ import EntityTasks from "./EntityTasks";
 import { useGetAllEntityDefinitionsQuery } from "../api/EntityDefinitionApi";
 import { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
+import { userCanModifyCase } from "../util/utils";
+import { selectCurrentUser } from "../state/AppSlice";
 
 export default function EntityTabContent({entityId})
 {
     const dispatch = useDispatch();
     const navigate = useNavigate();
     const activeCase = useSelector(selectActiveCase);
-    
+    const currentUserCanModifyCase = userCanModifyCase(useSelector(selectCurrentUser), activeCase.id);
+
     const { refetch, ...entityDefinitionQueryResults } = useGetAllEntityDefinitionsQuery();
     const entityDefinitions = entityDefinitionQueryResults?.data?.payload;
     useEffect(() => {
@@ -37,12 +40,14 @@ export default function EntityTabContent({entityId})
         ()=>enqueueSnackbar("Error adding file links.", {variant:'error'})); 
 
     const [storeFiles,storeFilesMutationState] = useStoreFilesMutation();
-    handleMutationResults(storeFilesMutationState, dispatch); 
+    handleMutationResults(storeFilesMutationState, dispatch,
+                            ()=>addFilesToEntity(storeFilesMutationState.originalArgs.map((fileData)=>({matrixEntity:entityId, mFile:fileData.id}))),
+    ); 
     
-    function addFiles(fileDataArray)
+    async function addFiles(fileDataArray)
     {
         storeFiles(fileDataArray);
-        addFilesToEntity(fileDataArray.map((fileData)=>({matrixEntity:entityId, mFile:fileData.id})));
+        //addFilesToEntity(fileDataArray.map((fileData)=>({matrixEntity:entityId, mFile:fileData.id})));
     }
     
     return (
@@ -59,11 +64,18 @@ export default function EntityTabContent({entityId})
                             </Box>
                         </Paper>
                         <Paper>
-                            <Box sx={{ display:'flex', flexDirection:'column', justifyContent:'space-around',m:2, mb:0}}>
-                                <DragDropTarget2 fileUploadCallback={addFiles} caseId={activeCase?.id}  sx={{ borderRadius:'4px'}}>
+                        {
+                            currentUserCanModifyCase?
+                            <DragDropTarget2 fileUploadCallback={addFiles} caseId={activeCase?.id}  sx={{ borderRadius:'4px'}}>
+                                <Box sx={{ display:'flex', flexDirection:'column', justifyContent:'space-around',m:2, mb:0}}>
                                     <EntityFiles entityId={entityId}/>
-                                </DragDropTarget2>
+                                </Box>
+                            </DragDropTarget2>                        
+                            :
+                            <Box sx={{ display:'flex', flexDirection:'column', justifyContent:'space-around',m:2, mb:0}}>
+                                    <EntityFiles entityId={entityId}/>
                             </Box>
+                        }
                         </Paper>
                         <Paper>
                             <Box sx={{ display:'flex', flexDirection:'column', justifyContent:'space-around',m:2, mb:0}}>

@@ -14,7 +14,7 @@ import { handleQueryResultsWithWaitMessage } from "../api/ApiUtils";
 import { useEffect } from "react";
 import TaskEntities from "./TaskEntities";
 import Paper from "@mui/material/Paper";
-import { Table, TableBody, TableCell, TableRow, Typography } from "@mui/material";
+import { Table, TableBody, TableCell, TableRow, Tooltip, Typography } from "@mui/material";
 import { api } from "../api/BaseApi";
 import TaskFiles from "./TaskFiles";
 import RefreshIcon from '@mui/icons-material/Refresh';
@@ -73,10 +73,14 @@ export default function Task({taskId})
                     <Box sx={{p:0,m:1}}>
                     <Paper>
                         <Box sx={{display:'flex',justifyContent:'flex-end',}}>
-                            <IconButton disabled={getTaskQueryResults.isFetching} onClick={() => refetchTaskData()}><RefreshIcon/></IconButton>
-                            <IconButton disabled={getTaskQueryResults.isFetching} onClick={()=>setEditTaskData({...task})}>
-                                <EditTwoToneIcon/>
-                            </IconButton>
+                            <Tooltip title="Refresh Task">
+                                <IconButton disabled={getTaskQueryResults.isFetching} onClick={() => refetchTaskData()}><RefreshIcon/></IconButton>
+                            </Tooltip>
+                            <Tooltip title="Edit Task">
+                                <IconButton disabled={getTaskQueryResults.isFetching} onClick={()=>setEditTaskData({...task})}>
+                                    <EditTwoToneIcon/>
+                                </IconButton>
+                            </Tooltip>
                         </Box>
                         {getTaskQueryResults.isFetching?(
                             <Box sx={{height:'320px', width:'100%', display:'flex', justifyContent:'center', alignItems:'center'}}>

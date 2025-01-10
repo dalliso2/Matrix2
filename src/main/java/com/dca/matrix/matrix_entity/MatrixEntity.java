@@ -62,7 +62,6 @@ public class MatrixEntity extends EntityBase
 	private MatrixCase matrixCase;
 	
 	@OneToMany(mappedBy="matrixEntity", cascade = CascadeType.ALL, fetch = FetchType.EAGER, orphanRemoval=true)
-	//@JoinColumn(name = "ENTITY_ID")
 	private Collection<PropertyValue> propertyValues = new LinkedList<>();
 
 	@OneToMany(mappedBy = "parent", fetch = FetchType.LAZY)
@@ -87,6 +86,12 @@ public class MatrixEntity extends EntityBase
 //		this.properties.add(property);
 //	}
 //	
+	public void addPropertyValue(PropertyValue val)
+	{
+		propertyValues.add(val);
+		val.setMatrixEntity(this);
+	}
+	
 	public String toString()
 	{
 		StringBuffer buf = new StringBuffer();

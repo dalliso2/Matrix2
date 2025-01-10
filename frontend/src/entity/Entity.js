@@ -12,17 +12,23 @@ import { useDispatch } from "react-redux";
 import "./Entity.css";
 import LoadingSkeleton from "../util/LoadingSkeleton";
 import RefreshIcon from '@mui/icons-material/Refresh';
-import { Table, TableBody } from "@mui/material";
+import { Table, TableBody, Tooltip } from "@mui/material";
 import { useTheme } from "@mui/material/styles";
 import { useGetAllEntityDefinitionsQuery } from "../api/EntityDefinitionApi";
 import { useNavigate } from "react-router-dom";
 import { handleQueryResultsWithWaitMessage } from "../api/ApiUtils";
+import { useSelector } from "react-redux";
+import { selectActiveCase, selectCurrentUser } from "../state/AppSlice";
+import { userCanModifyCase } from "../util/utils";
 
 export default function Entity( {entityId, entityUpdatedCallback } )
 {
     const theme = useTheme();
     const navigate = useNavigate(); 
     const dispatch = useDispatch(); 
+
+    const currentUserCanModifyCase = userCanModifyCase(useSelector(selectCurrentUser), useSelector(selectActiveCase).id);
+
     const [editEntityDialogOpen, setEditEntityDialogOpen] = React.useState(false);
 
     const { refetch, ...entityDefinitionQueryResults } = useGetAllEntityDefinitionsQuery();
@@ -45,10 +51,15 @@ export default function Entity( {entityId, entityUpdatedCallback } )
         <Box>
             <Box sx={{display:'flex',flexDirection:'column', width:'100%', p:2}}>
                 <Box sx={{display:'flex', justifyContent:'flex-end', width:'100%'}}>
-                    <IconButton disabled={getEntityResults.isFetching} onClick={() => refetchEntity()}><RefreshIcon/></IconButton>
-                    <IconButton disabled={getEntityResults.isFetching} onClick={()=>setEditEntityDialogOpen(true)}>
+                <Tooltip title="Edit Entity">
+                    <IconButton disabled={getEntityResults.isFetching} onClick={()=>setEditEntityDialogOpen(true)}
+                                sx={{visibility:currentUserCanModifyCase?'visible':'hidden'}}>
                         <EditTwoToneIcon/>
                     </IconButton> 
+                </Tooltip>
+                <Tooltip title="Refresh Entity">
+                    <IconButton disabled={getEntityResults.isFetching} onClick={() => refetchEntity()}><RefreshIcon/></IconButton>
+                </Tooltip>
                 </Box>    
                 <Box sx={{ position:'relative', display:'flex', width:'100%', gap:'30px', justifyContent:'space-around', overflow:'hidden'}}>
                 {
@@ -62,7 +73,7 @@ export default function Entity( {entityId, entityUpdatedCallback } )
                             <Box sx={{p:1}}><LoadingSkeleton/></Box>
                         </Box>
                 }
-                    <Box sx={{maxWidth:'50%'}}>
+                    <Box sx={{}}>
                         <Table>
                             <TableBody>
                             {

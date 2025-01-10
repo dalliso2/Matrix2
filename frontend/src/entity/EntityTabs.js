@@ -16,13 +16,14 @@ import AddIcon from "@mui/icons-material/Add";
 import EntitySearch from "./EntitySearch";
 import AddEditEntityDialog from "./AddEditEntityDialog";
 import SetActiveCaseDialog from "../case/SetActiveCaseDialog";
-import { selectEntityTabData } from "../state/AppSlice";
+import { selectActiveCase, selectEntityTabData, selectCurrentUser } from "../state/AppSlice";
 import { useGetAllEntityDefinitionsQuery } from "../api/EntityDefinitionApi";
 import { setCurrentEntityTab, selectCurrentEntityTabIndex } from "../state/AppSlice";
 import { removeEntityTab } from "../state/AppSlice";
 import { useEffect } from "react";
 import LoadingSkeleton from "../util/LoadingSkeleton";
 import { handleQueryResultsWithWaitMessage } from "../api/ApiUtils";
+import { userCanModifyCase } from "../util/utils";
 
 function a11yProps(index)  
 {
@@ -39,6 +40,8 @@ export default function EntityTabs()
 
     const tabEntityData = useSelector(selectEntityTabData); 
     const currentTabIndex = useSelector(selectCurrentEntityTabIndex);
+    const activeCase = useSelector(selectActiveCase);
+    const currentUser = useSelector(selectCurrentUser); 
 
     const { refetch, ...entityDefinitionQueryResults } = useGetAllEntityDefinitionsQuery();
     const entityDefinitions = entityDefinitionQueryResults?.data?.payload;
@@ -92,8 +95,9 @@ export default function EntityTabs()
             }
         </ContentWrapper> 
         {
-            entityDefinitionQueryResults.isFetching || entityDefinitionQueryResults.isError?undefined:
-            <Fab color="primary" aria-label="add" disabled={false}
+            !userCanModifyCase(currentUser, activeCase)?undefined:
+            <Fab color="primary" aria-label="add" 
+                disabled={!activeCase || entityDefinitionQueryResults.isFetching || entityDefinitionQueryResults.isError}
                 onClick={()=>{setShowAddEditEntityDialog(true)}} sx={{ position: 'fixed', bottom: 16, left: 90 }}>
                 <AddIcon />
             </Fab>

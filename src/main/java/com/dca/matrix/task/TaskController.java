@@ -62,11 +62,4 @@ public class TaskController
 		ApiResponse<Iterable<Task>> response = ApiResponseUtil.success(this.taskService.searchTasks(queryParameters), "success", request);
 		return new ResponseEntity<>(response, HttpStatus.OK);
 	}	
-	
-//	@PostMapping(path = "/search", consumes = "application/json")
-//	@ResponseStatus(HttpStatus.OK)
-//	public Iterable<Task> queryTasks(@RequestBody TaskQueryParameters queryParameters)
-//	{
-//		return this.taskService.searchTasks(queryParameters);
-//	}	
 }

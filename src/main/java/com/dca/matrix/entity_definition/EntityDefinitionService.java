@@ -5,5 +5,5 @@ import java.util.List;
 public interface EntityDefinitionService
 {
 	List<EntityDefinition> getAll();
-	EntityDefinition createUpdateEntityDefinition(EntityDefinition entityDef);
+	EntityDefinition storeEntityDefinition(EntityDefinition entityDef);
 }

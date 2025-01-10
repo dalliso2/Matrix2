@@ -1,8 +1,6 @@
 package com.dca.matrix.user;
 
 import java.util.List;
-import java.util.stream.Collectors;
-
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -67,7 +65,7 @@ public class MatrixUserController
 	{
 		List<MatrixUser> users = this.userService.search(searchString);
 		
-		List<MatrixUserDTO> userDTOs = users.stream().map(matrixUser->createDTO(matrixUser)).toList();
+		List<MatrixUserDTO> userDTOs = users.stream().map(matrixUser->new MatrixUserDTO(matrixUser)).toList();
 		return new ResponseEntity<>(ApiResponseUtil.success(userDTOs, 
 															userDTOs.size() + " users found.", 
 															request),
@@ -108,7 +106,7 @@ public class MatrixUserController
 	@ResponseStatus(HttpStatus.OK)
 	public MatrixUserDTO updatePassword(@RequestBody ChangePasswordMessage msg)
 	{
-		return this.createDTO(this.userService.updatePassword(msg));
+		return new MatrixUserDTO(this.userService.updatePassword(msg));
 	}
 	
 	@PatchMapping(path="/theme", consumes="application/json")

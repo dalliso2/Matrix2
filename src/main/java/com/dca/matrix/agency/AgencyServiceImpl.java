@@ -9,9 +9,12 @@ import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
 import com.dca.matrix.api.ApiErrorCode;
+import com.dca.matrix.authentication.AuthenticationService;
+import com.dca.matrix.authorization.AuthorizationService;
 import com.dca.matrix.exception.MatrixUncheckedException;
 import com.dca.matrix.exception.MatrixValidationException;
 
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 
 @Service
@@ -19,10 +22,14 @@ import lombok.RequiredArgsConstructor;
 public class AgencyServiceImpl implements AgencyService
 {
 	private final AgencyRepository agencyRepository;
+	private final AuthorizationService authorizationService;
 	
 	@Override
+	@Transactional
 	public Agency createUpdateAgency(final Agency agency)
 	{
+		this.authorizationService.verifyUserIsSystemAdmin();
+		
 		List<String> fieldErrors = new LinkedList<>();
 		
 		if (Strings.isBlank(agency.getName()))
@@ -48,8 +55,10 @@ public class AgencyServiceImpl implements AgencyService
 	}
 
 	@Override
+	@Transactional
 	public Agency deleteAgency(Long agencyId)
 	{
+		this.authorizationService.verifyUserIsSystemAdmin();
 		Agency existingAgency = this.agencyRepository.findById(agencyId).orElseThrow(()->
 									new MatrixValidationException("Agency with id " + agencyId + " does not exist.",
 																	null, ApiErrorCode.ENTITY_DOES_NOT_EXIST));
@@ -67,6 +76,7 @@ public class AgencyServiceImpl implements AgencyService
 	@Override
 	public List<Agency> getAgencyList()
 	{
+		this.authorizationService.verifyUserIsSystemAdmin();
 		return this.agencyRepository.findAllByOrderByName();
 	}
 

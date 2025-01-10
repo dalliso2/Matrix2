@@ -47,7 +47,7 @@ export default function FileSearchDialog({entityId, closeFn})
     const rows = searchResults && searchResults.map(file=>(
         {   rowProperties:{id:file.id}, 
             sx:{},
-            values: [{value:<IconButton onClick={()=>removeFileFromResults(file.id)}><AddLinkSharp/></IconButton>},
+            values: [{value:<Tooltip title="Link file to entity"><IconButton onClick={()=>removeFileFromResults(file.id)}><AddLinkSharp/></IconButton></Tooltip>},
                         {value:file.name}, 
                         {value:file.description}, 
                         {value:file.originalName}]

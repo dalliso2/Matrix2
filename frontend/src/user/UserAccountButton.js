@@ -4,7 +4,7 @@ import IconButton from "@mui/material/IconButton";
 import Popover from "@mui/material/Popover";
 import Switch from "@mui/material/Switch";
 import Box from "@mui/system/Box";
-import { Button } from "@mui/material";
+import { Button, Tooltip } from "@mui/material";
 import { useSetUserDarkThemeMutation } from '../api/UserApi';
 import ChangePasswordDialog from "./ChangePasswordDialog";
 import { useDispatch } from 'react-redux';
@@ -14,6 +14,8 @@ import { handleMutationResults } from "../api/ApiUtils";
 import { enqueueSnackbar } from "notistack";
 import { useNavigate } from "react-router-dom";
 import { setAuthToken } from "../state/AppSlice";
+import { resetState } from "../state/AppSlice";
+import { api } from "../api/BaseApi";
 
 export default function UserAccountButton()
 {
@@ -33,22 +35,20 @@ export default function UserAccountButton()
                             // "",
                             // "", 
                             ()=>{ 
-                                console.log("setDarkTheme user", mutationState.data.payload);
                                 enqueueSnackbar("Set theme to " + ((currentUser?.darkTheme)?"dark.":"light."), {variant:'success'});
                             },
                             ()=>{ closeFn();});
 
     async function logout()
     {
-        // dispatch(api.util.resetApiState());
-        // dispatch(resetState());
+        dispatch(api.util.resetApiState());
+        dispatch(resetState());
         dispatch(setAuthToken(null));
     }
 
     function setDarkTheme(val)
     {
         //dispatch(setStateDarkTheme(event.target.checked));
-        console.log("setDarkTheme",val);
         apiSetDarkTheme(val);
     }
 
@@ -60,9 +60,11 @@ export default function UserAccountButton()
 
     return (
         <>
-            <IconButton color="inherit" size="large" onClick={event=>setAnchorElement(event.currentTarget)} sx={{}}>
-                <AccountCircle color='inherit' size='large' fontSize='large'/>
-            </IconButton>
+            <Tooltip title="Account settings">
+                <IconButton color="inherit" size="large" onClick={event=>setAnchorElement(event.currentTarget)} sx={{}}>
+                    <AccountCircle color='inherit' size='large' fontSize='large'/>
+                </IconButton>
+            </Tooltip>
             <Popover open={!!anchorElement} 
                     anchorEl={anchorElement}
                     onClose={()=>setAnchorElement(undefined)}

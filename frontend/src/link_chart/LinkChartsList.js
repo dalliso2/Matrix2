@@ -5,7 +5,7 @@ import { useSelector } from 'react-redux';
 import { selectActiveCase } from '../state/AppSlice';
 import Box from '@mui/material/Box';
 import { useGetLinkChartListForCaseQuery } from '../api/LinkChartApi';
-import { handleQueryError } from '../api/ApiUtils';
+import { handleQueryResultsWithWaitMessage } from '../api/ApiUtils';
 import { TEXT } from '../util/PropertyType';
 import IconButton from '@mui/material/IconButton';
 import RefreshIcon from "@mui/icons-material/Refresh";
@@ -16,6 +16,7 @@ import { useState } from 'react';
 import { useTheme } from '@mui/material/styles';
 import { addLinkChartTab } from '../state/AppSlice';
 import { useNavigate } from 'react-router-dom';
+import Tooltip from '@mui/material/Tooltip';
 
 const columnHeadings = ["Name", "Description"];
 const columnTypes = [TEXT, TEXT];
@@ -30,13 +31,12 @@ export default function LinkChartsList()
 
     const [editLinkChart, setEditLinkChart] = useState();
 
-    const { data:envelope, refetch:refetchLinkChartList, ...linkChartListQueryStatus } = useGetLinkChartListForCaseQuery(activeCase.id);
-    const linkCharts = envelope?.payload;
+    const { refetch:refetchLinkChartList, ...linkChartListQueryResults } = useGetLinkChartListForCaseQuery(activeCase.id);
+    const linkCharts = linkChartListQueryResults?.data?.payload;
 
     useEffect(() => {
-        if (linkChartListQueryStatus.isError) 
-            handleQueryError(linkChartListQueryStatus, dispatch, navigate);
-    }, [linkChartListQueryStatus?.isError]);
+        handleQueryResultsWithWaitMessage(linkChartListQueryResults);
+    }, [linkChartListQueryResults?.isFetching]);
 
     //
     // Save task-entity api function
@@ -65,7 +65,9 @@ export default function LinkChartsList()
     return (
         <Box sx={{display:'flex', flexDirection:'column', width:'100%'}}>
             <Box sx={{position:'relative',display:'flex', justifyContent:'space-between', padding:'5px'}}>
-                <IconButton onClick={() => refetchLinkChartList(activeCase.id)}><RefreshIcon/></IconButton>
+                <Tooltip title="Refresh Link Chart List">
+                    <IconButton onClick={() => refetchLinkChartList(activeCase.id)}><RefreshIcon/></IconButton>
+                </Tooltip>
                 <Button onClick={()=>setEditLinkChart({id:undefined, matrixCase: activeCase.id, name:'', description:''})} 
                     sx={{ mr:1, alignSelf:'flex-end'}}>New Link Chart</Button>
             </Box>
@@ -74,7 +76,7 @@ export default function LinkChartsList()
                         columnTypes={columnTypes} 
                         cellCss={cellCss} 
                         rowValues={rowValues} 
-                        isFetching={linkChartListQueryStatus.isFetching}/>
+                        isFetching={linkChartListQueryResults.isFetching}/>
                 { editLinkChart && <AddEditLinkChartDialog linkChartObj={editLinkChart} closeFn={()=>closeDialog()}/> }
             </Box>
         </Box>

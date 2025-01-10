@@ -94,24 +94,24 @@ public class UserCaseRole
 	
 	public UserCaseKey getId() { return this.id; }
 	
-	@PrePersist
-	private void prePersist()
-	{
-		AuthenticationService authService = ApplicationContextProvider.getApplicationContext().getBean(AuthenticationService.class);
-		if (authService != null)
-			this.createdBy =  authService.getCurrentUser();
-		this.createTime = Date.from(Instant.now());
-		this.lastUpdatedBy = null;
-		this.lastUpdateTime = null;
-	}
-
-	@PreUpdate
-	private void preUpdate()
-	{
-		AuthenticationService authService = ApplicationContextProvider.getApplicationContext().getBean(AuthenticationService.class);
-		if (authService != null)
-			this.lastUpdatedBy =  authService.getCurrentUser();
-		this.lastUpdateTime = Date.from(Instant.now());
-	}
+//	@PrePersist
+//	private void prePersist()
+//	{
+//		AuthenticationService authService = ApplicationContextProvider.getApplicationContext().getBean(AuthenticationService.class);
+//		if (authService != null)
+//			this.createdBy =  authService.getCurrentUser();
+//		this.createTime = Date.from(Instant.now());
+//		this.lastUpdatedBy = null;
+//		this.lastUpdateTime = null;
+//	}
+//
+//	@PreUpdate
+//	private void preUpdate()
+//	{
+//		AuthenticationService authService = ApplicationContextProvider.getApplicationContext().getBean(AuthenticationService.class);
+//		if (authService != null)
+//			this.lastUpdatedBy =  authService.getCurrentUser();
+//		this.lastUpdateTime = Date.from(Instant.now());
+//	}
 
 }

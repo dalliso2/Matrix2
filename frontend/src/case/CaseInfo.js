@@ -6,15 +6,36 @@ import PersonAddAltTwoToneIcon from "@mui/icons-material/PersonAddAltTwoTone";
 import AddEditCaseDialog from "./AddEditCaseDialog";
 import LoadingSkeleton from "../util/LoadingSkeleton";
 import { Table, TableBody, TableCell, TableRow } from "@mui/material";
+import { useGetCaseQuery } from "../api/CaseApi";
+import { useDispatch } from "react-redux";
+import { useEffect } from "react";
+import { handleQueryResultsWithWaitMessage } from "../api/ApiUtils";
+import { useSelector } from "react-redux";
+import { selectCurrentUser } from "../state/AppSlice";
+import { userCanModifyCase } from "../util/utils";
 
-export default function CaseInfo({caseObj})
+export default function CaseInfo({caseId})
 {
+    const dispatch = useDispatch();
     const [editCase, setEditCase] = React.useState(false);
+    const currentUser = useSelector(selectCurrentUser);
+    const currentUserCanEditCase = userCanModifyCase(currentUser, caseId);
+
+    // load case data
+    const getCaseQueryResults = useGetCaseQuery(caseId);
+    const caseObj = getCaseQueryResults?.data?.payload;
+ 
+    useEffect(() => {
+        handleQueryResultsWithWaitMessage(getCaseQueryResults, dispatch);
+    }, [getCaseQueryResults?.isFetching]);
 
     return (
         caseObj?
         <Box sx={{width:'100%'}}>
+        {
+            currentUserCanEditCase &&
             <Button onClick={()=>setEditCase(true)} sx={{pl:0}}>Edit</Button>
+        }
             <IconButton sx={{visibility:'hidden'}}><PersonAddAltTwoToneIcon fontSize="large"/></IconButton>
             <Table>
                 <TableBody>
@@ -32,7 +53,7 @@ export default function CaseInfo({caseObj})
                 </TableRow>
                 </TableBody>    
             </Table>
-            { editCase && <AddEditCaseDialog caseObj={caseObj} closeFn={()=>setEditCase(false)}/>}
+            { editCase && <AddEditCaseDialog caseObj={caseObj} closeFn={()=>setEditCase(undefined)}/>}
         </Box>:
         <LoadingSkeleton/>
     );

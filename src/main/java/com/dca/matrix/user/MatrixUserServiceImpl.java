@@ -1,5 +1,7 @@
 package com.dca.matrix.user;
 
+import java.time.Instant;
+import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Objects;
@@ -26,9 +28,10 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 @Service
 @RequiredArgsConstructor
+@Transactional
 public class MatrixUserServiceImpl implements MatrixUserService
 {
-	// final members will be initialized by autowiring in the generated required args constructor
+	// final members will be initialized in the generated required args constructor
 	private final MatrixUserRepository MatrixUserRepository;
 	private final AuthenticationService authenticationService;
 	private final PasswordEncoder paswordEncoder;
@@ -42,7 +45,6 @@ public class MatrixUserServiceImpl implements MatrixUserService
 	 * 	might update a user's info without changing the password.
 	 */
 	@Override
-	@Transactional
 	public MatrixUser updateUser(MatrixUser user)
 	{
 		MatrixUser currentUser = this.authenticationService.getCurrentUser();
@@ -127,6 +129,22 @@ public class MatrixUserServiceImpl implements MatrixUserService
 			user.setPassword(this.paswordEncoder.encode(user.getPassword()));
 		}
 
+		// if existing user save the create date and created by from the existing user
+		if (existingUser != null)
+		{
+			user.setCreatedBy(existingUser.createdBy);
+			user.setCreateTime(existingUser.getCreateTime());
+		}
+		// else set to current user and time
+		else
+		{
+			user.setCreatedBy(currentUser);
+			user.setCreateTime(Date.from(Instant.now()));
+		}
+		
+		user.setLastUpdatedBy(currentUser);
+		user.setLastUpdateTime(Date.from(Instant.now()));
+		
 		MatrixUser savedUser = this.MatrixUserRepository.save(user);
 		
 		return savedUser;
@@ -162,6 +180,9 @@ public class MatrixUserServiceImpl implements MatrixUserService
 	{
 		MatrixUser currentUser = this.authenticationService.getCurrentUser();
 		
+		if (!currentUser.isEnabled())
+			throw new MatrixValidationException("User account is disabled.", null, ApiErrorCode.USER_DISABLED);
+		
 		if (!Objects.equals(msg.newPassword(),msg.newPassword2()))	
 			throw new MatrixValidationException("Passwords do not match.", null, ApiErrorCode.VALIDATION_ERROR);
 		
@@ -182,10 +203,12 @@ public class MatrixUserServiceImpl implements MatrixUserService
 	}
 
 	@Override
-	@Transactional
 	public MatrixUser setTheme(SetThemeMessage msg)
 	{
 		MatrixUser currentUser = this.authenticationService.getCurrentUser();
+		if (!currentUser.isEnabled())
+			throw new MatrixValidationException("User account is disabled.", null, ApiErrorCode.USER_DISABLED);
+		
 		currentUser.setDarkTheme(msg.darkTheme());
 		
 		return this.MatrixUserRepository.save(currentUser);

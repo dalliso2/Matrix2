@@ -41,10 +41,10 @@ public class AuthenticationController
 	private final PasswordEncoder passwordEncoder;
 	
 	@PostMapping("/login")
-	public ResponseEntity<ApiResponse> login(@RequestBody @Valid final AuthenticationRequestDTO authRequest,
+	public ResponseEntity<ApiResponse<AuthenticationResponseDTO>> login(@RequestBody @Valid final AuthenticationRequestDTO authRequest,
 																			HttpServletRequest request)
 	{
-		ResponseEntity<ApiResponse> responseEntity = null;
+		ResponseEntity<ApiResponse<AuthenticationResponseDTO>> responseEntity = null;
 				
 		final Optional<MatrixUser> userOpt = this.matrixUserService.findByUsername(authRequest.username());
 		
@@ -70,17 +70,17 @@ public class AuthenticationController
 		return responseEntity;
 	}
 	
-	@PostMapping("/refresh-credentials")
-	public ResponseEntity<ApiResponse<AuthenticationResponseDTO>> refreshCredentials(@RequestBody @Valid final TokenRefreshDTO tokenRefreshDTO,
-																			HttpServletRequest request)
-	{
-		MatrixUserDTO userDTO = new MatrixUserDTO((MatrixUser)SecurityContextHolder.getContext().getAuthentication().getPrincipal());
-		AuthenticationResponseDTO authResponse = new AuthenticationResponseDTO(tokenRefreshDTO.token(), userDTO);
-								
-		
-		return new ResponseEntity<>(ApiResponseUtil.success(authResponse, 
-															"Authenticated user " + userDTO.username(), 
-															request),
-															HttpStatus.OK);
-	}
+//	@PostMapping("/refresh-credentials")
+//	public ResponseEntity<ApiResponse<AuthenticationResponseDTO>> refreshCredentials(@RequestBody @Valid final TokenRefreshDTO tokenRefreshDTO,
+//																			HttpServletRequest request)
+//	{
+//		MatrixUserDTO userDTO = new MatrixUserDTO((MatrixUser)SecurityContextHolder.getContext().getAuthentication().getPrincipal());
+//		AuthenticationResponseDTO authResponse = new AuthenticationResponseDTO(tokenRefreshDTO.token(), userDTO);
+//								
+//		
+//		return new ResponseEntity<>(ApiResponseUtil.success(authResponse, 
+//															"Authenticated user " + userDTO.username(), 
+//															request),
+//															HttpStatus.OK);
+//	}
 }

@@ -4,7 +4,6 @@ import { useDispatch } from 'react-redux';
 import { useSelector } from 'react-redux';
 import { selectActiveCase } from '../state/AppSlice';
 import Box from '@mui/material/Box';
-import { handleQueryError } from '../api/ApiUtils';
 import { TEXT } from '../util/PropertyType';
 import IconButton from '@mui/material/IconButton';
 import RefreshIcon from "@mui/icons-material/Refresh";
@@ -16,6 +15,7 @@ import { useGetTimelineListForCaseQuery } from '../api/TimelineApi';
 import AddEditTimelineDialog from './AddEditTimelineDialog';
 import { addTimelineTab } from '../state/AppSlice';
 import { useNavigate } from 'react-router-dom';
+import { handleQueryResultsWithWaitMessage } from '../api/ApiUtils';
 
 const columnHeadings = ["Name", "Description"];
 const columnTypes = [TEXT, TEXT];
@@ -30,21 +30,12 @@ export default function LinkChartsList()
 
     const [editTimeline, setEditTimeline] = useState();
 
-    const { data:envelope, refetch:refetchTimelineList, ...timelineListQueryStatus } = useGetTimelineListForCaseQuery(activeCase.id);
-    const linkCharts = envelope?.payload;
+    const { refetch:refetchTimelineList, ...timelineListQueryResults } = useGetTimelineListForCaseQuery(activeCase.id);
+    const linkCharts = timelineListQueryResults?.data?.payload;
 
     useEffect(() => {
-        if (timelineListQueryStatus.isError) 
-            handleQueryError(timelineListQueryStatus, dispatch, navigate);
-    }, [timelineListQueryStatus?.isError]);
-
-    //
-    // Save task-entity api function
-    //
-    // const [storeTaskEntity, storeTaskEntityMutationState] = useStoreTaskEntityMutation();
-    // handleMutationResults(storeTaskEntityMutationState, dispatch, false, "","Error linking task and entity",
-    //     ()=>enqueueSnackbar(storeTaskEntityMutationState.originalArgs.successDescription, {variant:'success'}),
-    //     ()=>{});
+        handleQueryResultsWithWaitMessage(timelineListQueryResults, dispatch);
+    }, [timelineListQueryResults?.isFetching]);
 
     function closeDialog()
     {
@@ -65,7 +56,9 @@ export default function LinkChartsList()
     return (
         <Box sx={{display:'flex', flexDirection:'column', width:'100%'}}>
             <Box sx={{position:'relative',display:'flex', justifyContent:'space-between', padding:'5px'}}>
-                <IconButton onClick={() => refetchTimelineList(activeCase.id)}><RefreshIcon/></IconButton>
+                <Tooltip title="Refresh Timeline List">
+                    <IconButton onClick={() => refetchTimelineList(activeCase.id)}><RefreshIcon/></IconButton>
+                </Tooltip>
                 <Button onClick={()=>setEditTimeline({id:undefined, matrixCaseId: activeCase.id, name:'', description:''})} 
                     sx={{ mr:1, alignSelf:'flex-end'}}>New Timeline</Button>
             </Box>
@@ -74,7 +67,7 @@ export default function LinkChartsList()
                         columnTypes={columnTypes} 
                         cellCss={cellCss} 
                         rowValues={rowValues} 
-                        isFetching={timelineListQueryStatus.isFetching}/>
+                        isFetching={timelineListQueryResults.isFetching}/>
                 { editTimeline && <AddEditTimelineDialog timelineObj={editTimeline} closeFn={()=>closeDialog()}/> }
             </Box>
         </Box>

@@ -29,7 +29,7 @@ export default function EntityDisplayDialog({entityId, entityUpdatedCallback, on
     }, [entityDefinitionQueryResults.isFetching, getEntityResults.isFetching]);
 
     return (
-        <Dialog open={true} onClose={()=>{}}>
+        <Dialog open={getEntityResults.isSuccess} maxWidth={'md'} onClose={()=>{}}>
             <DialogTitle  sx={{backgroundColor:theme.palette.primary.main,color:theme.palette.primary.contrastText, 
                 borderColor: theme.palette.background.default, }}>{getTitle(entityDefinitions, entity)}</DialogTitle>
             <DialogContent>

@@ -76,9 +76,9 @@ export default function TimelineTabs()
     //     if (getAllTimelineEntitiesForCaseStatus.isError)
     //         handleQueryError(getAllTimelineEntitiesForCaseStatus, dispatch);
     //     if (getAllEntityDefinitionsForCaseStatus.isError)
-    //         handleQueryError(getAllEntityDefinitionsForCaseStatus, dispatch);
+    //         (getAllEntityDefinitionsForCaseStatus, dispatch);
     //     if (getTimelineStatus.isError)
-    //         handleQueryError(getAllTimelineEntitiesForCaseStatus, dispatch);
+    //         (getAllTimelineEntitiesForCaseStatus, dispatch);
     // } ,[getAllTimelineEntitiesForCaseStatus.isError, 
     //     getAllEntityDefinitionsForCaseStatus.isError,
     //     getTimelineStatus.isError]); 

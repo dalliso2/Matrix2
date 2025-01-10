@@ -1,5 +1,6 @@
 package com.dca.matrix.matrix_case;
 
+import java.util.HashSet;
 import java.util.Set;
 
 import com.dca.matrix.EntityBase;
@@ -8,6 +9,7 @@ import com.dca.matrix.matrix_entity.MatrixEntity;
 import com.dca.matrix.user_case_role.UserCaseRole;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
+import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
@@ -47,16 +49,22 @@ public class MatrixCase extends EntityBase
 	@Column(name = CASE_TITLE)
 	private String title;
 
-	@Column(name = CASE_DESCRIPTION)
+	@Column(name = CASE_DESCRIPTION, length=4096)
 	private String description;
 	
-	@OneToMany(fetch = FetchType.EAGER, mappedBy = "matrixCase")
+	@OneToMany(fetch = FetchType.EAGER, mappedBy = "matrixCase", cascade = CascadeType.ALL)
 	@JsonIgnore	
-	private Set<UserCaseRole> userCaseRoles;
+	private Set<UserCaseRole> userCaseRoles = new HashSet<>();
 	
 	@OneToMany(mappedBy = "matrixCase",fetch = FetchType.LAZY)
 //	@JoinColumn(name = "CASE_ENTITY")
 //	@OneToMany(mappedBy = "matrixCase",fetch = FetchType.LAZY)
-//	@JsonIgnore
-	private Set<MatrixEntity> caseEntites;
+	@JsonIgnore
+	private Set<MatrixEntity> caseEntites = new HashSet<>();
+	
+	public void addEntity(MatrixEntity entity)
+	{
+		this.caseEntites.add(entity);
+		entity.setMatrixCase(this);
+	}
 }

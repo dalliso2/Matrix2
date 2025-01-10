@@ -1,11 +1,14 @@
 package com.dca.matrix.file;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.net.MalformedURLException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Collection;
+import java.util.LinkedList;
 import java.util.Optional;
+import java.util.stream.Stream;
 
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Value;
@@ -16,10 +19,12 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.dca.matrix.api.ApiErrorCode;
+import com.dca.matrix.authorization.AuthorizationService;
 import com.dca.matrix.exception.MatrixUncheckedException;
 import com.dca.matrix.exception.MatrixValidationException;
 import com.dca.matrix.matrix_case.MatrixCase;
 import com.dca.matrix.matrix_case.MatrixCaseRepository;
+import com.dca.matrix.matrix_case.MatrixCaseService;
 
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
@@ -28,13 +33,15 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 @Service
 @RequiredArgsConstructor
+@Transactional
 public class FileStorageServiceImpl implements InitializingBean, FileStorageService
 {
 	@Value("${matrix.file_directory}")
 	private String uploadDirectory;
 	private Path root;
 	private final MFileRepository mFileRepository;
-	private final MatrixCaseRepository matrixCaseRepository;
+	private final MatrixCaseService matrixCaseService;
+	private final AuthorizationService authService;
 	
 /////////////// InitializingBean Methods /////////////////
 	@Override
@@ -65,47 +72,58 @@ public class FileStorageServiceImpl implements InitializingBean, FileStorageServ
 
 	@Override
 	@Transactional
-	public MFile save(Optional<Long> caseId, MultipartFile file)
+	public MFile saveFileInputStream(Optional<MatrixCase> caseOpt, InputStream fileInputStream, String originalFileName)
 	{
 		MFile newFile = null;
-		log.debug("save(file): begin");
-
 		MatrixCase mCase = null;
-		
-		if (caseId.isPresent())
-			mCase = this.matrixCaseRepository.findById(caseId.get()).orElseThrow(()->		
-								new MatrixValidationException("Case with id " + caseId + " does not exist.",
-										null, ApiErrorCode.CASE_DOES_NOT_EXIST));
 		
 		try
 		{
-			String originalFileName = file.getOriginalFilename();
-			log.debug("save(file): originalFileName: " + originalFileName);
-			
-			// save the file so that it will have an id
 			newFile = new MFile(originalFileName);
-			newFile.setMatrixCase(mCase);
-			log.debug("save(file): attempting to save file info in database");
+			if (caseOpt.isPresent())
+				newFile.setMatrixCase(caseOpt.get());
 			this.mFileRepository.save(newFile);
-			log.debug("save(file): successfully saved file in database");
-			
+
 			// save the file using name returned from the getServerFileName method
 			// this method appends the id, before the extension, to the file name
 			// this will prevent overwriting a file if users upload files with the 
 			// same name
-			log.debug("save(file): attempting to save file in file system");
-			Files.copy(file.getInputStream(), root.resolve(newFile.getServerFileName()));
-			log.debug("save(file): successfully saved file in file system");
+			Files.copy(fileInputStream, root.resolve(newFile.getServerFileName()));			
 		}
 		catch (Exception ex)
 		{
-			log.error("ERROR SAVING FILE");
 			log.error(ex.getMessage(), ex);
 		}
 		
 		return newFile;
 	}
+	
+	@Override
+	@Transactional
+	public MFile save(Optional<MatrixCase> caseOpt, MultipartFile file)
+	{
+		MFile returnVal = null;
+		try
+		{
+			returnVal = this.saveFileInputStream(caseOpt, file.getInputStream(), file.getOriginalFilename());
+		}
+		catch (IOException ex)
+		{
+			log.error(ex.getMessage());
+			throw new MatrixUncheckedException("Error saving file + " + file.getOriginalFilename(), null, null);
+		}
+		return returnVal;
+	}
 
+	@Override
+	public MFile loadMFile(Long id)
+	{
+		return this.mFileRepository.findById(id).orElseThrow(()->
+												new MatrixValidationException("File with id " + id + " does not exist.",
+														null, ApiErrorCode.FILE_DOES_NOT_EXIST));
+
+	}
+	
 	@Override
 	public Resource load(Long id)
 	{
@@ -116,7 +134,11 @@ public class FileStorageServiceImpl implements InitializingBean, FileStorageServ
 		try
 		{
 			log.debug("load(id): attempting to load file data from database");
-			MFile mFile = this.mFileRepository.findById(id).get();
+			MFile mFile = this.loadMFile(id);
+			
+			MatrixCase mCase = mFile.getMatrixCase();
+			if (mCase != null)
+				this.authService.verifyUserCanView(mFile.getMatrixCase().getId());
 			
 			Path filePath = this.root.resolve(mFile.getServerFileName());
 			log.debug("load(id): file path is " + filePath.toString());
@@ -147,7 +169,7 @@ public class FileStorageServiceImpl implements InitializingBean, FileStorageServ
 		return fileResource;
 	}
 
-	@Override
+	@Override 
 	@Transactional
 	public Collection<MFile> updateFiles(Collection<MFile> files)
 	{
@@ -156,6 +178,8 @@ public class FileStorageServiceImpl implements InitializingBean, FileStorageServ
 			MFile mFile = this.mFileRepository.findById(file.getId()).orElseThrow(()->
 						new MatrixValidationException("File with id " + file.getId() + " does not exist.",
 								null, ApiErrorCode.FILE_DOES_NOT_EXIST));
+			
+			this.authService.verifyUserCanModify(mFile.getMatrixCase().getId());
 			
 			mFile.setName(file.getName());
 			mFile.setDescription(file.getDescription());
@@ -168,5 +192,37 @@ public class FileStorageServiceImpl implements InitializingBean, FileStorageServ
 	public Collection<MFile> searchFilesNotLinkedToEntity(Long matrixEntityId, String searchString)
 	{
 		return this.mFileRepository.searchFilesNotLinkedToEntity(matrixEntityId, searchString);
+	}
+
+
+	@Override
+	public Collection<MFile> storeFiles(Long caseId, MultipartFile[] files)
+	{
+		Collection<MFile> newFiles = new LinkedList<>();
+
+		Optional<MatrixCase> caseOpt = this.matrixCaseService.getCaseOpt(caseId);
+		
+		// a user can only upload files for a case
+		// an admin may also upload user pics that aren't associated with a case
+		if (caseOpt.isPresent())
+			this.authService.verifyUserCanModify(caseId);
+		else
+			this.authService.verifyUserIsSystemAdmin();
+
+		try
+		{
+			Stream.of(files).forEach(file -> {
+				newFiles.add(this.save(caseOpt, file));
+			});
+		}
+		catch (Exception ex)
+		{
+			log.error("uploadFiles(files): FAILED TO SAVE FILES");
+			log.error("uploadFiles(files): " + ex.getMessage());
+			throw new MatrixValidationException("Error saving file:  " + ex.getLocalizedMessage(), null,
+					ApiErrorCode.ERROR_UPLOADING_FILE);
+		}
+
+		return newFiles;
 	}
 }

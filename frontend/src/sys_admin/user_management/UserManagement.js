@@ -37,9 +37,6 @@ export default function UserManagement()
         handleQueryResultsWithWaitMessage(searchUsersQueryResults, dispatch, "Searching Users...");
     }, [searchUsersQueryResults?.isFetching]);
 
-    console.log("UserManagement");
-    console.log(searchUsersQueryResults);
-
     useEffect(() => {
         if (filterString.length)
             searchUsersFn(filterString);

@@ -1,15 +1,10 @@
 package com.dca.matrix.task;
 
 import java.util.Arrays;
-import java.util.List;
-
 import org.springframework.data.jpa.domain.Specification;
 
 import com.dca.matrix.matrix_case.MatrixCase;
-import com.dca.matrix.matrix_case.MatrixCase_;
 import com.dca.matrix.user.MatrixUser;
-import com.dca.matrix.user.MatrixUser_;
-
 import jakarta.persistence.criteria.Join;
 
 

@@ -31,7 +31,6 @@ public class EntityFileController
 	private final EntityFileService entityFileService;
 	
 	@PostMapping(path = "/add")
-	@ResponseStatus(HttpStatus.OK)
 	public ResponseEntity<ApiResponse<Collection<EntityFile>>> save(@RequestBody Collection<EntityFile> entityFiles, HttpServletRequest request)
 	{	
 		return	new ResponseEntity<>(ApiResponseUtil.success(this.entityFileService.save(entityFiles), 
@@ -40,7 +39,6 @@ public class EntityFileController
 	}
 
 	@DeleteMapping(path = "/remove")
-	@ResponseStatus(HttpStatus.OK)
 	public ResponseEntity<ApiResponse<EntityFile>> remove(@RequestBody EntityFile entityFile, HttpServletRequest request)
 	{	
 		return	new ResponseEntity<>(ApiResponseUtil.success(this.entityFileService.remove(entityFile), 
@@ -49,7 +47,6 @@ public class EntityFileController
 	}
 
 	@GetMapping(path = "/all_for_entity/{entityId}")
-	@ResponseStatus(HttpStatus.OK)
 	public ResponseEntity<ApiResponse<List<EntityFile>>> getForEntity(@PathVariable("entityId") Long entityId, HttpServletRequest request)
 	{
 		return	new ResponseEntity<>(ApiResponseUtil.success(this.entityFileService.findForEntity(entityId), 

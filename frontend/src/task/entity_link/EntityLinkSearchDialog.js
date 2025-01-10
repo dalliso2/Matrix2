@@ -33,6 +33,7 @@ import { enqueueSnackbar } from "notistack";
 import { api } from "../../api/BaseApi";
 import { getTitle } from "../../util/utils";
 import { useNavigate } from "react-router-dom";
+import Tooltip from "@mui/material/Tooltip";
 
 export default function EntityLinkSearchDialog({ taskId, closeFn})
 {
@@ -106,7 +107,7 @@ export default function EntityLinkSearchDialog({ taskId, closeFn})
             {
                 const row = {rowProperties:{}, sx:{},
                         values: [{cellProperties:{  }, sx:{ width:0}, 
-                                    value:[<IconButton onClick={()=>setEditTaskEntity(entity)}><AddLinkSharp/></IconButton>]},
+                                    value:[<Tooltip title="Link entity to task"><IconButton onClick={()=>setEditTaskEntity(entity)}><AddLinkSharp/></IconButton></Tooltip>]},
                                 ...currentEntityGroup.entityDefinition.props.filter(prop=>!prop.deleted && prop.includeInList).map(prop => ({propertyDefinition: prop.id, type: prop.type , value:[
                                     getListComponent(prop.type, [entity.propertyValues.find(pVal=>pVal.propertyDefinition === prop.id)?.value])
                                 ]}))]

@@ -14,7 +14,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.dca.matrix.api.ApiResponse;
 import com.dca.matrix.api.ApiResponseUtil;
-import com.dca.matrix.matrix_case.MatixCaseService;
+import com.dca.matrix.matrix_case.MatrixCaseService;
 
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
@@ -26,27 +26,34 @@ import lombok.AllArgsConstructor;
 @AllArgsConstructor
 public class UserCaseRoleController
 {
-	private final UserCaseRoleService ucrService;
+//	private final UserCaseRoleService ucrService;
+//	
+//	@PostMapping(path = "/store", consumes = "application/json")
+//	@ResponseStatus(HttpStatus.OK)
+//	public ResponseEntity<ApiResponse<UserCaseRoleMessage>> storeUserCaseRole(@Valid @RequestBody UserCaseRoleMessage ucrMessage, HttpServletRequest request)
+//	{
+//		//return this.ucrService.storeUserCaseRole(ucrMessage);
+//		return	new ResponseEntity<>(ApiResponseUtil.success(new UserCaseRoleMessage(this.ucrService.storeUserCaseRole(ucrMessage)), 
+//				"Successfully retrieved all agencies.", 
+//				request), HttpStatus.OK);
+//
+//	}
+//	
+//	@DeleteMapping(path = "/delete", consumes = "application/json")
+//	@ResponseStatus(HttpStatus.OK)
+//	public ResponseEntity<ApiResponse<UserCaseRole>> deleteUserCaseRole(@Valid @RequestBody UserCaseRoleMessage ucrMessage, HttpServletRequest request)
+//	{
+//		//return this.ucrService.deleteUserCaseRole(ucrMessage);
+//		return	new ResponseEntity<>(ApiResponseUtil.success(this.ucrService.deleteUserCaseRole(ucrMessage), 
+//				"Successfully removed user " + ucrMessage.userId() + " from case " + ucrMessage.caseId(), 
+//				request), HttpStatus.OK);
+//
+//	}
 	
-	@PostMapping(path = "/store", consumes = "application/json")
-	@ResponseStatus(HttpStatus.OK)
-	public ResponseEntity<ApiResponse<UserCaseRole>> storeUserCaseRole(@Valid @RequestBody UserCaseRoleMessage ucrMessage, HttpServletRequest request)
-	{
-		//return this.ucrService.storeUserCaseRole(ucrMessage);
-		return	new ResponseEntity<>(ApiResponseUtil.success(this.ucrService.storeUserCaseRole(ucrMessage), 
-				"Successfully retrieved all agencies.", 
-				request), HttpStatus.OK);
-
-	}
-	
-	@DeleteMapping(path = "/delete", consumes = "application/json")
-	@ResponseStatus(HttpStatus.OK)
-	public ResponseEntity<ApiResponse<UserCaseRole>> deleteUserCaseRole(@Valid @RequestBody UserCaseRoleMessage ucrMessage, HttpServletRequest request)
-	{
-		//return this.ucrService.deleteUserCaseRole(ucrMessage);
-		return	new ResponseEntity<>(ApiResponseUtil.success(this.ucrService.deleteUserCaseRole(ucrMessage), 
-				"Successfully retrieved all agencies.", 
-				request), HttpStatus.OK);
-
-	}
+//	@PostMapping(path = "/set_owner")
+//	@PreAuthorize("hasRole('ADMIN')")
+//	public ResponseEntity<ApiResponse<UserCaseRole>> setCaseOwner(@RequestBody UserCaseRoleMessage ucrMessage, HttpServletRequest request)
+//	{
+//		return new ResponseEntity<>(ApiResponseUtil.success(this.ucrService.setCaseOwner(ucrMessage), null, HttpStatus.OK))
+//	}
 }

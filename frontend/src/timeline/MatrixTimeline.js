@@ -16,12 +16,13 @@ import { Timeline } from 'vis-timeline/standalone';
 import { useLazyGetTimelineQuery } from '../api/TimelineApi';
 import { useLazyGetAllTimelineEntitiesForCaseQuery } from '../api/EntityApi';
 import { useGetAllEntityDefinitionsQuery } from '../api/EntityDefinitionApi';
-import { handleQueryError } from '../api/ApiUtils';
+import { handleQueryResultsWithWaitMessage } from '../api/ApiUtils';
 import { useStoreTimelineMutation } from '../api/TimelineApi';
 import { handleMutationResults } from '../api/ApiUtils';
 import { enqueueSnackbar } from 'notistack';
 import { useBlocker } from 'react-router';
 import EntityDisplayDialog from '../entity/EntityDisplayDialog';
+import BinaryChoiceMessageBox from '../util/BinaryChoiceMessageBox';
 
 import './timeline.css';
 
@@ -67,6 +68,7 @@ function MTimeline({ timelineTabData, timelineRef })
     const theme = useTheme();
     const dispatch = useDispatch();
     const navigate = useNavigate();
+    const [nextRoute, setNextRoute] = useState(null);
     const activeCase = useSelector(selectActiveCase);
 
     const [showTimelineEditEntitiesDialog, setShowTimelineEditEntitiesDialog] = useState(false);
@@ -74,37 +76,35 @@ function MTimeline({ timelineTabData, timelineRef })
 
     //const timelineIdRef = useRef(timelineTabData.id);
     const timelineBoxRef = useRef(null);
+    // this ref is used to determine if the timeline has been modified
     const timelineModifiedRef = useRef(false);  
 
-    const [getTimelineData, {data:timelineEnvelope, ...getTimelineStatus}] = useLazyGetTimelineQuery();
-    const timelineData = timelineEnvelope?.payload;
+    const [getTimelineData, getTimelineResults] = useLazyGetTimelineQuery();
+    const timelineData = getTimelineResults?.data?.payload;
 
     useEffect(() => {
         getTimelineData(timelineTabData.id);
     } ,[timelineTabData.id]);
 
     // get all possible timeline entities for the active case
-    const [getAllTimelineEntities, {data:entityEnvelope, ...getAllTimelineEntitiesForCaseStatus}] = useLazyGetAllTimelineEntitiesForCaseQuery();
-    const timelineEntities = entityEnvelope?.payload;
+    const [getAllTimelineEntities, getAllTimelineEntitiesForCaseResults] = useLazyGetAllTimelineEntitiesForCaseQuery();
+    const timelineEntities = getAllTimelineEntitiesForCaseResults?.data?.payload;
     useEffect(() => {
         if (activeCase?.id)
             getAllTimelineEntities(activeCase.id);
     } ,[activeCase?.id]);
 
-    const {data:entityDefinitionEnvelope, ...getAllEntityDefinitionsForCaseStatus} = useGetAllEntityDefinitionsQuery();
-    const entityDefinitions = entityDefinitionEnvelope?.payload;
+    const getAllEntityDefinitionsForCaseResults = useGetAllEntityDefinitionsQuery();
+    const entityDefinitions = getAllEntityDefinitionsForCaseResults?.data?.payload;
 
     // check for query errors
-    useEffect(() => {  
-        if (getAllTimelineEntitiesForCaseStatus.isError)
-            handleQueryError(getAllTimelineEntitiesForCaseStatus, dispatch, navigate);
-        if (getAllEntityDefinitionsForCaseStatus.isError)
-            handleQueryError(getAllEntityDefinitionsForCaseStatus, dispatch, navigate);
-        if (getTimelineStatus.isError)
-            handleQueryError(getAllTimelineEntitiesForCaseStatus, dispatch, navigate);
-    } ,[getAllTimelineEntitiesForCaseStatus.isError, 
-        getAllEntityDefinitionsForCaseStatus.isError,
-        getTimelineStatus.isError]); 
+    useEffect(() => { 
+        handleQueryResultsWithWaitMessage(getAllTimelineEntitiesForCaseResults, dispatch,);
+        handleQueryResultsWithWaitMessage(getAllEntityDefinitionsForCaseResults, dispatch);
+        handleQueryResultsWithWaitMessage(getTimelineResults, dispatch);
+    } ,[getAllTimelineEntitiesForCaseResults.isFetching, 
+        getAllEntityDefinitionsForCaseResults.isFetching,
+        getTimelineResults.isFetching]); 
 
     function onClick(event) 
     {
@@ -112,7 +112,7 @@ function MTimeline({ timelineTabData, timelineRef })
     }
 
     useEffect(() => {
-        if (timelineBoxRef.current && timelineData && timelineEntities)//!timelineRef.current)
+        if (timelineBoxRef.current && timelineData && timelineEntities && entityDefinitions)//!timelineRef.current)
         {
             const items = [];
             //timelineIdRef.current = timelineData.id;
@@ -132,12 +132,11 @@ function MTimeline({ timelineTabData, timelineRef })
             timelineRef.current.on('click', onClick);
 
             return ()=>{
-                console.log("DESTROYING TIMELINE");
                 timelineRef.current.destroy();
                 timelineRef.current = undefined;
             }
         }
-    }, [timelineData, timelineEntities]);
+    }, [timelineData, timelineEntities, entityDefinitions]);
 
     function addEntities(entityIdsToAdd)
     {
@@ -163,13 +162,11 @@ function MTimeline({ timelineTabData, timelineRef })
     const [storeTimeline, timelineMutationState] = useStoreTimelineMutation();
     handleMutationResults(timelineMutationState, 
                             dispatch, 
-                            navigate,
-                            true, 
-                            "Saving timeline...",
-                            "Error saving timeline.", 
                             ()=>{
                                     timelineModifiedRef.current=false;
                                     enqueueSnackbar( "Timeline saved", {variant:'success'});
+                                    if (nextRoute)
+                                        navigate(nextRoute);
                             }
                         );
 
@@ -182,13 +179,17 @@ function MTimeline({ timelineTabData, timelineRef })
                         matrixEntityIds:timelineRef.current.itemsData.getIds()});
     }
 
-    useBlocker((tx) => {
-        console.log("TIMELINE BLOCKER");
+    useBlocker((routeData) => {
+        if (timelineModifiedRef.current)
+        {
+            setNextRoute(routeData.nextLocation.pathname);
+            return true;
+        }
     });
 
     return (
         <Box sx={{ position:'relative',display:'flex', flexDirection:'column', justifyContent:'center', width: "100%", height: "100%" }}>
-            <Box ref={timelineBoxRef}/>
+            <Box sx={{flexGrow:1, overflow:'scroll'}} ref={timelineBoxRef}/>
             <TimelineButtonContainer>
                 <TimelineEditEntitiesButton openFn={()=>setShowTimelineEditEntitiesDialog(true)}/>
                 <TimelineSaveButton saveTimelineFn={saveTimeline}/>
@@ -200,6 +201,10 @@ function MTimeline({ timelineTabData, timelineRef })
                                         removeEntitiesFn={removeEntities}
                                         closeFn={()=>setShowTimelineEditEntitiesDialog(false)}/> }
             {showEntityId && <EntityDisplayDialog entityId={showEntityId} entityUpdatedCallback={(updateItem)} onClose={()=>setShowEntityId(false)}/>}
+            { nextRoute && <BinaryChoiceMessageBox title="Save Link Chart" 
+                                message={"Do you want to save your changes to this link chart?"}
+                                onYes={()=>saveTimeline()}
+                                onNo={()=>{navigate(nextRoute);}}/>}
         </Box>
       )
 }

@@ -15,13 +15,21 @@ import { enqueueSnackbar } from "notistack";
 import RefreshIcon from '@mui/icons-material/Refresh';
 import { api } from "../api/BaseApi";
 import { handleQueryResultsWithWaitMessage } from "../api/ApiUtils";
+import { selectAuthToken } from "../state/AppSlice";
+import { useSelector } from "react-redux";
+import { userCanModifyCase } from "../util/utils";
+import { selectActiveCase, selectCurrentUser } from "../state/AppSlice";
+import { Tooltip } from "@mui/material";
 
 const headers = ["File name", "Description", "Download", "Unlink"];
 
 export default function EntityFiles({entityId, unlink=true, sx={}})
 {
     const dispatch = useDispatch();
+    const authToken = useSelector(selectAuthToken); 
     const [showFileSearchDialog, setShowFileSearchDialog] = React.useState(false);
+
+    const currentUserCanModifyCase = userCanModifyCase(useSelector(selectCurrentUser), useSelector(selectActiveCase).id);
 
     //
     // function to fetch entity files
@@ -64,15 +72,15 @@ export default function EntityFiles({entityId, unlink=true, sx={}})
 
     async function downloadFile(fileId, fileName)
     {
-        await apiGetFile(fileId,fileName);
+        await apiGetFile(authToken, fileId,fileName);
     }
 
     const rows = entityFiles && entityFiles.map((entityFile) => {
         return {rowProperties:{ id:entityFile.id, onClick: ()=>onClickFile(entityFile.id)},
         sx:{cursor:'default'},
         values:[{sx:{p:1},value:[entityFile.mfile.name]}, {sx:{p:1},value:[entityFile.mfile.description]}]
-        .concat([{sx:{p:1,width:'0px'},value:[<IconButton onClick={(event)=>downloadFile(entityFile.mfile.id, entityFile.mfile.serverFileName)}><DownloadTwoToneIcon/></IconButton>]}])
-        .concat([{sx:{p:1,width:'0px'},value:[<IconButton onClick={(event)=>unlinkFile(event, entityFile.id)}><LinkOffTwoToneIcon/></IconButton>]}])
+        .concat([{sx:{p:1,width:'0px'},value:[<Tooltip title="Dowload file"><IconButton onClick={(event)=>downloadFile(entityFile.mfile.id, entityFile.mfile.serverFileName)}><DownloadTwoToneIcon/></IconButton></Tooltip>]}])
+        .concat([{sx:{p:1,width:'0px'},value:[<Tooltip title="Unlink"><IconButton onClick={(event)=>unlinkFile(event, entityFile.id)}><LinkOffTwoToneIcon/></IconButton></Tooltip>]}])
     }});
 
     return (
@@ -80,10 +88,14 @@ export default function EntityFiles({entityId, unlink=true, sx={}})
             <Box sx={{display:'flex', justifyContent:'space-between', width:'100%', alignItems:'center'}}>
                 <Box sx={{fontWeight:'bold'}}>Linked Files</Box>
                 <Box>
-                <IconButton onClick={() => refetchEntityFiles()}><RefreshIcon/></IconButton>
-                <IconButton onClick={()=>setShowFileSearchDialog(true)}>
-                    <AddLinkSharp/>
-                </IconButton>
+                <Tooltip title="Link a file to this entity">
+                    <IconButton onClick={()=>setShowFileSearchDialog(true)} sx={{visibility:currentUserCanModifyCase?'visible':'hidden'}}>
+                        <AddLinkSharp/>
+                    </IconButton>
+                </Tooltip>
+                <Tooltip title="Refresh linked files">
+                    <IconButton onClick={() => refetchEntityFiles()}><RefreshIcon/></IconButton>
+                </Tooltip>
                 </Box> 
             </Box>  
         {

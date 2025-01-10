@@ -2,7 +2,7 @@ import React from "react";
 // import { apiGetChildren, apiUnlinkEntities } from "../api/entity";
 import { useDispatch } from "react-redux";
 // import { addEntityTab, selectReRender, setReRender } from "../state/EntityTabsSlice";
-import { useTheme } from "@mui/material";
+import { Tooltip, useTheme } from "@mui/material";
 import Grid from '../util/Grid';
 //import { getListComponent } from "../util/DisplayComponentFactory";
 import Box from "@mui/material/Box";
@@ -20,6 +20,7 @@ import { enqueueSnackbar } from "notistack";
 import Button from "@mui/material/Button";
 import { closeSnackbar } from "notistack";
 import { useNavigate } from "react-router-dom";
+import { addTaskTab } from "../state/AppSlice";
 
 const headers = ["Task #", "Title", "Description", "Coverage Description", "Status", "Unlink"];
 
@@ -46,7 +47,6 @@ export default function EntityTasks({entityId})
     const [storeTaskEntity, storeTaskEntityMutationState] = useStoreTaskEntityMutation();
     handleMutationResults(storeTaskEntityMutationState, dispatch,
         ()=>{
-            console.log("storeTaskEntityMutationState", storeTaskEntityMutationState);
             enqueueSnackbar(storeTaskEntityMutationState.originalArgs.successDescription, {variant:'success'})
         },
         ()=>{});
@@ -88,9 +88,15 @@ export default function EntityTasks({entityId})
         deleteTaskEntity(taskEntityId);
     }
 
+    function navigateToTask(task)
+    {
+        dispatch(addTaskTab({taskId:task.id, title: "Task " + task.caseTaskId + " - " + task.title}));
+        navigate("/tasks");
+    }
+
     const rows = taskEntities?.map(taskEntity=>
-            ({  rowProperties:{}, 
-                sx:{},
+            ({  rowProperties:{onClick:()=>navigateToTask(taskEntity.task)}, 
+                sx:{cursor:'pointer', '&:hover':{backgroundColor:theme.palette.action.hover}},
                 values:[    {value:taskEntity.task.caseTaskId}, 
                         {value:taskEntity.task.title}, 
                         {value:taskEntity.task.description}, 
@@ -98,7 +104,9 @@ export default function EntityTasks({entityId})
                         {value:taskEntity.task.status},
                         {value:
                             (<Box sx={{display:'flex'}}>
-                                <IconButton onClick={(event)=>unlinkTaskAndEntity(taskEntity.id)}><LinkOffTwoToneIcon/></IconButton>
+                                <Tooltip title="Unlink Task">
+                                    <IconButton onClick={(event)=>unlinkTaskAndEntity(taskEntity.id)}><LinkOffTwoToneIcon/></IconButton>
+                                </Tooltip>
                             </Box>)
                         }
                     ]}));
@@ -108,7 +116,9 @@ export default function EntityTasks({entityId})
             <Box sx={{display:'flex', justifyContent:'space-between', width:'100%', alignItems:'center'}}>
                 <Box sx={{}}><b>Linked Tasks</b></Box>
                 <Box>
-                <IconButton onClick={() =>refetchRelatedTasks()}><RefreshIcon/></IconButton>
+                <Tooltip title="Refresh linked tasks">
+                    <IconButton onClick={() =>refetchRelatedTasks()}><RefreshIcon/></IconButton>
+                </Tooltip>
                 </Box> 
             </Box>  
             <Box>

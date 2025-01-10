@@ -3,9 +3,6 @@ import { router } from "../router/MatrixRouter";
 
 function getTags(tagName, results)
 {
-    console.log("getTags");
-    console.log("tagName: ", tagName); 
-    console.log("results: ", results);
     if (!results)
         return [];
 
@@ -13,24 +10,6 @@ function getTags(tagName, results)
         return results.map(({id})=>({type: tagName, id}));
     else
         return [{type: tagName, id: results.id}];
-}
-
-function handleQueryError(queryResults, dispatch, navigate, errorFn)
-{
-    if (!queryResults)
-        return;
-    if (queryResults.data?.api_error)
-    {
-        const errorList = (queryResults.data.errors?.length)?("\n\n" + mutationResults.data.error.data.errors.join("\n")):"";
-
-        dispatch(setMessageBoxData( queryResults.requestId, 
-                                    "Error",
-                                    queryResults.data.message + 
-                                    errorList));
-
-        if (errorFn)
-            errorFn();
-    }
 }
 
 function handleMutationResults(mutationResults, 
@@ -115,7 +94,6 @@ async function onQueryStartedHandler(queryFullfilledPromise, dispatch, requestId
             failFn();
         router.navigate("/login");
 
-        console.log(error);
         if (error.meta.response.status === 401)
             dispatch(setMessageBoxData(HTTP_ERROR, "Session expired", "Your session expired.  Please login again."));
         else if (error.meta.response.status === 403)
@@ -156,5 +134,4 @@ export {    getTags,
             handleQueryResultsWithWaitMessage, 
             handleMutationResults, 
             onQueryStartedHandler, 
-            handleQueryError, 
             showApiErrorMessageBox };

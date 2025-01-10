@@ -34,8 +34,7 @@ export default function TimelineTabs()
     const activeCase = useSelector(selectActiveCase);
     const timelineTabsData = useSelector(selectTimelinesTabData);
     const currentTabIndex = useSelector(selectCurrentTimelineTabIndex);
-console.log("TimelineTabs");
-console.log(timelineTabsData);
+    
     const [nextTab, setNextTab] = useState(-1);
     const [closeTabId, setCloseTabId] = useState(-1);
 
@@ -71,7 +70,7 @@ console.log(timelineTabsData);
             dispatch(setCurrentTimelineTab(index));
     }
 
-    // save the current zoom and pan of the cytoscape instance
+    // save the current zoom and pan of the timeline instance
     // so it can be restored when the tab is revisited
     function saveTimelineData()
     {
@@ -157,7 +156,7 @@ console.log(timelineTabsData);
       </Box>
       <SetActiveCaseDialog/>
       { (nextTab >= 0 || closeTabId >= 0) && <BinaryChoiceMessageBox title="Save timeline" 
-        message={"Do you want to save your changes to this link chart?"}
+        message={"Do you want to save your changes to this timeline?"}
         onYes={saveTimeline}
         onNo={dontSaveTimeline}/>}
       </>

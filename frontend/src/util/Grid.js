@@ -76,7 +76,7 @@ export default function Grid({header=undefined,
                                 noResultsMessage})
 {
     const theme = useTheme();
-    
+
     return ( 
         <>
             <Box><h5 style={{paddingBottom:1,margin:0}}>{header}</h5></Box>
@@ -95,7 +95,8 @@ export default function Grid({header=undefined,
                                                                 color:theme.palette.primary.contrastText, 
                                                                 borderColor: theme.palette.background.default, 
                                                                 position:'sticky', 
-                                                                whiteSpace:'nowrap',}}>{heading}</TableCell>
+                                                                whiteSpace:'nowrap',
+                                                                textAlign:'center'}}>{heading}</TableCell>
                                 )
                             }
                         </TableRow>
@@ -109,17 +110,17 @@ export default function Grid({header=undefined,
                         }
                         { 
                             rowValues?.length===0 && noResultsMessage?
-                                <TableRow sx={{ p:0, height:'100%', width:'100%', overflow:'hidden'}}>
+                                <TableRow sx={{ pr:0, height:'100%', width:'100%', overflow:'hidden'}}>
                                     <TableCell colSpan={columnHeadings?.length} sx={{ p:0, textAlign:'center', opacity:0.5, border:0 }}>
                                         <h2 sx={{p:0}}>{noResultsMessage}</h2>
                                     </TableCell>
                                 </TableRow>
                             : rowValues && rowValues.map((row, rowIndex) =>
-                                <TableRow key={rowIndex} {...row.rowProperties} sx={{...row.sx}}>
+                                <TableRow {...row.rowProperties} sx={{...row.sx,}}>
                                 {
-                                        row.values?.map((value, valueIndex) => (
-                                            <TableCell key={valueIndex}  {...value.cellProperties} 
-                                                        sx={{ p:1, whiteSpace:'pre-wrap', verticalAlign:'middle', ...value.sx, }}>
+                                        row.values?.map((value, valueIndex) => ( 
+                                            <TableCell {...value.cellProperties} 
+                                                        sx={{ p:1, pl:3, whiteSpace:'pre-wrap', verticalAlign:'middle', ...value.sx, }}>
                                                         {value?.value}
                                             </TableCell>   
                                         ))

@@ -40,10 +40,6 @@ export default function LinkChartTabs()
 
     const linkChartTabsData = useSelector(selectLinkChartsTabData);
 
-    console.log("LinkChartTabs");   
-    console.log(linkChartTabsData);
-    console.log(currentTabIndex);
-
     // reference to cytoscape instance
     const cyRef = useRef(undefined);
     // flag to indicate if the current tab has been modified
@@ -84,7 +80,6 @@ export default function LinkChartTabs()
         const tabDataCopy = JSON.parse(JSON.stringify(linkChartTabsData[currentTabIndex-1]));
         tabDataCopy.zoom = cyRef.current.zoom();
         tabDataCopy.pan = {...cyRef.current.pan()};
-        console.log(tabDataCopy);
         dispatch(addLinkChartTab(tabDataCopy));
     }
 
@@ -93,23 +88,30 @@ export default function LinkChartTabs()
         saveTabChartData();
         linkChartModifiedRef.current=false;
         saveLinkChartFnRef.current();
+
         if (closeTabId >= 0)
-        {
-            dispatch(removeLinkChartTab(closeTabId));
-            setCloseTabId(-1);
-        }
+            closeTab(closeTabId);
+    }
+
+    function closeTab(tabId)
+    {
+        dispatch(removeLinkChartTab(tabId));
+        linkChartModifiedRef.current=false;
         if (nextTab >= 0)
         {
             dispatch(setCurrentLinkChartTab(nextTab));
             setNextTab(()=>-1);
-        }
+        }     
+        setCloseTabId(()=>-1);
     }
 
     function dontSaveLinkChart()
     {
-        linkChartModifiedRef.current=false;
-        dispatch(setCurrentLinkChartTab(nextTab));
-        setNextTab(()=>-1);
+        if (closeTabId >= 0)
+        {
+            setCloseTabId(-1);
+            closeTab(closeTabId);
+        }
     }
 
     // first tab is always the list of link charts

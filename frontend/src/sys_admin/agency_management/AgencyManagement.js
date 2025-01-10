@@ -18,6 +18,7 @@ import { useTheme } from '@mui/material/styles';
 import { useDispatch } from 'react-redux';
 import { useGetAllAgenciesQuery } from '../../api/AgencyApi';
 import { handleQueryResultsWithWaitMessage } from '../../api/ApiUtils';
+import { Tooltip } from '@mui/material';
 
 const columnHeadings = ["Name", "Abbreviation"]
 const columnTypes = [TEXT, TEXT];
@@ -61,7 +62,9 @@ export default function AgencyManagement()
             <Content>   
                 <Box sx={{ position:'relative', width:'100%', maxHeight:'100%', display: 'flex', flexDirection:'column' }}>
                     <Box sx={{position:'relative',display:'flex', justifyContent:'space-between', padding:'5px', flexGrow:0}}>
-                        <IconButton disabled={allAgencyQueryResults.isFetching} onClick={() => refetch()}><RefreshIcon/></IconButton>
+                        <Tooltip title="Refresh Agency List">
+                            <IconButton disabled={allAgencyQueryResults.isFetching} onClick={() => refetch()}><RefreshIcon/></IconButton>
+                        </Tooltip>    
                         <Button disabled={allAgencyQueryResults.isFetching} sx={{ m:0, p:0 }} onClick={() => setEditAgency({...newAgency})} >Add Organization</Button>
                     </Box>
                     <Grid columnHeadings={columnHeadings} columnTypes={columnTypes} rowValues={agencyList} isFetching={allAgencyQueryResults.isFetching}/>

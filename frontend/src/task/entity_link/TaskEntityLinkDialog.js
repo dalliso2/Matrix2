@@ -7,7 +7,7 @@ import { useTheme } from "@mui/material";
 import { useDispatch } from "react-redux";
 import { useGetAllEntityDefinitionsQuery } from "../../api/EntityDefinitionApi";
 import { useEffect } from "react";
-import { handleQueryError } from "../../api/ApiUtils";
+import { handleQueryResultsWithWaitMessage } from "../../api/ApiUtils";
 import { getInputComponent } from "../../util/InputComponentFactory";
 import { MULTILINE_TEXT } from "../../util/PropertyType";
 import { useStoreTaskEntityMutation } from "../../api/TaskApi";
@@ -42,7 +42,6 @@ function getImageId(entityDefinitions, entityOne)
 
 export default function TaskEntityLinkDialog({entity, description, saveFn, closeFn})
 {
-    console.log("TaskEntityLinkDialog");
     const theme = useTheme();
     const dispatch = useDispatch();
     const navigate = useNavigate();
@@ -52,12 +51,12 @@ export default function TaskEntityLinkDialog({entity, description, saveFn, close
     //
     // load entity definitions
     //
-    const { data:envelope, refetch, ...entityDefinitionQueryStatus } = useGetAllEntityDefinitionsQuery();
+    const { refetch, ...entityDefinitionQueryResults } = useGetAllEntityDefinitionsQuery();
     useEffect(() => {
-        if (entityDefinitionQueryStatus.isError) 
-            handleQueryError(entityDefinitionQueryStatus, dispatch, navigate);
-    }, [entityDefinitionQueryStatus.isError]);
-    const entityDefinitions = envelope?envelope.payload:[];
+        console.log(entityDefinitionQueryResults);
+        handleQueryResultsWithWaitMessage(entityDefinitionQueryResults, dispatch,);
+    }, [entityDefinitionQueryResults?.isFetching]);
+    const entityDefinitions = entityDefinitionQueryResults?.data?.payload;
 
     const entityName = entityDefinitions && getTitle(entityDefinitions, entity);
     const entityImageId = entityDefinitions && getImageId(entityDefinitions, entity);

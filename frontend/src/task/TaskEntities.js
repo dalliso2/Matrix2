@@ -2,10 +2,10 @@ import React from "react";
 import Box from "@mui/material/Box";
 import { useGetEntitiesForTaskQuery } from "../api/TaskApi";
 import { useEffect } from "react";
-import { handleQueryError } from "../api/ApiUtils";
+import { handleQueryResultsWithWaitMessage } from "../api/ApiUtils";
 import { useGetAllEntityDefinitionsQuery } from "../api/EntityDefinitionApi";
 import { addEntityTab } from "../state/AppSlice";
-import { IconButton } from "@mui/material";
+import { IconButton, Tooltip } from "@mui/material";
 import EditTwoToneIcon from '@mui/icons-material/EditTwoTone';
 import LinkOffTwoToneIcon from '@mui/icons-material/LinkOffTwoTone';
 import { getEntityDefinitionColumnHeadings } from "../util/utils";
@@ -35,7 +35,6 @@ export default function TaskEntities({taskId})
     const navigate = useNavigate();
 
     const [entityLinkSearchDialogOpen, setEntityLinkSearchDialogOpen] = useState(false);
-    const [entityToLink, setEntityToLink] = useState(undefined); 
     const [editTaskEntity, setEditTaskEntity] = useState(undefined);    
 
     // load entity definitions
@@ -47,8 +46,8 @@ export default function TaskEntities({taskId})
     const taskEntities = getTaskEntitesQueryResults?.data?.payload;
 
     useEffect(() => {  
-        handleQueryError(getTaskEntitesQueryResults, dispatch);
-        handleQueryError(entityDefinitionQueryResults, dispatch);
+        handleQueryResultsWithWaitMessage(getTaskEntitesQueryResults, dispatch);
+        handleQueryResultsWithWaitMessage(entityDefinitionQueryResults, dispatch);
     }, [getTaskEntitesQueryResults.isFetching, entityDefinitionQueryResults.isFetching]);
     
     //
@@ -58,20 +57,6 @@ export default function TaskEntities({taskId})
     handleMutationResults(storeTaskEntityMutationState, dispatch,
         ()=>enqueueSnackbar(storeTaskEntityMutationState.originalArgs.successDescription, {variant:'success'}),
         ()=>{});
-        
-    //
-    // code to re-link task/entity that has just been deleted
-    //
-    const undoRemove = (snackbarId)=>(
-        <Button onClick={()=>{
-                                storeTaskEntity({   taskId:deleteTaskEntityMutationState.data.payload.task.id,
-                                                    entityId:deleteTaskEntityMutationState.data.payload.matrixEntity.id, 
-                                                    description:deleteTaskEntityMutationState.data.payload.description,
-                                                    successDescription:"Successfully re-linked task to "
-                                                        + getTitle(entityDefinitions,deleteTaskEntityMutationState.data.payload.matrixEntity)});
-                                closeSnackbar(snackbarId);            
-                            }}>Undo</Button>
-    );
 
     //
     // Remove task-entity api function
@@ -153,9 +138,13 @@ export default function TaskEntities({taskId})
                                 ]}))]
                                 .concat({value:[taskEntity.description]},{sx:{width:'0px'},value:[
                                     <Box sx={{display:'flex'}}>
-                                        <IconButton onClick={(event)=>{event.stopPropagation();setEditTaskEntity(taskEntity);}}><EditTwoToneIcon/></IconButton>
-                                        <IconButton onClick={(event)=>unlinkTaskAndEntity(event, taskEntity.id)}><LinkOffTwoToneIcon/></IconButton>
-                                    </Box>
+                                        <Tooltip title="Edit Relationship">
+                                            <IconButton onClick={(event)=>{event.stopPropagation();setEditTaskEntity(taskEntity);}}><EditTwoToneIcon/></IconButton>
+                                        </Tooltip>
+                                        <Tooltip title="Unlink Task">
+                                            <IconButton onClick={(event)=>unlinkTaskAndEntity(event, taskEntity.id)}><LinkOffTwoToneIcon/></IconButton>
+                                        </Tooltip>
+                                        </Box>
                                 ]})
                             };
                 currentEntityGroup.rows.push(row);  
@@ -168,9 +157,13 @@ export default function TaskEntities({taskId})
             <Box sx={{display:'flex', justifyContent:'space-between', width:'100%', alignItems:'center',pb:0,mb:0}}>
                 <Box sx={{fontWeight:'bold'}}><b>Referenced Entities</b></Box>
                 <Box>
-                    <IconButton onClick={() => refetchTaskEntities()}><RefreshIcon/></IconButton>
-                    <IconButton onClick={()=>{setEntityLinkSearchDialogOpen(true)}}><AddLinkSharp/></IconButton>
-                </Box> 
+                    <Tooltip title="Refresh linked entities">
+                        <IconButton onClick={() => refetchTaskEntities()}><RefreshIcon/></IconButton>
+                    </Tooltip>
+                    <Tooltip title="Link an entity to this task">
+                        <IconButton onClick={()=>{setEntityLinkSearchDialogOpen(true)}}><AddLinkSharp/></IconButton>
+                    </Tooltip>
+                    </Box> 
             </Box>  
             <Box>
                 <Box sx={{}}>

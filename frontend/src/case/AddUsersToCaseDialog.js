@@ -21,7 +21,7 @@ import { useTheme } from '@mui/material/styles';
 import { PROFILE_IMAGE } from "../util/PropertyType";
 import { getListComponent } from "../util/DisplayComponentFactory";
 import { useLazySearchUsersQuery } from "../api/UserApi";
-import { useAddUserCaseRoleMutation } from "../api/CaseApi";
+import { useAddUserToCaseMutation } from "../api/CaseApi";
 import { useDispatch } from "react-redux";
 import { handleMutationResults, handleQueryResultsWithWaitMessage } from "../api/ApiUtils";
 import { enqueueSnackbar } from "notistack";
@@ -30,7 +30,7 @@ import { useEffect } from "react";
 const columnHeadings = ["Username", "Last Name", "First Name", "Picture", "Role"]
 const columnTypes = [TEXT,TEXT,TEXT,PROFILE_IMAGE,SELECT];
 
-export default function AddUsersToCaseDialog({caseUsers, caseObj, closeDialogFn }) 
+export default function AddUsersToCaseDialog({caseUsers, caseId, closeDialogFn }) 
 {
     const theme = useTheme();
     const dispatch = useDispatch();
@@ -43,28 +43,28 @@ export default function AddUsersToCaseDialog({caseUsers, caseObj, closeDialogFn 
         handleQueryResultsWithWaitMessage(searchQueryResults, dispatch);
     }, [searchQueryResults?.isFetching]);
     
-    const [storeUserCaseRole,storeMutationState] = useAddUserCaseRoleMutation();  
-    handleMutationResults(storeMutationState, dispatch, 
-                            ()=> enqueueSnackbar("Added " + storeMutationState.originalArgs.username + " to case as a " + storeMutationState.data.payload.caseRole + "." , {variant:'success'}),
-                            ()=>{ enqueueSnackbar("Failed to add " + storeMutationState.originalArgs.username + " to case." , {variant:'error'}); closeDialogFn();});
+    const [addUserToCase,addUserToCaseState] = useAddUserToCaseMutation();  
+    handleMutationResults(addUserToCaseState, dispatch, 
+                            ()=> enqueueSnackbar("Added " + addUserToCaseState.originalArgs.username + " to case as a " + addUserToCaseState.data.payload.caseRole + "." , {variant:'success'}),
+                            ()=>{ enqueueSnackbar("Failed to add " + addUserToCaseState.originalArgs.username + " to case." , {variant:'error'}); closeDialogFn();});
 
     const userData = searchResults && searchResults.filter(user=>!caseUserIds.includes(user.id))
-                    .map(user=>{ return {rowProperties:{id:user.id, onClick:()=>{}}, 
+                    .map(user=>{ return {rowProperties:{id:user.id, key:user.id, onClick:()=>{}}, 
                         sx:{cursor:'pointer', '&:hover':{backgroundColor:theme.palette.action.hover}},
-                        values:[{value:[user.username],sx:{verticalAlign:'middle',p:0,pl:1}},
-                                {value:[user.firstName],sx:{verticalAlign:'middle',p:0,pl:1}},
-                                {value:[user.lastName],sx:{verticalAlign:'middle',p:0,pl:1}},
-                                {value:user.profileImage && [getListComponent(PROFILE_IMAGE, [user.profileImage])]},
+                        values:[{value:[user.username],sx:{verticalAlign:'middle',p:0,pl:1}, cellProperties:{key:user.username}},
+                                {value:[user.firstName],sx:{verticalAlign:'middle',p:0,pl:1}, cellProperties:{key:user.username + user.firstName}},
+                                {value:[user.lastName],sx:{verticalAlign:'middle',p:0,pl:1}, cellProperties:{key:user.username + user.lastName}},
+                                {value:user.profileImage && [getListComponent(PROFILE_IMAGE, [user.profileImage])], cellProperties:{key:user.username + user.profileImage}},
                                 {value:[getInputComponent({type:SELECT,
                                                 name: 'role',
                                                 value: '',
-                                                onChange:event=>storeUserCaseRole({userId:user.id,caseId:caseObj.id,roleId:event.target.value, username:user.username}),
+                                                onChange:event=>addUserToCase({ucr:{userId:user.id,caseId:caseId,roleId:event.target.value}, username:user.username, filterString}),
                                                 selectData:CaseRoles.map((role,index)=>{return {id:index,name:role}})
                                             })],
-                                    sx: {verticalAlign:'middle',p:0,pl:1, pr:1,width:'20ch' } } 
+                                    sx: {verticalAlign:'middle',p:0,pl:1, pr:1,width:'20ch' }, cellProperties:{key:user.username + "role"} } 
                         ]
                 };}); 
-        
+                
     return (
         <Dialog open={true} fullWidth={true} maxWidth={'sm'}>
             <DialogTitle>Add Users To Case</DialogTitle>
@@ -74,7 +74,7 @@ export default function AddUsersToCaseDialog({caseUsers, caseObj, closeDialogFn 
                         <TextField label="Search" variant="outlined" size="small" onChange={(event)=>setFilterString(event.target.value)} />
                         <Button sx={{ pl:2, alignSelf:'flex-end'}} disabled={!filterString.length} onClick={() => searchUsersFn(filterString) } >Search Users</Button>
                     </Box>
-                    <Grid columnHeadings={columnHeadings} rowValues={userData}/>
+                    <Grid columnHeadings={columnHeadings} rowValues={userData} isFetching={searchQueryResults.isFetching}/>
                 </Box>
             </DialogContent>
             <DialogActions><Button onClick={()=>closeDialogFn()}>Close</Button></DialogActions>

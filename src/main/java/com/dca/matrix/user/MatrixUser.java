@@ -1,12 +1,15 @@
 package com.dca.matrix.user;
 
 import java.util.Collection;
+import java.util.Date;
 import java.util.List;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.Objects;
 import java.util.Set;
 
+import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.UpdateTimestamp;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
@@ -30,11 +33,16 @@ import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
+import jakarta.persistence.Temporal;
+import jakarta.persistence.TemporalType;
 import jakarta.persistence.Transient;
 import lombok.Data;
 import lombok.Getter;
@@ -45,12 +53,13 @@ import lombok.Setter;
 @Table(name=MatrixUser.TABLE)
 @Data
 @NoArgsConstructor(force = true)
-public class MatrixUser extends EntityBase implements UserDetails, Cloneable
+public class MatrixUser implements UserDetails, Cloneable
 {
 	private static final long serialVersionUID = 1L;
 	// table name
 	public static final String TABLE = "matrix_user";
 	// column name
+	public static final String ID = "ID";
 	public static final String USERNAME = "username";
 	public static final String PASSWORD = "password";
 	public static final String LAST_NAME = "last_name";
@@ -67,8 +76,34 @@ public class MatrixUser extends EntityBase implements UserDetails, Cloneable
 	public static final String ROLE_USER = "ROLE_USER";
 	public static final String ROLE_ADMIN = "ROLE_ADMIN";
 	
-	
 	public static int PASSWORD_MIN_LENGTH = 8;
+	
+	@Id
+	@Column(name = "ID")
+	@GeneratedValue(strategy = GenerationType.IDENTITY)
+	protected Long id;
+	
+	@Column(name = "CREATE_TIME")
+	@Temporal(TemporalType.TIMESTAMP)
+	@CreationTimestamp
+	@JsonIgnore
+	protected Date createTime;
+	
+	@ManyToOne(fetch = FetchType.LAZY)
+	@JoinColumn(name = "CREATED_BY")
+	@JsonIgnore
+	protected MatrixUser createdBy;
+	
+	@Column(name = "LAST_UPDATE_TIME")
+	@Temporal(TemporalType.TIMESTAMP)
+	@UpdateTimestamp
+	@JsonIgnore
+	protected Date lastUpdateTime;
+	
+	@ManyToOne(fetch = FetchType.LAZY)
+	@JoinColumn(name = "LAST_UPDATED_BY")
+	@JsonIgnore
+	protected MatrixUser lastUpdatedBy;
 	
 	// EMPTY_PASSWORD is used to return an empty string of the minimum
 	// eight characters through the api, since we never want to return
@@ -137,12 +172,14 @@ public class MatrixUser extends EntityBase implements UserDetails, Cloneable
 			switch (ucr.getCaseRole())
 			{
 				// no break statements, each role has all authorities beneath it
-				case CaseRoleEnum.Owner:
+				case CaseRoleEnum.Admin:
 					authorities.add(new SimpleGrantedAuthority("CASE_" + caseId + "_" + CaseAuthorityEnum.ADMIN));
 				case CaseRoleEnum.Participant:
 					authorities.add(new SimpleGrantedAuthority("CASE_" + caseId + "_" + CaseAuthorityEnum.EDIT));
 				case CaseRoleEnum.Reviewer:
 					authorities.add(new SimpleGrantedAuthority("CASE_" + caseId + "_" + CaseAuthorityEnum.VIEW));
+				case CaseRoleEnum.None:
+					break;
 			}
 		});
 		
@@ -184,15 +221,6 @@ public class MatrixUser extends EntityBase implements UserDetails, Cloneable
 	{
 		return this.enabled;
 	}
-
-	public boolean equalsExcludePassword(MatrixUser otherUser)
-	{
-		return Objects.equals(this.username, otherUser.username) 
-				&& Objects.equals(this.firstName, otherUser.firstName)
-				&& Objects.equals(this.lastName, otherUser.lastName)
-				&& Objects.equals(this.enabled, otherUser.enabled)
-				&& Objects.equals(this.isAdmin, otherUser.isAdmin);
-	}
 	
 	public CaseRoleEnum getCaseRole(MatrixCase mCase)
 	{
@@ -207,28 +235,35 @@ public class MatrixUser extends EntityBase implements UserDetails, Cloneable
 		}
 		return caseRole;
 	}
-	
-	public void isCaseAdmin(MatrixCase matrixCase)
+
+	public boolean isCaseAdmin(Long caseId)
 	{		
-		if (!this.hasAuth(matrixCase, CaseAuthorityEnum.ADMIN))
+		if (!this.hasAuth(caseId, CaseAuthorityEnum.ADMIN))
 			throw new AccessDeniedException("You do not have administrative rights for this case.");
+		return true;
 	}
 	
-	public void canView(MatrixCase matrixCase)
+	public boolean canView(Long caseId)
 	{
-		if (!this.hasAuth(matrixCase, CaseAuthorityEnum.VIEW))
+		if (!this.hasAuth(caseId, CaseAuthorityEnum.VIEW))
 			throw new AccessDeniedException("You do not have the authority to view this case.");
+		return true;
 	}
 	
-	public void canModify(MatrixCase matrixCase)
+	public boolean canModify(Long caseId)
 	{		
-		if (!this.hasAuth(matrixCase, CaseAuthorityEnum.EDIT))
+		if (!this.hasAuth(caseId, CaseAuthorityEnum.EDIT))
 			throw new AccessDeniedException("You do not have the authority to modify this case.");
+		return true;
 	}
 	
-	private boolean hasAuth(MatrixCase matrixCase, CaseAuthorityEnum authVal)
+	private boolean hasAuth(Long caseId, CaseAuthorityEnum authVal)
 	{
-		String caseAuthority = "CASE_" + matrixCase.getId() + authVal;
+		// admins can do anything
+		if (this.isAdmin)
+			return true;
+		
+		String caseAuthority = "CASE_" + caseId + "_" + authVal;
 		return this.getAuthorities().stream().anyMatch(auth->auth.getAuthority().equals(caseAuthority));
 	}
 	

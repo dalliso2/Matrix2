@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { useTheme } from '@mui/material/styles';
 import Dialog from '@mui/material/Dialog';
 import DialogTitle from '@mui/material/DialogTitle';
@@ -12,24 +12,34 @@ import { validate } from "../validation/validation";
 import { useDispatch } from "react-redux";
 import { useStoreCaseMutation } from "../api/CaseApi";
 import { handleMutationResults } from "../api/ApiUtils";
-import { useNavigate } from "react-router-dom";
+import { enqueueSnackbar } from "notistack";
 
 const fields = [
     {   name: 'id', label: 'id', type: 'hidden', required: false },
-    {   name: 'caseNumber', label: 'Case Number', type: TEXT, required: true, onChange: (event) => change(event) },
-    {   name: 'title', label: 'Title', type: MULTILINE_TEXT, rows:4, maxLength:255, required: true,onChange: (event) => change(event) },
-    {   name: 'description', label: 'Description', type: MULTILINE_TEXT, rows:4, maxLength:255, required: false, onChange: (event) => change(event) }
+    {   name: 'caseNumber', label: 'Case Number', type: TEXT, maxLength:255, required: true, onChange: (event) => change(event) },
+    {   name: 'title', label: 'Title', type: MULTILINE_TEXT, rows:4, maxLength:255, required: true, onChange: (event) => change(event) },
+    {   name: 'description', label: 'Description', type: MULTILINE_TEXT, rows:4, maxLength:4096, required: false, onChange: (event) => change(event) }
 ];
 
 export default function AddEditCaseDialog({caseObj, closeFn}) 
 { 
     const theme = useTheme();
     const dispatch = useDispatch();
-    const navigate = useNavigate();    
     const [caseData, setCaseData] = useState(caseObj);
+    const [successMsg, setSuccessMsg] = useState(undefined);
+    const [failMsg, setFailMsg] = useState(undefined);
 
     const [storeCase, mutationState] = useStoreCaseMutation();
-    handleMutationResults(mutationState, dispatch, ()=>closeFn());
+    handleMutationResults(mutationState, dispatch,
+            ()=> setSuccessMsg("Case " + mutationState.data.payload.caseNumber + " saved."));
+
+    useEffect(() => {
+        if (successMsg)
+        {
+            enqueueSnackbar(successMsg , {variant:'success'});
+            closeFn();
+        }
+    }, [successMsg]);
 
     async function onSave()
     {
@@ -53,7 +63,7 @@ export default function AddEditCaseDialog({caseObj, closeFn})
         {
             fields.map((field, index) => 
             (
-                <Box key={index}>
+                <Box key={field.name}>
                     {getInputComponent(field, index)}
                 </Box>
             ))

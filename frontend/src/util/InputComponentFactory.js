@@ -1,5 +1,5 @@
 import React from "react";
-import { Box, Chip, FormHelperText, IconButton, Switch, TextField } from "@mui/material";
+import { Box, Chip, FormHelperText, IconButton, Switch, TextField, Tooltip } from "@mui/material";
 import FormControlLabel from "@mui/material/FormControlLabel";
 import Checkbox from "@mui/material/Checkbox";
 import FormControl from "@mui/material/FormControl";
@@ -21,7 +21,7 @@ import Image from "./Image";
 
 const RETRIEVE_FILE_URL = "/api/file/";
 
-export function getInputComponent(fieldData, index, dispatch)
+export function getInputComponent(fieldData, key, dispatch)
 {
     var {selectData, helperText, visible, caseId, propDefId, ...field} = fieldData;
     const error = field.error || false;
@@ -42,7 +42,7 @@ export function getInputComponent(fieldData, index, dispatch)
                 const {onChange, value, ...rest} = field;
                 component = 
                 <InputMask
-                    key={index}
+                    key={key}
                     onChange={onChange}
                     value={value || ''}
                     mask={field.mask}
@@ -54,7 +54,7 @@ export function getInputComponent(fieldData, index, dispatch)
                         <FormControl sx={{width:'100%'}}>
                         <TextField 
                             {...rest}
-                            key={index}
+                            key={key}
                             fullWidth
                             size="small"
                             sx={{marginTop:1}} />
@@ -66,7 +66,7 @@ export function getInputComponent(fieldData, index, dispatch)
             }
             else
                 component = 
-                    <FormControl sx={{width:'100%'}} key={index}>
+                    <FormControl sx={{width:'100%'}} key={key}>
                     <TextField 
                         {...field}
                         value={field.value || ''}
@@ -82,7 +82,7 @@ export function getInputComponent(fieldData, index, dispatch)
             break;
         case MULTILINE_TEXT:
             component =
-                <FormControl sx={{width:'100%'}} key={index}>
+                <FormControl sx={{width:'100%'}} key={key}>
                 <TextField  
                     {...field}
                     value={field?.value || ''}
@@ -90,6 +90,7 @@ export function getInputComponent(fieldData, index, dispatch)
                     fullWidth
                     onChange={field.onChange}
                     size="small"
+                    inputProps={{ maxLength: field.maxLength }}
                     sx={{mt:1}}
                 />
                 <FormHelperText id={field.name + "-label"} error={true}>
@@ -99,7 +100,7 @@ export function getInputComponent(fieldData, index, dispatch)
             break;  
         case CHECKBOX:
             component =
-                <FormControlLabel key={index} control={ <Checkbox  {...field} /> } 
+                <FormControlLabel key={key} control={ <Checkbox  {...field} /> } 
                                     onChange={field.onChange}
                                     checked={ !!field.value ? field.value:false }
                                     sx={{ margin:'auto'}} 
@@ -108,13 +109,13 @@ export function getInputComponent(fieldData, index, dispatch)
             break;
         case SELECT:
             component =  
-                <FormControl fullWidth={true} size="small" key={index} error={field.error} required={field.required} sx={{mt:1}}>
+                <FormControl fullWidth={true} size="small" key={key} error={field.error} required={field.required} sx={{mt:1}}>
                     <InputLabel id={field.name + field.id} >{ field.label }</InputLabel>
                     <Select {...field} fullWidth={true} labelId={field.name + field.id} value={field?.value}  sx={{}}>
                     {
                         selectData?.map((item,index) =>
                         (
-                            <MenuItem key={index} value={item.id}>
+                            <MenuItem key={item.name} value={item.id}>
                                     <span>{item.name}</span>
                             </MenuItem>
                         ))
@@ -127,13 +128,13 @@ export function getInputComponent(fieldData, index, dispatch)
             break;
         case SELECT_MULTIPLE:
             component =
-                <FormControl fullWidth={true} size="small" key={index} error={field.error} required={field.required} sx={{mt:1}}>
+                <FormControl fullWidth={true} size="small" key={key} error={field.error} required={field.required} sx={{mt:1}}>
                     <InputLabel id={field.name + field.id} >{ field.label }</InputLabel>
                     <Select {...field} 
                             multiple 
                             fullWidth={true} 
                             labelId={field.name + field.id} 
-                            value={field.value}  
+                            value={field?.value || []}  
                             renderValue={(selected) => {
                                 return (
                                 <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5 }}>
@@ -146,7 +147,7 @@ export function getInputComponent(fieldData, index, dispatch)
                     {
                         selectData?.map((item,index) =>
                         (
-                            <MenuItem key={index} value={item.id}>
+                            <MenuItem key={item.name} value={item.id}>
                                     <span>{item.name}</span>
                             </MenuItem>
                         ))
@@ -159,7 +160,7 @@ export function getInputComponent(fieldData, index, dispatch)
             break;
         case 'SWITCH':
             component =
-            <FormControlLabel key={index} control={<Switch 
+            <FormControlLabel key={key} control={<Switch 
                                 disabled={field.disabled}
                                 name={field.name} 
                                 onChange={field.onChange}/>} 
@@ -169,7 +170,7 @@ export function getInputComponent(fieldData, index, dispatch)
             break;
         case DATE:
             component =
-                <React.Fragment key={index}>
+                <React.Fragment key={key}>
                     <DesktopDatePicker
                         value={field.value?field.value:null}
                         onChange={field.onChange}
@@ -178,6 +179,7 @@ export function getInputComponent(fieldData, index, dispatch)
                             label: field.label,
                             error: field.error,
                             size:'small',
+                            helperText:helperText,
                             clearable: true,
                             onClear: () => field.onChange(null),
                             required: field.required
@@ -186,18 +188,12 @@ export function getInputComponent(fieldData, index, dispatch)
                         }}
                         sx={{width:'25ch', mt:1}}
                     />
-                    <FormControl sx={{width:'100%'}} key={index}>
-                        <FormHelperText id={field.name + "-label"} error={true}>
-                        {helperText}
-                        </FormHelperText>
-                    </FormControl>
                 </React.Fragment>
             break;
         case DATE_RANGE:
             field.error || (field.error = [false, false]);
-            field.helperText || (field.helperText = [' ',' ']);
             component =
-                <React.Fragment key={index}>
+                <React.Fragment key={key}>
                 <Box sx={{}}>
                 <Box sx={{ marginBottom:2, borderBottom:1 }}>{field.label}</Box>
                 <Box sx={{display:'flex'}}>
@@ -210,7 +206,8 @@ export function getInputComponent(fieldData, index, dispatch)
                         label: "Start Date",
                         error: field.error[0],
                         size:'small',
-                        helperText:field.helperText[0],
+                        helperText:helperText[0],
+                        helperText:helperText[0],
                         clearable: true,
                         onClear: () => field.onChangeStartDate(null),
                         required: field.required
@@ -227,8 +224,9 @@ export function getInputComponent(fieldData, index, dispatch)
                     slotProps={{ textField:{    
                         label: "End Date",
                         error: field.error[1],
+                        helperText:helperText[1],
                         size:'small',
-                        helperText:field.helperText[1],
+                        helperText:helperText[1],
                         clearable: true,
                         onClear: () => field.onChangeEndDate(null),
                         required: field.required
@@ -241,9 +239,8 @@ export function getInputComponent(fieldData, index, dispatch)
                 </React.Fragment>
             break;
         case DATE_TIME:
-            !field.helperText && (field.helperText = ' ');
             component =
-                    <FormControl sx={{width:'100%'}} key={index} >
+                    <FormControl sx={{width:'100%'}} key={key} >
                         <DesktopDateTimePicker
                             value={field.value?field.value:null}                   
                             onChange={field.onChange}
@@ -251,6 +248,7 @@ export function getInputComponent(fieldData, index, dispatch)
                             slotProps={{ textField:{    
                                 label: field.label,
                                 error: field.error,
+                                helperText:helperText,
                                 size:'small',
                                 clearable: true,
                                 onClear: () => field.onChange(null),
@@ -260,18 +258,14 @@ export function getInputComponent(fieldData, index, dispatch)
                             }}             
                             sx={{width:'30ch', mt:1}}
                         />
-                        <FormHelperText id={field.name + "-label"} error={true}>
-                            {helperText}
-                        </FormHelperText>
                     </FormControl>
             break
         case DATE_TIME_RANGE:
             const error0 = field.error && field?.error[0];
             const error1 = field.error && field?.error[1];
             field.error || (field.error = [false, false]);
-            field.helperText || (field.helperText = [' ',' ']);
             component =
-                <Box sx={{}} key={index}>
+                <Box sx={{}} key={key}>
                     <Box sx={{ marginBottom:2, borderBottom:1 }}>{field.label}</Box>
                         <Box sx={{display: 'flex'}}>
                         <DesktopDateTimePicker
@@ -282,7 +276,7 @@ export function getInputComponent(fieldData, index, dispatch)
                                 label: "Start Date/Time",
                                 error: field.error[0],
                                 size:'small',
-                                helperText:field.helperText[0],
+                                helperText:helperText[0],
                                 clearable: true,
                                 onClear: () => field.onChangeStartDate(null),
                                 required: field.required
@@ -300,7 +294,7 @@ export function getInputComponent(fieldData, index, dispatch)
                                 label: "End Date/Time", 
                                 error: field.error[1],
                                 size:'small',
-                                helperText:field.helperText[1],
+                                helperText:helperText[1],
                                 clearable: true,
                                 onClear: () => field.onChangeEndDate(null),
                                 required: field.required
@@ -314,22 +308,24 @@ export function getInputComponent(fieldData, index, dispatch)
             break;
         case PROFILE_IMAGE:
             component = 
-                <Box sx={{mt:3}} key={index}>
+                <Box sx={{mt:3}} key={key}>
                 {
                     field?.value?
                     (
                     <Box id="profile_image_container" sx={{display:'inline-block'}}>
                         <DragDropTarget fileIdsCallback={(id)=>field.onChange(id)} caseId={caseId} multiple={false} dispatch={dispatch}/>
                         <Image id={field.value} className="label-profile-image"/>
-                        <IconButton onClick={()=>field.onChange(undefined)} sx={{ cursor: "pointer", 
-                            position:'absolute', 
-                            right:15, bottom: 15, 
-                            bgcolor: 'primary.main',
-                            zIndex: 10002,
-                            ':hover': {bgcolor: 'primary.main', color: 'white',}
-                        }}>
-                            <DeleteTwoToneIcon />
-                        </IconButton>    
+                        <Tooltip title="Delete Image">
+                            <IconButton onClick={()=>field.onChange(undefined)} sx={{ cursor: "pointer", 
+                                position:'absolute', 
+                                right:15, bottom: 15, 
+                                bgcolor: 'primary.main',
+                                zIndex: 10002,
+                                ':hover': {bgcolor: 'primary.main', color: 'white',}
+                            }}>
+                                <DeleteTwoToneIcon />
+                            </IconButton>    
+                        </Tooltip>
                     </Box>
                     ):
                     (
@@ -339,7 +335,7 @@ export function getInputComponent(fieldData, index, dispatch)
                             <Box sx={{textAlign:'center', width:'100%'}}>Drop profile image here</Box>
                             <Box sx={{textAlign:'center', width:'100%'}}>or click to select file.</Box>
                             <Box sx={{textAlign:'center', width:'100%', position:'absolute',bottom:0}}>
-                                <FormControl sx={{width:'100%'}} key={index}>
+                                <FormControl sx={{width:'100%'}} key={key}>
                                     <FormHelperText id={field.name + "-label"} error={true} sx={{textAlign:'center'}}>
                                     {helperText}
                                 </FormHelperText>
@@ -351,7 +347,7 @@ export function getInputComponent(fieldData, index, dispatch)
                 </Box>
             break;  
         case 'IMAGE_ARRAY':
-            component = <ImageArrayInput field={field} caseId={caseId} key={index}/>;
+            component = <ImageArrayInput field={field} caseId={caseId} key={key}/>;
 
     }
 

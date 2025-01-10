@@ -17,7 +17,7 @@ export default function Content(props)
     return (
         <Box sx={{p:2, width:'100%', height:'100%', display:'flex', justifyContent:'center'}}>
             <Fade in={true} timeout={300}>
-                <Paper elevation={10} sx={{ p:2, minWidth:'75%', height:'100%', display:'flex', ...props.sx}}>
+                <Paper elevation={10} sx={{ p:2, width:'90%', height:'100%', display:'flex', ...props.sx}}>
                     {props.children}
                 </Paper>
             </Fade>        

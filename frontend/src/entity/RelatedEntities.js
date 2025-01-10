@@ -1,6 +1,6 @@
 import React from "react";
 import { useDispatch } from "react-redux";
-import { useTheme } from "@mui/material";
+import { Tooltip, useTheme } from "@mui/material";
 import Grid from '../util/Grid';
 import Box from "@mui/material/Box";
 import { useGetRelatedEntitiesQuery } from "../api/EntityApi";
@@ -24,13 +24,17 @@ import { Button } from "@mui/material";
 import { useLinkEntitiesMutation } from "../api/EntityApi";
 import RefreshIcon from '@mui/icons-material/Refresh';
 import { api } from "../api/BaseApi";
-import { useNavigate } from "react-router-dom";
+import { useSelector } from "react-redux";
+import { selectActiveCase, selectCurrentUser } from "../state/AppSlice";
+import { userCanModifyCase } from "../util/utils";
 
 export default function RelatedEntities({unlink=true, entityDefinitions, entityId})
 {
     const theme = useTheme();   
-    const navigate = useNavigate();
     const dispatch = useDispatch();
+
+    const currentUserCanModifyCase = userCanModifyCase(useSelector(selectCurrentUser), useSelector(selectActiveCase).id);
+
     // the related entity that is being linked to the current entity
     const [linkDialogRelatedEntity, setLinkDialogRelatedEntity] = React.useState(undefined);
     // setting this to true will cause the dialog that allows searching for entities to link 
@@ -142,23 +146,31 @@ export default function RelatedEntities({unlink=true, entityDefinitions, entityI
             currentEntityDefId = currentEntityDefinition.id;
             currentEntityGroup = {entityDefinition: currentEntityDefinition,
                                     name: currentEntityDefinition.name,
-                                    headers: getEntityDefinitionColumnHeadings(currentEntityDefinition).concat(['Relationship','Edit/Unlink']),
+                                    headers: getEntityDefinitionColumnHeadings(currentEntityDefinition).concat(currentUserCanModifyCase?['Relationship','Edit/Unlink']:['Relationship']),
                                     rows:[]};
             relatedEntityGroups.push(currentEntityGroup); 
         }
+        
+        //console.log("relatedEntity",relatedEntity.child.propertyValues.filter(pVal=>pVal.propertyDefinition === prop.id).map(pVal2=>pVal2.value));
         const row = {rowProperties:{id:relatedEntity.id, onClick: ()=>dispatch(addEntityTab({entityId:relatedEntity.child.id, title:getTitle(entityDefinitions, relatedEntity.child )}))}, 
                 sx:{cursor:'pointer', '&:hover':{backgroundColor:theme.palette.action.hover}},
                 values: [
                         ...currentEntityGroup.entityDefinition.props.filter(prop=>!prop.deleted && prop.includeInList).map(prop => ({propertyDefinition: prop.id, type: prop.type , value:[
-                            getListComponent(prop.type, [relatedEntity.child.propertyValues.find(pVal=>pVal.propertyDefinition === prop.id)?.value])
+                            getListComponent(prop.type, relatedEntity.child.propertyValues.filter(pVal=>pVal.propertyDefinition === prop.id).map(pVal2=>pVal2.value))
                         ]}))]
-                        .concat({value:[relatedEntity.parentToChildDescription + '/' + relatedEntity.childToParentDescription]},{sx:{width:'0px'},value:[
-                            <Box sx={{display:'flex'}}>
-                                <IconButton onClick={(event)=>{event.stopPropagation();setLinkDialogRelatedEntity({...relatedEntity});}}><EditTwoToneIcon/></IconButton>
-                                <IconButton onClick={(event)=>unlinkEntity(event, {...relatedEntity})}><LinkOffTwoToneIcon/></IconButton>
-                            </Box>
-                        ]})
+                        .concat([{value:[relatedEntity.parentToChildDescription + '/' + relatedEntity.childToParentDescription],
+                                    sx:{width:'0px'}},])
                     };
+
+        currentUserCanModifyCase && row.values.push({value:[
+            <Box sx={{display:'flex'}}>
+                <Tooltip title="Edit link">
+                    <IconButton onClick={(event)=>{event.stopPropagation();setLinkDialogRelatedEntity({...relatedEntity});}}><EditTwoToneIcon/></IconButton>
+                </Tooltip>
+                <Tooltip title="Unlink">
+                    <IconButton onClick={(event)=>unlinkEntity(event, {...relatedEntity})}><LinkOffTwoToneIcon/></IconButton>
+                </Tooltip>
+            </Box>]});
         currentEntityGroup.rows.push(row);  
     }
 
@@ -167,10 +179,14 @@ export default function RelatedEntities({unlink=true, entityDefinitions, entityI
             <Box sx={{display:'flex', justifyContent:'space-between', width:'100%', alignItems:'center'}}>
                 <Box sx={{}}><b>Linked Entities</b></Box>
                 <Box>
-                <IconButton onClick={() => refetchRelatedEntities()}><RefreshIcon/></IconButton>
-                <IconButton onClick={()=>setLinkEntityDialogOpen(true)}>
-                    <AddLinkSharp/>
-                </IconButton>
+                <Tooltip title="Link an entity to this entity">
+                    <IconButton onClick={()=>setLinkEntityDialogOpen(true)} sx={{visibility:currentUserCanModifyCase?'visible':'hidden'}}>
+                        <AddLinkSharp/>
+                    </IconButton>
+                </Tooltip>
+                <Tooltip title="Refresh Linked Entities">
+                    <IconButton onClick={() => refetchRelatedEntities()}><RefreshIcon/></IconButton>
+                </Tooltip>
                 </Box> 
             </Box>  
             <Box>

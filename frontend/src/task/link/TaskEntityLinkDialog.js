@@ -60,7 +60,6 @@ export default function TaskEntityLinkDialog({taskObj, closeFn, reRenderFn})
 
     // group results by entityDefinitionType
 
-    console.log(results);
     return (
         <>
         <Dialog open={true} maxWidth='lg' fullWidth>

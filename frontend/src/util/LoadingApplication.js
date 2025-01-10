@@ -11,7 +11,7 @@ import './LoadingApplication.css';
 import { createTheme } from "@mui/material/styles";
 import { useGetCurrentUserQuery } from "../api/UserApi";
 import { useEffect } from "react";
-import { handleQueryError } from "../api/ApiUtils";
+import { handleQueryResultsWithWaitMessage } from "../api/ApiUtils";
 import { useDispatch } from "react-redux";
 import { useNavigate } from 'react-router-dom';
 
@@ -21,15 +21,14 @@ function LoadingApplication()
     const navigate = useNavigate();
     const dispatch = useDispatch();
 
-    const { data:envelope, ...getCurrentUserQueryStatus } = useGetCurrentUserQuery();
+    const getCurrentUserQueryResults = useGetCurrentUserQuery();
 
     useEffect(() => {
-        if (getCurrentUserQueryStatus.isError) 
-            handleQueryError(getCurrentUserQueryStatus, dispatch, navigate);
-    }, [getCurrentUserQueryStatus.isError]);
+        handleQueryResultsWithWaitMessage(getCurrentUserQueryResults, dispatch);
+    }, [getCurrentUserQueryResults.isFetching]);
 
     useEffect(() => {
-        if (!getCurrentUserQueryStatus.isFetching) 
+        if (!getCurrentUserQueryResults.isFetching) 
         {
             navigate("/");
         }

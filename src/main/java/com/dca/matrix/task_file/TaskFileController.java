@@ -40,8 +40,7 @@ public class TaskFileController
 	@ResponseStatus(HttpStatus.OK)
 	public ResponseEntity<ApiResponse<Collection<TaskFile>>> save(@RequestBody Collection<TaskFileMessage> taskFileMessages, HttpServletRequest request)
 	{	
-		Collection<TaskFile> taskFiles = this.taskFileService.save(taskFileMessages);
-		return new ResponseEntity<>(ApiResponseUtil.success(taskFiles, 
+		return new ResponseEntity<>(ApiResponseUtil.success(this.taskFileService.save(taskFileMessages), 
 															"Saved task files.", 
 															request),HttpStatus.OK);
 	}
@@ -59,9 +58,9 @@ public class TaskFileController
 	@ResponseStatus(HttpStatus.OK)
 	public ResponseEntity<ApiResponse<List<TaskFile>>> getAllForTask(@PathVariable("taskId") Long taskId, HttpServletRequest request)
 	{
-		List<TaskFile> taskFiles = this.taskFileService.findAllForTaskId(taskId);
-		return new ResponseEntity<>(ApiResponseUtil.success(taskFiles, "Retrieved task files for task " + taskId, request), 
-																HttpStatus.OK);
+		return new ResponseEntity<>(ApiResponseUtil.success(this.taskFileService.findAllForTaskId(taskId), 
+										"Retrieved task files for task " + taskId, request), 
+										HttpStatus.OK);
 	}
 	
 	@PostMapping(path="/search_unlinked_files")

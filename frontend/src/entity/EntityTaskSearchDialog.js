@@ -12,7 +12,7 @@ import dayjs from "dayjs";
 import { useTheme } from "@mui/material/styles";
 import { useGetCaseUsersQuery } from "../api/CaseApi";
 import { useLazySearchTasksQuery } from "../api/TaskApi";
-import { handleQueryError, handleQueryResultsWithWaitMessage } from "../api/ApiUtils";
+import { handleQueryResultsWithWaitMessage } from "../api/ApiUtils";
 import { DialogContent } from "@mui/material";
 import { useNavigate } from "react-router-dom";
 
@@ -27,16 +27,17 @@ export default function EntityTaskSearchDialog({closeFn})
     const currentTabData = useSelector(selectCurrentTabData);
 
     // get users for drop down
-    const { data:currentCaseUsers, ...currentCaseUsersQueryStatus } = useGetCaseUsersQuery(activeCase.id);
-    handleQueryResultsWithWaitMessage(currentCaseUsersQueryStatus, dispatch, navigate, "Loading case users...", ()=>{});
+    const currentCaseUsersQueryResults = useGetCaseUsersQuery(activeCase.id);
+    const currentCaseUsers = currentCaseUsersQueryResults?.data?.payload;
 
     // set up search function
-    const [ searchTasksFn, { data:envelope, ...searchTasksQueryStatus} ]  = useLazySearchTasksQuery();
-    const results = envelope?.payload;  
-    useEffect(() => {  
-        if (searchTasksQueryStatus.isError)
-            handleQueryError(searchTasksQueryStatus, dispatch, navigate);
-    } ,[searchTasksQueryStatus.isError]);
+    const [ searchTasksFn, searchTasksQueryResults ]  = useLazySearchTasksQuery();
+    const results = searchTasksQueryResults?.data?.payload;
+
+    useEffect(() => {
+        handleQueryResultsWithWaitMessage(currentCaseUsersQueryResults, dispatch);
+        handleQueryResultsWithWaitMessage(searchTasksQueryResults, dispatch);
+    } ,[currentCaseUsersQueryResults.isFetching,searchTasksQueryResults.isFetching]);
 
     const searchText = getInputComponent({
         name: 'searchText', 
@@ -101,7 +102,7 @@ export default function EntityTaskSearchDialog({closeFn})
                                     <Grid  columnHeadings={["Task #","Title", "Status","Due Date/Time","Assigned To"]}
                                         columnType={[TEXT, TEXT, DATE_TIME, TEXT]}
                                         rowValues={rowValues}
-                                        isFetching={searchTasksQueryStatus.isFetching}
+                                        isFetching={searchTasksQueryResults.isFetching}
                                     />
                             }
                         </Paper>

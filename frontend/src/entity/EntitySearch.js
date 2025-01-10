@@ -11,16 +11,16 @@ import {
 import { useLazySearchEntitiesQuery } from "../api/EntityApi";
 import LoadingSkeleton from "../util/LoadingSkeleton";
 import { useEffect } from "react";
-import { handleQueryError } from "../api/ApiUtils";
 import { setEntitySearchResults } from "../state/AppSlice";
 import { selectEntitySearchResults } from "../state/AppSlice";
 import { addEntityTab } from "../state/AppSlice";
-import { getEntityDefinitionColumnHeadings, getTitle } from "../util/utils";
+import { consolidatePropValues, getEntityDefinitionColumnHeadings, getTitle } from "../util/utils";
 import { getListComponent } from "../util/DisplayComponentFactory";
 import { useTheme } from "@mui/material";
 import Grid from "../util/Grid";
 import { useGetAllEntityDefinitionsQuery } from "../api/EntityDefinitionApi";
 import { useNavigate } from "react-router-dom";
+import { handleQueryResultsWithWaitMessage } from "../api/ApiUtils";
 
 export default function EntitySearch()
 {
@@ -31,28 +31,17 @@ export default function EntitySearch()
     const entityDefinitionIds = useSelector(selectEntitySearchEntityDefIdArray);
     const activeCase = useSelector(selectActiveCase);
 
-    const { data:entityDefsEnvelope, refetch, ...entityDefinitionQueryStatus } = useGetAllEntityDefinitionsQuery();
-    const entityDefinitions = entityDefsEnvelope?entityDefsEnvelope.payload:[];
+    const entityDefinitionQueryResults = useGetAllEntityDefinitionsQuery();
+    const entityDefinitions = entityDefinitionQueryResults?.data?.payload;
 
-    //
-    // code to search for entities
-    //
-    const [searchEntitiesFn, {data:envelope, ...searchEntitiesQueryStatus}] = useLazySearchEntitiesQuery();
-    useEffect(() => {
-        if (!searchEntitiesQueryStatus.isFetching && searchEntitiesQueryStatus?.isSuccess) 
-        {
-            dispatch(setEntitySearchResults(envelope.payload));
-        }
-    }, [searchEntitiesQueryStatus?.isFetching]);
+    const [searchEntitiesFn,  searchEntitiesQueryResults] = useLazySearchEntitiesQuery();
 
     useEffect(() => {
-        if (entityDefinitionQueryStatus.isError) 
-            handleQueryError(entityDefinitionQueryStatus, dispatch, navigate);
-        if (searchEntitiesQueryStatus?.isError) 
-            handleQueryError(searchEntitiesQueryStatus, dispatch, navigate);
-         if (searchEntitiesQueryStatus.isError) 
-            handleQueryError(searchEntitiesQueryStatus, dispatch, navigate);
-    }, [searchEntitiesQueryStatus.isError,entityDefinitionQueryStatus.isError,searchEntitiesQueryStatus?.isError]);
+        handleQueryResultsWithWaitMessage(searchEntitiesQueryResults, dispatch);
+        handleQueryResultsWithWaitMessage(entityDefinitionQueryResults, dispatch);
+        if (searchEntitiesQueryResults?.isSuccess) 
+            dispatch(setEntitySearchResults(searchEntitiesQueryResults?.data?.payload));
+    }, [searchEntitiesQueryResults?.isFetching,entityDefinitionQueryResults?.isFetching]);
 
     const searchResults = useSelector(selectEntitySearchResults);
 
@@ -68,17 +57,19 @@ export default function EntitySearch()
 
         for (const relatedEntity of entityGroup)
         {
-            const row = {rowProperties:{id:relatedEntity.id, onClick: ()=>dispatch(addEntityTab({entityId:relatedEntity.id, title:getTitle(entityDefinitions, relatedEntity )}))}, 
+            const propValues = consolidatePropValues(relatedEntity);
+            const row = {rowProperties:{id:relatedEntity.id, key: relatedEntity.id, onClick: ()=>dispatch(addEntityTab({entityId:relatedEntity.id, title:getTitle(entityDefinitions, relatedEntity )}))}, 
             sx:{cursor:'pointer', '&:hover':{backgroundColor:theme.palette.action.hover}},
             values: [
-                    ...currentEntityGroup.entityDefinition.props.filter(prop=>!prop.deleted && prop.includeInList).map(prop => ({propertyDefinition: prop.id, type: prop.type , value:[
-                        getListComponent(prop.type, [relatedEntity.propertyValues.find(pVal=>pVal.propertyDefinition === prop.id)?.value])
+                    ...currentEntityGroup.entityDefinition.props.filter(prop=>!prop.deleted && prop.includeInList)
+                        .map(prop => ({cellProperties:{key:relatedEntity.id + "_" + prop.id}, propertyDefinition: prop.id, type: prop.type, 
+                            value:[getListComponent(prop.type, propValues.find(pVal=>pVal.propertyDefinition === prop.id)?.values)
                     ]}))]
                 };
             currentEntityGroup.rows.push(row);  
         }
     }
-
+    
     return (
         <>
             <Box sx={{display:'flex',flexDirection:'column', width:'100%'}}>
@@ -112,9 +103,9 @@ export default function EntitySearch()
                 </Box>
                 <Box sx={{flexGrow:1, overflow:'auto'}}>
                 { 
-                    searchEntitiesQueryStatus?.isFetching?<LoadingSkeleton/>
+                    searchEntitiesQueryResults?.isFetching?<LoadingSkeleton/>
                     :relatedEntityGroups.map((entityGroup,index)=>
-                        <Box key={index} sx={{p:1, margin:1, pb:3}}>
+                        <Box key={entityGroup.entityDefinition.id} sx={{p:1, margin:1, pb:3}}>
                             <h5 style={{paddingBottom:1,margin:0}}>{entityGroup.name}</h5>
                             <Paper elevation={5}>
                             <Grid    

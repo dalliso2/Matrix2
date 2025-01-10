@@ -39,6 +39,11 @@ public class GlobalExceptionHandler
 	@ExceptionHandler({MatrixValidationException.class})
 	public ResponseEntity<ApiResponse<Void>> handleMatrixValidationException(MatrixValidationException ex, HttpServletRequest request)
 	{
+		log.debug("--------------------------------------");
+		log.debug("--------------------------------------");
+		log.debug("--------------------------------------");
+		log.debug("--------------------------------------");
+		log.debug(ex.getMessage());
 		return new ResponseEntity<>(ApiResponseUtil.fail(ex.getMessage(), ex.getErrors(), ex.getErrorCode(), request),
 									HttpStatus.OK);
 	}

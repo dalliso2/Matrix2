@@ -32,6 +32,7 @@ import java.util.stream.Stream;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -40,11 +41,10 @@ import lombok.extern.slf4j.Slf4j;
 @RestController
 @RequestMapping(path = "/api/entity", produces = "application/json")
 @RequiredArgsConstructor
+@PreAuthorize("isAuthenticated()")
 public class MatrixEntityController
 {
-	private final MatrixEntityService matrixEntityService;
-	private final MatrixEntityRepository	matrixEntityRepository;
-//	private ObjectMapper			objectMapper;
+	private final MatrixEntityService 	matrixEntityService;
 
 	@GetMapping("/{matrixEntityId}")
 	public ResponseEntity<ApiResponse<MatrixEntity>> get(@PathVariable("matrixEntityId") Long matrixEntityId, HttpServletRequest request)

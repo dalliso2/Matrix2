@@ -43,7 +43,7 @@ public class EntityDefinitionController
 	@PreAuthorize("hasRole('ADMIN')")
 	public ResponseEntity<ApiResponse<EntityDefinition>> create(@RequestBody EntityDefinition entityDefinition, HttpServletRequest request)
 	{
-		return new ResponseEntity<>(ApiResponseUtil.success(this.entityDefinitionService.createUpdateEntityDefinition(entityDefinition), 
+		return new ResponseEntity<>(ApiResponseUtil.success(this.entityDefinitionService.storeEntityDefinition(entityDefinition), 
 									"Created entity definition.",
 									request), 
 									HttpStatus.OK);

@@ -9,7 +9,6 @@ const userApi = api.enhanceEndpoints({addTagTypes:['User']}).injectEndpoints({
             query: (credentials) => ({url: '/login', method: 'POST', body: credentials}),
             transformResponse: (response, meta, arg) => 
             {
-                console.log("login",response);
                 return response || [];
             },
             //providesTags: (result, error, arg) => result?.payload?[{type: 'User', id:result.payload.user.id}]:[],
@@ -19,7 +18,6 @@ const userApi = api.enhanceEndpoints({addTagTypes:['User']}).injectEndpoints({
             query: (filter) => ({url:`/user/search/${filter}`}),
             transformResponse: (response, meta, arg) => 
             {
-                console.log("searchUsers",response);    
                 return response || [];
             },
             providesTags: (result, error, arg) => result?.payload?result.payload.map(user => ({type: 'User', id:user.id})):[],
@@ -28,31 +26,6 @@ const userApi = api.enhanceEndpoints({addTagTypes:['User']}).injectEndpoints({
                 onQueryStartedHandler(queryFulfilled, dispatch, requestId, undefined);
             }
         }),
-        // getUser: builder.query({
-        //     query: (id) => ({url:`/user/${id}`}),
-        //     transformResponse: (response, meta, arg) => 
-        //     {
-        //         console.log("getUser",response);
-        //         return response;
-        //     },
-        //     providesTags: (result, error, id) => result?[{type: 'User', id:result.payload.id}]:[],
-        //     async onQueryStarted(id , { dispatch, queryFulfilled, requestId }) {
-        //         onQueryStartedHandler(queryFulfilled, dispatch, requestId, undefined);
-        //     },
-        //     keepUnusedDataFor: 300
-        // }),
-        // getCurrentUser: builder.query({
-        //     query: () => '/user/current',
-        //     transformResponse: (response, meta, arg) => 
-        //     {
-        //         console.log("getCurrentUser",response);
-        //         return response;
-        //     },
-        //     async onQueryStarted(undefined , { dispatch, queryFulfilled, requestId }) {
-        //         onQueryStartedHandler(queryFulfilled, dispatch, requestId );
-        //     },
-        //     providesTags: (result, error, id) => result?.payload?.id?[{type: 'User', id:result.payload.id}]:[],
-        // }),
         storeUser: builder.mutation({
             query: (userData) => ({url: '/user/store', method: 'POST', body: userData}),
             async onQueryStarted(userData , { dispatch, queryFulfilled, requestId }) {

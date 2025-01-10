@@ -1,8 +1,8 @@
 import { api } from './BaseApi';
-import { onQueryStartedHandler } from './ApiUtils';
+import { getTags, onQueryStartedHandler } from './ApiUtils';
 
 const timelineApi = api.injectEndpoints({
-    entityTypes: ['timeline'],
+    entityTypes: ['timeline', 'timelineList'],
     endpoints: (builder) => ({
         storeTimeline: builder.mutation({
             // data = {id, name, description, matrixCase, timelineEntities}
@@ -12,7 +12,7 @@ const timelineApi = api.injectEndpoints({
             async onQueryStarted(undefined, { dispatch, queryFulfilled, requestId }) {
                 onQueryStartedHandler(queryFulfilled, dispatch, requestId, "Saving timeline...");
             },
-            invalidatesTags: (result, error, arg) => [{type: 'Timeline', id:result?.id}],
+            invalidatesTags: (result, error, arg) => getTags(result, 'timeline').concat(['timelineList']),
         }),
         updateTimelineNameDescription: builder.mutation({
             // data = {id, name, description}
@@ -22,10 +22,11 @@ const timelineApi = api.injectEndpoints({
             async onQueryStarted(undefined, { dispatch, queryFulfilled, requestId }) {
                 onQueryStartedHandler(queryFulfilled, dispatch, requestId, "Updating timeline..." );
             },
-            invalidatesTags: (result, error, arg) => [{type: 'timelineListItem', id:result?.id}],
+            invalidatesTags: (result, error, arg) => getTags(result, 'timeline'),
         }),
         removeTimeline: builder.mutation({
             query: (id) => ({url: `/timeline/remove`, method: 'POST',body: {id}}),
+            invalidatesTags: (result, error, arg) => ['timelineList'],
         }),
         // getTimelinesForCase: builder.query({
         //     query: (caseId) => ({url:`/link_chart/all_for_case/${caseId}`, method: 'GET'}),
@@ -41,7 +42,7 @@ const timelineApi = api.injectEndpoints({
             async onQueryStarted(undefined, { dispatch, queryFulfilled, requestId }) {
                 onQueryStartedHandler(queryFulfilled, dispatch, requestId, );
             },
-            providesTags: (results, error, args) => results?.payload.map(result=>({type:'timelineListItem', id:result.id})),
+            providesTags: (results, error, args) => getTags(results, 'timeline'),
             keepUnusedDataFor: 300
         }),
         getTimeline: builder.query({
@@ -49,7 +50,7 @@ const timelineApi = api.injectEndpoints({
             async onQueryStarted(undefined, { dispatch, queryFulfilled, requestId }) {
                 onQueryStartedHandler(queryFulfilled, dispatch, requestId, );
             },
-            providesTags: (result, error, arg) => [{type: 'timeline', id:result?.id}],
+            providesTags: (result, error, arg) => getTags(result, 'timeline'),
             keepUnusedDataFor: 300
         }),
     }),

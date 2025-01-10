@@ -1,14 +1,14 @@
 import React from 'react';
 import CytoscapeComponent from 'react-cytoscapejs';
 import { useSelector } from 'react-redux';
-import { selectActiveCase } from '../state/AppSlice';
+import { selectActiveCase, selectAuthToken } from '../state/AppSlice';
 import { useDispatch } from 'react-redux';
 import SetActiveCaseDialog from '../case/SetActiveCaseDialog';
 import { Box } from '@mui/material';
 import LinkChartButtonContainer from './LinkChartButtonContainer';
 import { useGetCaseEntityRelationshipsQuery, useGetAllLinkChartEntitiesForCaseQuery } from '../api/EntityApi';
 import { useEffect } from 'react';
-import { handleQueryError } from '../api/ApiUtils';
+import { handleQueryResultsWithWaitMessage } from '../api/ApiUtils';
 import { useStoreLinkChartMutation, useGetLinkChartQuery } from '../api/LinkChartApi';
 import { handleMutationResults } from '../api/ApiUtils';
 import { enqueueSnackbar } from 'notistack';
@@ -25,6 +25,12 @@ import BinaryChoiceMessageBox from '../util/BinaryChoiceMessageBox';
 import { useNavigate } from 'react-router-dom';
 import { selectLinkChartTabIsNew, setLinkChartTabIsNew } from '../state/AppSlice';
 import EntityDisplayDialog from '../entity/EntityDisplayDialog';
+import Fab from '@mui/material/Fab';
+import MarginTwoToneIcon from '@mui/icons-material/MarginTwoTone';
+import coseBilkent from 'cytoscape-cose-bilkent';
+import cytoscape from 'cytoscape';
+
+cytoscape.use(coseBilkent);
 
 const defaultStyleSheet = [ {selector:'node',style:{width:80, height:80, backgroundFit:'cover',shape:'ellipse'}},
     { selector: 'edge', style:{'label': 'data(label)', 'curve-style': 'bezier', 'target-arrow-shape': 'triangle', 
@@ -39,6 +45,7 @@ export default function LinkChart({cyRef, linkChartModifiedRef, linkChartTabData
     const dispatch = useDispatch();
     const navigate = useNavigate();
     const activeCase = useSelector(selectActiveCase);
+    const authToken = useSelector(selectAuthToken);
     // flag to indicate if the tab is new
     const tabIsNew = useSelector(selectLinkChartTabIsNew);
 
@@ -66,7 +73,7 @@ export default function LinkChart({cyRef, linkChartModifiedRef, linkChartTabData
             cyRef.current.on('click', 'node', function(evt){
                 setShowEntityId(evt.target.data('id'));
             });
-            cyRef.current.on('layoutstop', function(evt){cyRef.current.zoom(1);});
+            //cyRef.current.on('layoutstop', function(evt){cyRef.current.fit();});
         }
     },[cyRef]);
 
@@ -109,16 +116,16 @@ export default function LinkChart({cyRef, linkChartModifiedRef, linkChartTabData
     }, [theme]);
 
     // get all possible link chart entities for the active case
-    const {data:entityEnvelope, ...getAllLinkChartEntitiesForCaseStatus} = useGetAllLinkChartEntitiesForCaseQuery(activeCase.id);
-    const linkChartEntities = entityEnvelope?.payload;
+    const getAllLinkChartEntitiesForCaseResults = useGetAllLinkChartEntitiesForCaseQuery(activeCase.id);
+    const linkChartEntities = getAllLinkChartEntitiesForCaseResults?.data?.payload;
     // 
     // load all possible entity relationships for the active case
     //
-    const {data:entityRelationshipEnvelope, ...getAllEntityRelationshipsForCaseStatus} = useGetCaseEntityRelationshipsQuery(activeCase.id);
-    const linkChartRelationships = entityRelationshipEnvelope?.payload;
+    const getAllEntityRelationshipsForCaseResults = useGetCaseEntityRelationshipsQuery(activeCase.id);
+    const linkChartRelationships = getAllEntityRelationshipsForCaseResults?.data?.payload;
     // load link chart data
-    const {data:linkChartEnvelope, ...getLinkChartStatus} = useGetLinkChartQuery(linkChartTabData.id);
-    const linkChartData = linkChartEnvelope?.payload;
+    const getLinkChartResults = useGetLinkChartQuery(linkChartTabData.id);
+    const linkChartData = getLinkChartResults?.data?.payload;
 
     // load link chart data into cytoscape
     useEffect(() => {
@@ -151,15 +158,12 @@ export default function LinkChart({cyRef, linkChartModifiedRef, linkChartTabData
 
     // check for query errors
     useEffect(() => {  
-        if (getAllEntityRelationshipsForCaseStatus.isError)
-            handleQueryError(getAllEntityRelationshipsForCaseStatus, dispatch, navigate);
-        if (getAllLinkChartEntitiesForCaseStatus.isError)
-            handleQueryError(getAllLinkChartEntitiesForCaseStatus, dispatch, navigate);
-        if (getLinkChartStatus.isError)
-            handleQueryError(getLinkChartStatus, dispatch, navigate);
-    } ,[getAllEntityRelationshipsForCaseStatus.isError, 
-        getAllLinkChartEntitiesForCaseStatus.isError,
-        getLinkChartStatus.isError]); 
+        handleQueryResultsWithWaitMessage(getAllEntityRelationshipsForCaseResults, dispatch);
+        handleQueryResultsWithWaitMessage(getAllLinkChartEntitiesForCaseResults, dispatch);
+        handleQueryResultsWithWaitMessage(getLinkChartResults, dispatch);
+    } ,[getAllEntityRelationshipsForCaseResults.isFetching, 
+        getAllLinkChartEntitiesForCaseResults.isFetching,
+        getLinkChartResults.isFetching]); 
 
     //
     // set up function to save the link chart
@@ -167,13 +171,9 @@ export default function LinkChart({cyRef, linkChartModifiedRef, linkChartTabData
     const [storeLinkChart, linkChartMutationState] = useStoreLinkChartMutation();
     handleMutationResults(linkChartMutationState, 
                             dispatch, 
-                            navigate,
-                            true, 
-                            "Saving link chart...",
-                            "Error saving entity.", 
                             ()=>{
                                     linkChartModifiedRef.current=false;
-                                    enqueueSnackbar( "FIX THIS MESSAGE", {variant:'success'});
+                                    enqueueSnackbar( "Saved link chart " + linkChartData.name, {variant:'success'});
                             }
                         );
 
@@ -220,7 +220,8 @@ export default function LinkChart({cyRef, linkChartModifiedRef, linkChartTabData
                 return;
 
             addedElements = addedElements.union(cyRef.current.add({data: {  id: entity.id.toString() }}).position(entityData[1]));
-            cyRef.current.style().selector('#' + entity.id).style({   backgroundImage: '/api/file/' + entity?.imageId.toString(),
+            const backgroundImageUrl = entity?.imageId && '/api/file/' + entity?.imageId?.toString() + "?t=" + authToken;
+            cyRef.current.style().selector('#' + entity.id).style({   backgroundImage: backgroundImageUrl,
                                                                         label: entity?.title})
                                                                 .update();
          });
@@ -251,21 +252,31 @@ export default function LinkChart({cyRef, linkChartModifiedRef, linkChartTabData
         node.style('label', entity.__title);
     }
 
+    const layout = {
+        name: 'cose-bilkent',
+        nodeDimensionsIncludeLabels: true,
+        padding:20,
+        fit:true,
+        tile:true,
+        randomize: true,
+        nodeRepulsion: 100000000,
+    }
+
     return  <>
                 {    
                     <Box sx={{position:'relative',display:'flex', width:'100%', height:'100%'}}>
-                        <Box sx={{flexGrow:1}}>
                             <CytoscapeComponent 
                                     cy={cy => cyRef.current = cy}
                                     elements={[]} 
-                                    style={{ width: '100%', height: '100%' }}
+                                    style={{ flexGrow:1 }}
                                     stylesheet={defaultStyleSheet} 
                                     />
-                        </Box>
                         <LinkChartButtonContainer>
                             <LinkChartEditEntitiesButton openFn={()=>setShowLinkChartEditEntitiesDialog(true)}/>
                             <LinkChartEditButton linkChartObj={linkChartData}/>
                             <LinkChartSaveButton saveLinkChartFn={saveLinkChartFn}/>
+                            <Fab color="primary" aria-label="Layout" 
+                                    sx={{}} onClick={()=>{cyRef.current.layout(layout).run();}}><MarginTwoToneIcon/></Fab>
                         </LinkChartButtonContainer>
                     </Box>
                 }

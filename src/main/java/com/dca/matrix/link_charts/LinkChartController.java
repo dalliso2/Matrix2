@@ -5,6 +5,7 @@ import java.util.Collection;
 import org.hibernate.internal.log.DeprecationLogger;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
@@ -27,6 +28,7 @@ import lombok.extern.slf4j.Slf4j;
 @RequestMapping(path="/api/link_chart/", produces="application/json")
 @RequiredArgsConstructor
 @Slf4j
+@PreAuthorize("isAuthenticated()")
 public class LinkChartController
 {
 	private final LinkChartService linkChartService;

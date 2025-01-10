@@ -7,6 +7,7 @@ import com.dca.matrix.matrix_case.MatrixCaseSerializer;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 
+import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
@@ -36,9 +37,11 @@ public class LinkChart extends EntityBase
 	@JsonSerialize(using = MatrixCaseSerializer.class)
 	private MatrixCase matrixCase;
 	
+	@Column(columnDefinition = "TEXT")
 	@JsonDeserialize(using = StringDeserializer.class)
 	private String entities;
 	
+	@Column(columnDefinition = "TEXT")
 	@JsonDeserialize(using = StringDeserializer.class)
 	private String styleSheet;
 }

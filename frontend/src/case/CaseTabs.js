@@ -1,6 +1,5 @@
-import React, { useEffect } from "react";
+import React from "react";
 import { useDispatch } from "react-redux";
-import { useGetUserCaseListQuery } from "../api/CaseApi";
 import TabbedContentArea from "../util/TabbedContentArea";
 import TabWrapper from "../util/TabWrapper";
 import Tabs from "@mui/material/Tabs";
@@ -12,8 +11,9 @@ import CloseTwoTone from "@mui/icons-material/CloseTwoTone";
 import UserCaseList from "./UserCaseList";
 import CaseTabContent from "./CaseTabContent";
 import { useSelector } from "react-redux";
-import { addCaseTab, selectCurrentCaseTabIndex, setCurrentCaseTab, removeCaseTab, selectCaseTabCaseIds } from "../state/AppSlice";
-import { handleQueryResultsWithWaitMessage } from "../api/ApiUtils";
+import { addCaseTab, selectCurrentCaseTabIndex, setCurrentCaseTab, removeCaseTab, selectCaseTabData } from "../state/AppSlice";
+import AdminCaseList from "./AdminCaseList";
+import { selectCurrentUser } from "../state/AppSlice";
 
 function a11yProps(index) 
 {
@@ -27,12 +27,13 @@ export default function CaseTabs()
 {
     const dispatch = useDispatch();
 
+    const currentUser = useSelector(selectCurrentUser);
     const currentTabIndex = useSelector(selectCurrentCaseTabIndex);
-    const { refetch, ...getUserCaseListResult } = useGetUserCaseListQuery();
-    const caseList = getUserCaseListResult?.data?.payload;
-    useEffect(() => {
-        handleQueryResultsWithWaitMessage(getUserCaseListResult, dispatch);
-    }, [getUserCaseListResult?.isFetching]);
+    // const { refetch, ...getUserCaseListResult } = useGetUserCaseListQuery();
+    // const caseList = getUserCaseListResult?.data?.payload;
+    // useEffect(() => {
+    //     handleQueryResultsWithWaitMessage(getUserCaseListResult, dispatch);
+    // }, [getUserCaseListResult?.isFetching]);
 
     function addTab(caseInfo)
     {
@@ -46,13 +47,12 @@ export default function CaseTabs()
         dispatch(removeCaseTab(caseId));
     }
 
-    const tabData = useSelector(selectCaseTabCaseIds);
-    const tabs = [{title: "My Cases", component: <UserCaseList/>}]
+    const tabData = useSelector(selectCaseTabData);
+    const tabs = [currentUser?.isAdmin ? {label: "Case Search", component: <AdminCaseList/>} :{label: "My Cases", component: <UserCaseList/>}]
                     .concat(
-                        tabData?.map((caseId, index) => 
+                        tabData?.map((caseObj, index) => 
                         { 
-                            const caseObj = caseList.find(caseObj => caseObj.id === caseId);
-                            return {id: caseObj.id, title: caseObj.caseNumber, component: <CaseTabContent caseObj={caseObj}/>}; 
+                            return {id: caseObj.id, label: caseObj.caseNumber, component: <CaseTabContent caseId={caseObj.id}/>}; 
                         })
                     || []);
 
@@ -73,7 +73,7 @@ export default function CaseTabs()
               <Tab key={index} 
                 sx={{p:1}}
                 label={ 
-                    <span>{tabInfo.title} 
+                    <span>{tabInfo.label} 
                     {
                         index > 0 &&
                         <IconButton color="inherit" size="small" 

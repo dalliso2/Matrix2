@@ -26,7 +26,7 @@ public class EntityDefinitionServiceImpl implements EntityDefinitionService
 
 	@Override
 	@Transactional
-	public EntityDefinition createUpdateEntityDefinition(EntityDefinition entityDefinition)
+	public EntityDefinition storeEntityDefinition(EntityDefinition entityDefinition)
 	{
 		return this.entityDefinitionRepository.save(entityDefinition);
 	}

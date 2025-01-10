@@ -20,7 +20,6 @@ import { handleMutationResults } from "../api/ApiUtils";
 import { useDispatch } from "react-redux";
 import { handleQueryResultsWithWaitMessage } from "../api/ApiUtils";
 import { useNavigate } from "react-router-dom";
-
 const dateFormat = 'M/D/YYYY HH:mm';
 
 export default function AddEditTaskDialog({successFn, closeFn, taskDataProps}) 

@@ -10,8 +10,10 @@ import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
 import com.dca.matrix.api.ApiErrorCode;
+import com.dca.matrix.authorization.AuthorizationService;
 import com.dca.matrix.exception.MatrixUncheckedException;
 import com.dca.matrix.exception.MatrixValidationException;
+import com.dca.matrix.file.FileStorageService;
 import com.dca.matrix.file.MFile;
 import com.dca.matrix.file.MFileRepository;
 import com.dca.matrix.matrix_entity.EntityUtils;
@@ -19,45 +21,46 @@ import com.dca.matrix.matrix_entity.MatrixEntity;
 import com.dca.matrix.matrix_entity.MatrixEntityRepository;
 import com.dca.matrix.task.Task;
 import com.dca.matrix.task.TaskRepository;
+import com.dca.matrix.task.TaskService;
 
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
 @Service
 @RequiredArgsConstructor
 @Slf4j
+@Transactional
 public class TaskFileServiceImpl implements TaskFileService
 {
 	private final TaskFileRepository taskFileRepository;
-	private final TaskRepository taskRepository;
-	private final MFileRepository mfRepository;
-
+	private final AuthorizationService authorizationService;
+	private final TaskService taskService;
+	private final FileStorageService fileStorageService;
+	
 	@Override
 	public Collection<TaskFile> save(Collection<TaskFileMessage> msgs)
 	{
-		List<TaskFile> returnVal = new LinkedList<>();
+		final List<TaskFile> returnVal = new LinkedList<>();
 		msgs.forEach(msg->
 		{
-			Task task = this.taskRepository.findById(msg.taskId()).orElseThrow(
-					()->new MatrixValidationException("Task with id " + msg.taskId() + " does not exist.",
-														null, ApiErrorCode.TASK_DOES_NOT_EXIST));
-			
-			MFile file = this.mfRepository.findById(msg.fileId()).orElseThrow(
-					()->new MatrixValidationException("File with id " + msg.fileId() + " does not exist.",
-														null, ApiErrorCode.ENTITY_DOES_NOT_EXIST));
+			final Task task = this.taskService.getTask(msg.taskId());
+			final MFile file = this.fileStorageService.loadMFile(msg.fileId());
 
-			Optional<TaskFile> tfOpt = this.taskFileRepository.findByTaskAndMatrixFile(task, file);
+			// verify task and file are from same case
+			if (!task.getMatrixCase().equals(file.getMatrixCase()))
+				throw new MatrixValidationException("Task  " + msg.taskId() + " and file " + msg.fileId() + " are from different cases.",
+														null, ApiErrorCode.VALIDATION_ERROR);
 			
-			if (tfOpt.isPresent())
-			{
-				TaskFile tf = tfOpt.get();
-				tf.setDescription(msg.description());
-				returnVal.add(this.taskFileRepository.save(tf));
-			}
-			else
-				returnVal.add(this.taskFileRepository.save(new TaskFile(task, file, msg.description())));
+			this.authorizationService.verifyUserCanModify(task.getMatrixCase().getId());
+			
+			this.taskFileRepository.findByTaskAndMatrixFile(task, file)
+				.ifPresentOrElse(tf->{
+					tf.setDescription(msg.description());
+					returnVal.add(this.taskFileRepository.save(tf));
+				}, 
+				()->returnVal.add(this.taskFileRepository.save(new TaskFile(task, file, msg.description()))));
 		});
-
 
 		return returnVal;
 	}
@@ -69,6 +72,8 @@ public class TaskFileServiceImpl implements TaskFileService
 				()->new MatrixUncheckedException("TaskEntity with id " + taskFileId + " does not exist.",
 													null, ApiErrorCode.TASK_DOES_NOT_EXIST));
 		
+		this.authorizationService.verifyUserCanModify(tf.getTask().getMatrixCase().getId());
+		
 		this.taskFileRepository.delete(tf);
 		return tf;
 	}
@@ -78,38 +83,25 @@ public class TaskFileServiceImpl implements TaskFileService
 	{
 		List<MFile> fileList = null;
 		
-		Task task = this.taskRepository.findById(searchMessage.taskId()).orElseThrow(
-				()->new MatrixUncheckedException("TaskEntity with id " + searchMessage.taskId() + " does not exist.",
-						null, ApiErrorCode.TASK_DOES_NOT_EXIST));
-
-		log.debug("CaseId: " + task.getMatrixCase().getId());
+		Task task = this.taskService.getTask(searchMessage.taskId());
+		
+		this.authorizationService.verifyUserCanModify(task.getMatrixCase().getId());
+		
 		if (Strings.isBlank(searchMessage.searchText()))
-		{
-			log.debug("%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%");
-			log.debug("%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%");
-			log.debug("%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%");
-			log.debug("1");
 			fileList = this.taskFileRepository.searchFilesNotLinkedToTask(task.getId(),task.getMatrixCase().getId());
-		}
 		else 
-		{
-			log.debug("%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%");
-			log.debug("%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%");
-			log.debug("%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%");
-			log.debug("2");
 			fileList = this.taskFileRepository.searchFilesNotLinkedToTask( 	task.getId(),
 					task.getMatrixCase().getId(),
 					searchMessage.searchText());
-		}
-		
-		fileList.forEach(fl->log.debug(fl.toString()));
-		log.debug(fileList.size() + " ");
+
 		return fileList;
 	}
 
 	@Override
 	public List<TaskFile> findAllForTaskId(Long taskId)
 	{
+		Task task = this.taskService.getTask(taskId);
+		this.authorizationService.verifyUserCanView(task.getMatrixCase().getId());
 		return this.taskFileRepository.findAllForTaskId(taskId);
 	}
 }

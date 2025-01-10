@@ -6,32 +6,31 @@ import { Box, Button } from "@mui/material";
 import { useDispatch, useSelector } from "react-redux";
 import { selectActiveCase } from "../state/AppSlice";
 import { useEffect } from "react";
-import { handleQueryError } from "../api/ApiUtils";
+import { handleQueryResultsWithWaitMessage } from "../api/ApiUtils";
 import { useGetAllLinkChartEntitiesForCaseQuery } from "../api/EntityApi";
 import LoadingSkeleton from "../util/LoadingSkeleton";
 import { Checkbox, List, ListItem } from "@mui/material";
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import IconButton from "@mui/material/IconButton";
+import RefreshIcon from '@mui/icons-material/Refresh';
 
 export default function LinkChartEditEntitiesDialog({ existingEntitiesIdsFn, 
                                                         addEntitiesFn, removeEntitiesFn, closeFn })
 {
     const theme = useTheme();
-    const navigate = useNavigate();
     const dispatch = useDispatch();
     const activeCase = useSelector(selectActiveCase);
 
     const [reRender, setReRender] = useState(false);
 
     // get all link chart entities for the active case
-    const {data:entityEnvelope, ...getAllLinkChartEntitiesForCaseStatus} = useGetAllLinkChartEntitiesForCaseQuery(activeCase.id);
-    const allEntities = entityEnvelope?.payload;//.filter(entity=>!existingEntitiesFn().includes(entity.id.toString())) || [];
+    const getAllLinkChartEntitiesForCaseResults = useGetAllLinkChartEntitiesForCaseQuery(activeCase.id);
+    const allEntities = getAllLinkChartEntitiesForCaseResults?.data?.payload;//.filter(entity=>!existingEntitiesFn().includes(entity.id.toString())) || [];
 
     // check for query errors
     useEffect(() => {  
-        if (getAllLinkChartEntitiesForCaseStatus.isError) 
-            handleQueryError(getAllLinkChartEntitiesForCaseStatus, dispatch, navigate);
-    } ,[getAllLinkChartEntitiesForCaseStatus.isError]);
+        handleQueryResultsWithWaitMessage(getAllLinkChartEntitiesForCaseResults,dispatch);
+    } ,[getAllLinkChartEntitiesForCaseResults.isFetching]);
 
     function entityClicked(entityId)
     {
@@ -57,7 +56,6 @@ export default function LinkChartEditEntitiesDialog({ existingEntitiesIdsFn,
     }
 
     const selectedEntityIds = existingEntitiesIdsFn();
-
     return (
         <Draggable sx={{ borderRadius:'5px' }}>
             <Paper elevation={5} sx={{  position:'fixed', 
@@ -70,16 +68,19 @@ export default function LinkChartEditEntitiesDialog({ existingEntitiesIdsFn,
                                         flexDirection:'column', 
                                         zIndex:20000}}>
                 <Typography component="h2" variant="h6" className="MuiDialogTitle-root"
-                            sx={{   padding:'16px 24px', 
+                            sx={{   padding:'8px 16px', 
                                     flex:'0 0 auto', 
+                                    display:'flex',
+                                    justifyContent:'space-between',
+                                    alignItems:'center',
                                     borderTopLeftRadius:'5px',
                                     borderTopRightRadius:'5px',
                                     backgroundColor: theme.palette.primary.main, color: theme.palette.primary.contrastText  
-                            }}>Add Entities</Typography>
+                            }}>Add Entities<IconButton sx={{}} onClick={() =>console.log("AAAAAA")}><RefreshIcon sx={{'&.MuiSvgIcon-root':{fill:theme.palette.secondary.contrastText}}}/></IconButton></Typography>
 
                     <Box sx={{width:'100%', height:'100%', overflow:'auto', display:'flex'}}>
                     {
-                        getAllLinkChartEntitiesForCaseStatus.isFetching?
+                        getAllLinkChartEntitiesForCaseResults.isFetching?
                         <LoadingSkeleton/>:
                         allEntities.length > 0?
                             <List sx={{width:'100%'}}>
@@ -88,7 +89,7 @@ export default function LinkChartEditEntitiesDialog({ existingEntitiesIdsFn,
                                             secondaryAction={<Checkbox checked={selectedEntityIds.includes(entity.id.toString())} 
                                             onClick={()=>entityClicked(entity.id.toString())} 
                                             name={entity.id}  />}>
-                                        {entity.title}
+                                            <Typography>{entity.title}</Typography>
                                     </ListItem>    
                                 ))}
                             </List>

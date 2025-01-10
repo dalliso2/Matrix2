@@ -1,16 +1,12 @@
-import { executeGet, executePostJSON } from "./base";
 
-export const UPLOAD_FILE_URL = "/api/file/upload";
 export const RETRIEVE_FILE_URL = "/api/file/";
-export const UPDATE_FILES = '/api/file/update_files';
-export const UNLINK_ENTITY_FILE = '/api/entity_file/remove';
 
-export async function apiGetFile(fileId, fileName)
+export async function apiGetFile(authToken, fileId, fileName)
 {
-    fetch(RETRIEVE_FILE_URL + fileId, {
+    const params = new URLSearchParams({t:authToken}).toString();
+
+    fetch(RETRIEVE_FILE_URL + fileId + "?" + params, {
         method: 'GET',
-        credentials: 'include',
-        mode: 'cors'
     }).then(response => response.blob())
     .then(blob => {
         const url = window.URL.createObjectURL(new Blob([blob]));
@@ -21,15 +17,4 @@ export async function apiGetFile(fileId, fileName)
         link.click();
         link.parentNode.removeChild(link);
     });
-}
-
-
-export async function apiUpdateFiles(files)
-{
-    return await executePostJSON(UPDATE_FILES, files);
-}
-
-export async function apiUnlinkFile(entityFileId)
-{
-    return await executeGet(UNLINK_ENTITY_FILE, entityFileId);
 }

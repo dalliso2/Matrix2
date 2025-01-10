@@ -11,10 +11,12 @@ import org.springframework.stereotype.Service;
 
 import com.dca.matrix.api.ApiErrorCode;
 import com.dca.matrix.authentication.AuthenticationService;
+import com.dca.matrix.authorization.AuthorizationService;
 import com.dca.matrix.exception.MatrixUncheckedException;
 import com.dca.matrix.exception.MatrixValidationException;
 import com.dca.matrix.matrix_case.MatrixCase;
 import com.dca.matrix.matrix_case.MatrixCaseRepository;
+import com.dca.matrix.matrix_case.MatrixCaseService;
 import com.dca.matrix.matrix_entity.MatrixEntity;
 import com.dca.matrix.matrix_entity.MatrixEntityRepository;
 import com.dca.matrix.user.MatrixUser;
@@ -26,22 +28,14 @@ import lombok.AllArgsConstructor;
 public class TimelineServiceImpl implements TimelineService
 {
 	private TimelineRepository timelineRepository;
-	private MatrixEntityRepository matrixEntityRepository;
-	private MatrixCaseRepository matrixCaseRespository;
-	private final AuthenticationService authenticationService;
+	//private MatrixCaseRepository matrixCaseRespository;
+	private final AuthorizationService authorizationService;
+	private final MatrixCaseService matrixCaseService;
 	
 	@Override
 	public TimelineDTO store(TimelineDTO timelineDTO)
 	{
-		MatrixUser currentUser = this.authenticationService.getCurrentUser();
-		if (timelineDTO.matrixCaseId() != null)
-		{
-			MatrixCase mCase = this.matrixCaseRespository.findById(timelineDTO.matrixCaseId())
-									.orElseThrow(()->new MatrixUncheckedException("Case with id " + timelineDTO.matrixCaseId() + " does not exist.",
-										null, ApiErrorCode.TIMELINE_DOES_NOT_EXIST));
-			
-			currentUser.canModify(mCase);
-		}
+		this.authorizationService.verifyUserCanModify(timelineDTO.matrixCaseId());
 		
 		List<String> fieldErrorList = new LinkedList<String>();
 		
@@ -72,11 +66,7 @@ public class TimelineServiceImpl implements TimelineService
 			t.setId(timelineDTO.id());
 		}		
 
-		MatrixCase mCase = this.matrixCaseRespository.findById(timelineDTO.matrixCaseId()).orElseThrow(()->
-								new MatrixUncheckedException("Case with id " + timelineDTO.matrixCaseId() + " does not exist.",
-										null, ApiErrorCode.TIMELINE_DOES_NOT_EXIST));
-		
-		t.setMatrixCase(mCase);
+		t.setMatrixCase(this.matrixCaseService.getCase(timelineDTO.matrixCaseId()));
 		t.setName(timelineDTO.name());
 		t.setDescription(timelineDTO.description());
 		if (timelineDTO.matrixEntityIds() != null)
@@ -93,23 +83,18 @@ public class TimelineServiceImpl implements TimelineService
 				new MatrixUncheckedException("Timeline with id " + id + " does not exist.",
 						null, ApiErrorCode.TIMELINE_DOES_NOT_EXIST));
 		
-		MatrixUser currentUser = this.authenticationService.getCurrentUser();
-		
-		currentUser.canModify(t.getMatrixCase());
-		
+		this.authorizationService.verifyUserCanView(t.getMatrixCase().getId());
+	
 		return new TimelineDTO(t);
 	}
 
 	@Override
 	public Collection<TimelineDTO> findByCase(Long caseId)
 	{
-		MatrixCase mcase = new MatrixCase();
-		mcase.setId(caseId);
+		MatrixCase mCase = this.matrixCaseService.getCase(caseId);
+		this.authorizationService.verifyUserCanView(mCase.getId());
 		
-		MatrixUser currentUser = this.authenticationService.getCurrentUser();
-		currentUser.canView(mcase);
-		
-		return this.timelineRepository.findByMatrixCaseOrderByName(mcase).stream().map(t->new TimelineDTO(t)).toList();
+		return this.timelineRepository.findByMatrixCaseOrderByName(mCase).stream().map(t->new TimelineDTO(t)).toList();
 	}
 
 }

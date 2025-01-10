@@ -31,9 +31,6 @@ export default function AddEditLinkChartDialog({linkChartObj, closeFn})
     const [updateLinkChart, mutationState] = useUpdateLinkChartNameDescriptionMutation();
     handleMutationResults(mutationState, 
                             dispatch, 
-                            navigate,
-                            true, 
-                            "Updating link chart...", "Error Updating Link chart", 
                             ()=>{
                                 const payload = mutationState.data.payload;
                                 dispatch(addLinkChartTab({id:payload.id, title:payload.name}));

@@ -12,12 +12,12 @@ export default function CaseGrid({cases, rowClickFn, isFetching})
     const theme = useTheme();   
 
     const rowValues = cases?.map((record) => 
-        ({rowProperties: {id:record.id, onClick:()=>{rowClickFn(record.id);},},
+        ({rowProperties: {id:record.id, key:record.id, onClick:()=>{rowClickFn(record);},},
             sx:{cursor:'pointer', '&:hover':{backgroundColor:theme.palette.action.hover}},
-            values:[{value:[record.caseNumber], sx:{whiteSpace:'pre'}}, 
-                    {value:[record.title], sx:{whiteSpace:'pre'}}, 
-                    {value:[record.description]}, 
-                    {value:[['Owner','Participant','Reviewer'][record.role]]}]}));
+            values:[{value:[record.caseNumber], sx:{whiteSpace:'pre'}, cellProperties:{key:record.id + "caseNumber"}}, 
+                    {value:[record.title], sx:{whiteSpace:'pre'}, cellProperties:{key:record.id + "title"}}, 
+                    {value:[record.description], cellProperties:{key:record.id + "description"}}, 
+                    {value:[['Admin','Participant','Reviewer'][record.role]], cellProperties:{key:record.id + "role"}}]}));
 
     return (
             <Grid columnHeadings={columnHeadings} 

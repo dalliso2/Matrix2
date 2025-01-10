@@ -16,7 +16,7 @@ import DialogTitle from "@mui/material/DialogTitle";
 import DialogContent from "@mui/material/DialogContent";
 import DialogActions from "@mui/material/DialogActions";
 import Collapse from "@mui/material/Collapse";
-import { handleQueryError } from "../../api/ApiUtils";
+import { handleQueryResultsWithWaitMessage } from "../../api/ApiUtils";
 import LoadingSkeleton from "../../util/LoadingSkeleton";
 import { useLazySearchEntitiesNotLinkedQuery } from "../../api/EntityApi";
 import { useEffect } from "react";
@@ -45,21 +45,18 @@ export default function EntityLinkDialog({entityObj, entityDefinitions, closeFn}
     const entityObjName = getTitle(entityDefinitions, entityObj);
     const entityToLinkName = entityToLink && getTitle(entityDefinitions, entityToLink);
 
-    const [searchEntitiesFn, {data:envelope, ...searchResultsStatus}] = useLazySearchEntitiesNotLinkedQuery();
-    const searchResults = envelope?.payload || [];
+    const [searchEntitiesFn, searchResultsStatus ] = useLazySearchEntitiesNotLinkedQuery();
+    const searchResults = searchResultsStatus?.data?.payload;
     useEffect(() => {
-        if (searchResultsStatus.isError) 
-            handleQueryError(searchResultsStatus, dispatch, navigate);
-    }, [searchResultsStatus.isError]);
+        handleQueryResultsWithWaitMessage(searchResultsStatus, dispatch,);
+    }, [searchResultsStatus.isFetching]);
 
-
-    const [linkEntities, linkEntitiesMutationStatus] = useLinkEntitiesMutation();
-    handleMutationResults(linkEntitiesMutationStatus, dispatch, navigate, false, "Linking entities...",
-        "Error creating link between entities", 
+    const [linkEntities, linkEntitiesMutationResults] = useLinkEntitiesMutation();
+    handleMutationResults(linkEntitiesMutationResults, dispatch, 
         ()=> enqueueSnackbar("Successfully linked " 
                                 + entityObjName 
                                 + " and " 
-                                + linkEntitiesMutationStatus.originalArgs.entityToLinkName, {variant:'success'}),
+                                + linkEntitiesMutationResults.originalArgs.entityToLinkName, {variant:'success'}),
         ()=>{});
 
     function createEntityLink(parentChildRelationshipDescription,childParentRelationshipDescription)
@@ -106,7 +103,7 @@ export default function EntityLinkDialog({entityObj, entityDefinitions, closeFn}
                     rows: entityTypeArray.filter(entity=>entity.id !== entityObj.id).map((entity,index)=>{
                             const entityDefinition = entityDefinitions.find(def=>def.id === entity.entityDefinition);
                             const row = {rowProperties:{id:entity.id}, values:[{cellProperties:{  }, sx:{ width:0}, 
-                                        value:[<IconButton onClick={()=>setEntityToLink(entity)}><AddLinkSharp/></IconButton>]},
+                                        value:[<Tooltip title="Link Entities"><IconButton onClick={()=>setEntityToLink(entity)}><AddLinkSharp/></IconButton></Tooltip>]},
                                         ...entityDefinition.props.filter(prop=>prop.includeInList).map(prop => {return{propertyDefinition: prop.id, type:prop.type, value:[]}})
                                     ]};
                             for (let prop of entity.propertyValues)

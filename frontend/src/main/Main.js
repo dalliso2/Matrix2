@@ -20,7 +20,7 @@ import GroupsTwoToneIcon from '@mui/icons-material/GroupsTwoTone';
 import ShareIcon from '@mui/icons-material/Share';
 import ChevronLeftIcon from '@mui/icons-material/ChevronLeft';
 import ViewTimelineTwoToneIcon from '@mui/icons-material/ViewTimelineTwoTone';
-import { useNavigate } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 import { Outlet } from 'react-router-dom';
 import UserAccountButton from '../user/UserAccountButton';
 import AppBar from './AppBar';
@@ -30,10 +30,13 @@ import CenteredCircularProgress from '../util/CenteredCircularProgress';
 import UnexpectedError from './UnexpectedError';
 import { useSelector } from 'react-redux';
 import { selectSystemInErrorState } from '../state/AppSlice';
-import { useDispatch } from 'react-redux';
 import { selectCurrentUser } from '../state/AppSlice';
+import { selectActiveCase } from '../state/AppSlice';
 
 const drawerWidth = 240;
+
+const defaultLightTheme = createTheme({ palette: { mode: "light" }});
+const defaultDarkTheme = createTheme({ palette: { mode: "dark" }});
 
 const darkTheme = createTheme({ palette: { mode: "dark" }, 
                                 typography: { fontSize: 12 },
@@ -70,6 +73,15 @@ const lightTheme = createTheme({    palette: { mode: "light" },
                                             styleOverrides: {   root: { padding:'0px 0px 0px 0px'},
                                             },     
                                         },
+                                        MuiListItemButton: {
+                                            styleOverrides: {   
+                                                root: { 
+                                                    '&.Mui-selected': {
+                                                    }
+                                                },
+
+                                            },     
+                                        },
                                 },
                             });
 
@@ -78,7 +90,8 @@ const CURRENT_USER_MESSAGE_KEY = "CURRENT_USER_KEY";
 export default function Main() 
 {
     const navigate = useNavigate();
-    const dispatch = useDispatch();
+    const currentLocation = useLocation();
+    const activeCase = useSelector(selectActiveCase);
 
     // application state
     const systemInErrorState = useSelector(selectSystemInErrorState);
@@ -94,7 +107,6 @@ export default function Main()
 
     var links = [];
 
-    console.log("currentUser",currentUser);
     if (currentUser) 
     {
         //if (currentUser.isAdmin)
@@ -123,7 +135,9 @@ export default function Main()
     //const theme = (currentUser && currentUser.darkTheme) ? darkTheme : lightTheme;
     const theme =  currentUser?.darkTheme ? darkTheme : lightTheme;
 
-    console.log(theme);
+    //console.log(currentLocation.pathname===link.link);
+    //links.map(link=>console.log(link.link, link.link.includes(currentLocation.pathname)));
+    
     return (
         <ThemeProvider theme={theme}>
             {systemInErrorState && <UnexpectedError/>}
@@ -142,7 +156,7 @@ export default function Main()
                             </IconButton>
                             <Typography component="h1" variant="h6" color="inherit" noWrap
                                 sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexGrow: 1, textAlign: 'center' }}>
-                                <Box sx={{ display: 'inline-block', textAlign: 'center', flexGrow: 1 }}>Matrix 2</Box>
+                                <Box sx={{ }}>Matrix 2&nbsp;</Box><Box sx={{fontSize:'smaller'}}>{activeCase?"  - " + activeCase.title:"  - No active case"}</Box>
                             </Typography>
                         </Box>
                         <Box sx={{}}>
@@ -171,7 +185,7 @@ export default function Main()
                     <List component="nav" sx={{}}>
                         {
                             links.map((link, index) =>
-                                <ListItemButton key={index} onClick={() => navigate(link.link)} >
+                                <ListItemButton key={link.link} selected={currentLocation.pathname.includes(link.link)} onClick={() => navigate(link.link)} >
                                     <ListItemIcon>
                                         {link.icon}
                                     </ListItemIcon>

@@ -7,7 +7,7 @@ import { useDispatch } from "react-redux";
 import AddLinkSharp from "@mui/icons-material/AddLinkSharp";
 import RefreshIcon from '@mui/icons-material/Refresh';
 import { useGetFilesForTaskQuery } from "../api/TaskApi";
-import { handleQueryError } from "../api/ApiUtils";
+import { handleQueryResultsWithWaitMessage } from "../api/ApiUtils";
 import { useEffect } from "react";
 import { handleMutationResults } from "../api/ApiUtils";
 import TaskFileSearchDialog from "./TaskFileSearchDialog";
@@ -22,12 +22,12 @@ import { useSelector } from "react-redux";
 import { selectActiveCase } from "../state/AppSlice";
 import { useStoreFilesMutation } from "../api/FileApi";
 import { useNavigate } from "react-router-dom";
+import Tooltip from "@mui/material/Tooltip";
 
 const headers = ["File name", "Description", "Download", "Unlink"];
 
 export default function TaskFiles({taskId, unlink=true, sx={}})
 {
-    console.log("TaskFiles");
     const dispatch = useDispatch();
     const navigate = useNavigate();
 
@@ -36,11 +36,10 @@ export default function TaskFiles({taskId, unlink=true, sx={}})
     const activeCase = useSelector(selectActiveCase);   
 
     const {refetch:refetchTaskFiles, ...taskFilesQueryResults} = useGetFilesForTaskQuery(taskId);
-    const taskFiles = taskFilesQueryResults?.currentData?.payload;
+    const taskFiles = taskFilesQueryResults?.data?.payload;
     useEffect(() => {
-        if (taskFilesQueryResults.isError) 
-            handleQueryError(taskFilesQueryResults, dispatch, navigate);
-    }, [taskFilesQueryResults.isError]);
+        handleQueryResultsWithWaitMessage(taskFilesQueryResults, dispatch,)
+    }, [taskFilesQueryResults.isFetching]);
 
     const [addTaskFiles, addTaskFileMutationState] = useAddTaskFilesMutation();
     
@@ -96,8 +95,8 @@ export default function TaskFiles({taskId, unlink=true, sx={}})
         return {rowProperties:{ id:taskFile.id, onClick: ()=>onClickFile(taskFile.id)},
         sx:{cursor:'default'},
         values:[{sx:{p:1},value:[taskFile.matrixFile.name]}, {sx:{p:1},value:[taskFile.matrixFile.description]}]
-        .concat([{sx:{p:1,width:'0px'},value:[<IconButton onClick={(event)=>downloadFile(taskFile.matrixFile.id, taskFile.matrixFile.serverFileName)}><DownloadTwoToneIcon/></IconButton>]}])
-        .concat([{sx:{p:1,width:'0px'},value:[<IconButton onClick={(event)=>unlinkFile(event, taskFile.id)}><LinkOffTwoToneIcon/></IconButton>]}])
+        .concat([{sx:{p:1,width:'0px'},value:[<Tooltip title="Download file"><IconButton onClick={(event)=>downloadFile(taskFile.matrixFile.id, taskFile.matrixFile.serverFileName)}><DownloadTwoToneIcon/></IconButton></Tooltip>]}])
+        .concat([{sx:{p:1,width:'0px'},value:[<Tooltip title="Unlink file"><IconButton onClick={(event)=>unlinkFile(event, taskFile.id)}><LinkOffTwoToneIcon/></IconButton></Tooltip>]}])
     }});
 
     return (
@@ -106,10 +105,14 @@ export default function TaskFiles({taskId, unlink=true, sx={}})
                 <Box sx={{display:'flex', justifyContent:'space-between', width:'100%', alignItems:'center'}}>
                     <Box sx={{fontWeight:'bold'}}>Linked Files</Box>
                     <Box>
-                    <IconButton disabled={taskFilesQueryResults.isFetching} onClick={() => refetchTaskFiles()}><RefreshIcon/></IconButton>
-                    <IconButton disabled={taskFilesQueryResults.isFetching} onClick={()=> {setShowFileSearchDialog(true)}}>
-                        <AddLinkSharp/>
-                    </IconButton>
+                    <Tooltip title="Link a file to this task">
+                        <IconButton disabled={taskFilesQueryResults.isFetching} onClick={() => refetchTaskFiles()}><RefreshIcon/></IconButton>
+                    </Tooltip>
+                        <Tooltip title="Refresh linked files">
+                            <IconButton disabled={taskFilesQueryResults.isFetching} onClick={()=> {setShowFileSearchDialog(true)}}>
+                            <AddLinkSharp/>
+                        </IconButton>
+                    </Tooltip>
                     </Box> 
                 </Box>  
             {
