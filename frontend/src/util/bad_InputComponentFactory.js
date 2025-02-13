@@ -25,29 +25,33 @@ const RETRIEVE_FILE_URL = "/api/file/";
 
 export function getInputComponent(fieldData, key, dispatch)
 {
-    var {selectData, helperText, visible, caseId, propDefId, ...field} = fieldData;
+    var {   type, id, propDefId, name, label, caseId, value, disabled, visible, required, 
+            maxLength, selectData, helperText, multiLine, rows, width, mask,
+            onChange, onChangeEndDate, onChangeStartDate,
+             ...field} = fieldData;
+         
+    if (visible == false)
+        return undefined;
+
     const error = field.error || false;
     if (!helperText)
         helperText = ' ';
 
-    if (visible == false)
-        return undefined;
-
     var component = undefined;  
 
-    switch (field.type)
+    switch (type)
     {
         case TEXT:
         case PASSWORD:
-            if (field.mask)
+            if (mask)
             {
-                const {onChange, value, ...rest} = field;
+                //const {onChange, value, ...rest} = field;
                 component = 
                 <InputMask
                     key={key}
                     onChange={onChange}
                     value={value || ''}
-                    mask={field.mask}
+                    mask={mask}
                     disabled={false}
                     maskChar='_'
                     alwaysShowMask
@@ -60,7 +64,7 @@ export function getInputComponent(fieldData, key, dispatch)
                             fullWidth
                             size="small"
                             sx={{marginTop:1}} />
-                            <FormHelperText id={field.name + "-label"} error={true}>
+                            <FormHelperText id={name + "-label"} error={true}>
                                 {helperText || ' '}
                             </FormHelperText>
                         </FormControl>}
@@ -71,13 +75,13 @@ export function getInputComponent(fieldData, key, dispatch)
                     <FormControl sx={{width:'100%'}} key={key}>
                     <TextField 
                         {...field}
-                        value={field.value || ''}
+                        value={value || ''}
                         fullWidth
                         size="small"
-                        inputProps={{ maxLength: field.maxLength }}
+                        inputProps={{ maxLength: maxLength }}
                         sx={{mt:1, 
-                            width:field.width?(field.width + 2) + 'ch':undefined}} />
-                        <FormHelperText id={field.name + "-label"} error={true}>
+                            width:width?(width + 2) + 'ch':undefined}} />
+                        <FormHelperText id={name + "-label"} error={true}>
                             {helperText || ' '}
                         </FormHelperText>
                     </FormControl>
@@ -90,12 +94,12 @@ export function getInputComponent(fieldData, key, dispatch)
                     value={field?.value || ''}
                     multiline
                     fullWidth
-                    onChange={field.onChange}
+                    onChange={onChange}
                     size="small"
-                    inputProps={{ maxLength: field.maxLength,}}
+                    inputProps={{ maxLength: maxLength,}}
                     sx={{mt:1, flexGrow:1}}
                 />
-                <FormHelperText id={field.name + "-label"} error={true}>
+                <FormHelperText id={name + "-label"} error={true}>
                     {helperText || ' '}
                 </FormHelperText>
                 </FormControl>  
@@ -103,17 +107,17 @@ export function getInputComponent(fieldData, key, dispatch)
         case CHECKBOX:
             component =
                 <FormControlLabel key={key} control={ <Checkbox  {...field} /> } 
-                                    onChange={field.onChange}
-                                    checked={ !!field.value ? field.value:false }
+                                    onChange={onChange}
+                                    checked={ !!value ? value:false }
                                     sx={{ margin:'auto'}} 
-                                    label={field.label}
+                                    label={label}
                 />
             break;
         case SELECT:
             component =  
-                <FormControl fullWidth={true} size="small" key={key} error={field.error} required={field.required} sx={{mt:1}}>
-                    <InputLabel id={field.name + field.id} >{ field.label }</InputLabel>
-                    <Select {...field} fullWidth={true} labelId={field.name + field.id} value={field?.value}  sx={{}}>
+                <FormControl fullWidth={true} size="small" key={key} error={error} required={required} sx={{mt:1}}>
+                    <InputLabel id={name + id} >{ label }</InputLabel>
+                    <Select {...field} fullWidth={true} labelId={name + id} value={field?.value}  sx={{}}>
                     {
                         selectData?.map((item,index) =>
                         (
@@ -123,19 +127,19 @@ export function getInputComponent(fieldData, key, dispatch)
                         ))
                     }
                     </Select>
-                    <FormHelperText id={field.name + "-label"} error={true}>
+                    <FormHelperText id={name + "-label"} error={true}>
                     {helperText || ' '}
                     </FormHelperText>
                 </FormControl>
             break;
         case SELECT_MULTIPLE:
             component =
-                <FormControl fullWidth={true} size="small" key={key} error={field.error} required={field.required} sx={{mt:1}}>
-                    <InputLabel id={field.name + field.id} >{ field.label }</InputLabel>
+                <FormControl fullWidth={true} size="small" key={key} error={error} required={required} sx={{mt:1}}>
+                    <InputLabel id={name + id} >{ label }</InputLabel>
                     <Select {...field} 
                             multiple 
                             fullWidth={true} 
-                            labelId={field.name + field.id} 
+                            labelId={name + id} 
                             value={field?.value || []}  
                             renderValue={(selected) => {
                                 return (
@@ -155,7 +159,7 @@ export function getInputComponent(fieldData, key, dispatch)
                         ))
                     }
                     </Select>
-                    <FormHelperText id={field.name + "-label"} error={true}>
+                    <FormHelperText id={name + "-label"} error={true}>
                     {helperText || ' '}
                     </FormHelperText>
                 </FormControl>
@@ -163,28 +167,28 @@ export function getInputComponent(fieldData, key, dispatch)
         case 'SWITCH':
             component =
             <FormControlLabel key={key} control={<Switch 
-                                disabled={field.disabled}
-                                name={field.name} 
-                                onChange={field.onChange}/>} 
-                                label={field.label}
+                                disabled={disabled}
+                                name={name} 
+                                onChange={onChange}/>} 
+                                label={label}
                                 value={true}
-                                checked={field.value}/>
+                                checked={value}/>
             break;
         case DATE:
             component =
                 <React.Fragment key={key}>
                     <DesktopDatePicker
-                        value={field.value?field.value:null}
-                        onChange={field.onChange}
-                        disabled={field.disabled}
+                        value={value?value:null}
+                        onChange={onChange}
+                        disabled={disabled}
                         slotProps={{ textField:{    
-                            label: field.label,
-                            error: field.error,
+                            label: label,
+                            error: error,
                             size:'small',
                             helperText:helperText || ' ',
                             clearable: true,
-                            onClear: () => field.onChange(null),
-                            required: field.required
+                            onClear: () => onChange(null),
+                            required: required
                             },
                             actionBar:{actions:['clear']}
                         }}
@@ -193,43 +197,43 @@ export function getInputComponent(fieldData, key, dispatch)
                 </React.Fragment>
             break;
         case DATE_RANGE:
-            field.error || (field.error = [false, false]);
+            //error || (error = [false, false]);
             component =
                 <React.Fragment key={key}>
                 <Box sx={{}}>
                 <Box sx={{ marginBottom:2, borderBottom:1 }}>{field.label}</Box>
                 <Box sx={{display:'flex'}}>
                 <DesktopDatePicker
-                    value={field.value[0]?field.value[0]:null}
-                    onChange={field.onChangeStartDate}
+                    value={value[0]?value[0]:null}
+                    onChange={onChangeStartDate}
                     sx={{width:'25ch'}}
-                    disabled={field.disabled}
+                    disabled={disabled}
                     slotProps={{ textField:{    
                         label: "Start Date",
-                        error: field.error[0],
+                        error: error && error[0],
                         size:'small',
                         helperText:helperText[0] || ' ',
                         clearable: true,
-                        onClear: () => field.onChangeStartDate(null),
-                        required: field.required
+                        onClear: () => onChangeStartDate(null),
+                        required: required
                         },
                         actionBar:{actions:['clear']}
                     }}
                 />
                 <Box sx={{width:'1ch'}} />
                 <DesktopDatePicker
-                    value={field.value[1]?field.value[1]:null}
-                    onChange={field.onChangeEndDate}
+                    value={value[1]?value[1]:null}
+                    onChange={onChangeEndDate}
                     sx={{width:'25ch'}}
-                    disabled={field.disabled}
+                    disabled={disabled}
                     slotProps={{ textField:{    
                         label: "End Date",
-                        error: field.error[1],
+                        error: error && error[1],
                         size:'small',
                         helperText:helperText[1] || ' ',
                         clearable: true,
-                        onClear: () => field.onChangeEndDate(null),
-                        required: field.required
+                        onClear: () => onChangeEndDate(null),
+                        required: required
                         },
                         actionBar:{actions:['clear']}
                     }}
@@ -242,17 +246,17 @@ export function getInputComponent(fieldData, key, dispatch)
             component =
                     <FormControl sx={{width:'100%'}} key={key} >
                         <DesktopDateTimePicker
-                            value={field.value?field.value:null}                   
-                            onChange={field.onChange}
-                            disabled={field.disabled}
+                            value={value?value:null}                   
+                            onChange={onChange}
+                            disabled={disabled}
                             slotProps={{ textField:{    
-                                label: field.label,
-                                error: field.error,
+                                label: label,
+                                error: error,
                                 helperText:helperText || ' ',
                                 size:'small',
                                 clearable: true,
-                                onClear: () => field.onChange(null),
-                                required: field.required
+                                onClear: () => onChange(null),
+                                required: required
                                 },
                                 actionBar:{actions:['accept','clear']}
                             }}             
@@ -261,25 +265,25 @@ export function getInputComponent(fieldData, key, dispatch)
                     </FormControl>
             break
         case DATE_TIME_RANGE:
-            const error0 = field.error && field?.error[0];
-            const error1 = field.error && field?.error[1];
-            field.error || (field.error = [false, false]);
+            // const error0 = error && field?.error[0];
+            // const error1 = error && field?.error[1];
+            // error || (error = [false, false]);
             component =
                 <Box sx={{}} key={key}>
-                    <Box sx={{ marginBottom:2, borderBottom:1 }}>{field.label}</Box>
+                    <Box sx={{ marginBottom:2, borderBottom:1 }}>{label}</Box>
                         <Box sx={{display: 'flex'}}>
                         <DesktopDateTimePicker
-                            value={field.value[0]?field.value[0]:null}
-                            onChange={field.onChangeStartDate}
-                            disabled={field.disabled}
+                            value={value[0]?value[0]:null}
+                            onChange={onChangeStartDate}
+                            disabled={disabled}
                             slotProps={{ textField:{    
                                 label: "Start Date/Time",
-                                error: field.error[0],
+                                error: error && error[0],
                                 size:'small',
                                 helperText:helperText[0] || ' ',
                                 clearable: true,
-                                onClear: () => field.onChangeStartDate(null),
-                                required: field.required
+                                onClear: () => onChangeStartDate(null),
+                                required: required
                                 },
                                 actionBar:{actions:['accept','clear']}
                             }}             
@@ -287,17 +291,17 @@ export function getInputComponent(fieldData, key, dispatch)
                         />
                         <div style={{width:'20px'}}/>
                         <DesktopDateTimePicker
-                            value={field.value[1]?field.value[1]:null}
-                            onChange={field.onChangeEndDate}
-                            disabled={field.disabled}
+                            value={value[1]?value[1]:null}
+                            onChange={onChangeEndDate}
+                            disabled={disabled}
                             slotProps={{ textField:{    
                                 label: "End Date/Time", 
-                                error: field.error[1],
+                                error: error && error[1],
                                 size:'small',
                                 helperText:helperText[1] || ' ',
                                 clearable: true,
-                                onClear: () => field.onChangeEndDate(null),
-                                required: field.required
+                                onClear: () => onChangeEndDate(null),
+                                required: required
                                 },
                                 actionBar:{actions:['accept','clear']}
                             }}             
@@ -313,10 +317,10 @@ export function getInputComponent(fieldData, key, dispatch)
                     field?.value?
                     (
                     <Box id="profile_image_container" sx={{display:'inline-block'}}>
-                        <DragDropTarget fileIdsCallback={(id)=>field.onChange(id)} caseId={caseId} multiple={false} dispatch={dispatch}/>
-                        <Image id={field.value} className="label-profile-image"/>
+                        <DragDropTarget fileIdsCallback={(id)=>onChange(id)} caseId={caseId} multiple={false} dispatch={dispatch}/>
+                        <Image id={value} className="label-profile-image"/>
                         <Tooltip title="Delete Image">
-                            <IconButton onClick={()=>field.onChange(undefined)} sx={{ cursor: "pointer", 
+                            <IconButton onClick={()=>onChange(undefined)} sx={{ cursor: "pointer", 
                                 position:'absolute', 
                                 right:15, bottom: 15, 
                                 bgcolor: 'primary.main',
@@ -330,13 +334,13 @@ export function getInputComponent(fieldData, key, dispatch)
                     ):
                     (
                     <Box className={error?"error-label-file-upload":"label-file-upload"}  sx={{float:'right'}}>
-                        <DragDropTarget fileIdsCallback={(id)=>field.onChange(id)} caseId={caseId} accept="image/*" multiple={false} dispatch={dispatch}/>
+                        <DragDropTarget fileIdsCallback={(id)=>onChange(id)} caseId={caseId} accept="image/*" multiple={false} dispatch={dispatch}/>
 
                             <Box sx={{textAlign:'center', width:'100%'}}>Drop profile image here</Box>
                             <Box sx={{textAlign:'center', width:'100%'}}>or click to select file.</Box>
                             <Box sx={{textAlign:'center', width:'100%', position:'absolute',bottom:0}}>
                                 <FormControl sx={{width:'100%'}} key={key}>
-                                    <FormHelperText id={field.name + "-label"} error={true} sx={{textAlign:'center'}}>
+                                    <FormHelperText id={name + "-label"} error={true} sx={{textAlign:'center'}}>
                                     {helperText || ' '}
                                 </FormHelperText>
                             </FormControl>
@@ -347,7 +351,11 @@ export function getInputComponent(fieldData, key, dispatch)
                 </Box>
             break;  
         case 'IMAGE_ARRAY':
-            component = <ImageArrayInput field={field} caseId={caseId} key={key}/>;
+            component = <ImageArrayInput    value={value} 
+                                            onChange={onChange} 
+                                            error={error} 
+                                            caseId={caseId} 
+                                            key={key}/>;
             break;
         case LAT_LONG:
             break;
@@ -365,11 +373,11 @@ export function getInputComponent(fieldData, key, dispatch)
                             <TextField 
                                 label={addressPart}
                                 onChange={field['onChange' + addressPart]}
-                                value={field.value[index] || ''}
+                                value={value[index] || ''}
                                 size="small"
                                 inputProps={{ maxLength: 75 }}
                                 sx={{mt:1, width:'77 ch'}} />
-                            <FormHelperText id={field.name + "-label"} error={true}>
+                            <FormHelperText id={name + "-label"} error={true}>
                                 {helperText[index] || ' '}
                             </FormHelperText>
                         </FormControl>

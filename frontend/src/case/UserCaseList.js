@@ -30,6 +30,13 @@ export default function UserCaseList()
         handleQueryResultsWithWaitMessage(caseListQueryResults, dispatch);
     }, [caseListQueryResults?.isFetching]);
 
+    function addCase(caseData)
+    {
+        if (caseData)
+            dispatch(addCaseTab(caseData));
+        setSelectedCase(undefined);
+    }
+
     // const rowValues = caseList?.map((record) => 
     //             ({rowProperties: {id:record.id, onClick:()=>dispatch(addCaseTab(record.id)),},
     //                 sx:{cursor:'pointer', '&:hover':{backgroundColor:theme.palette.action.hover}},
@@ -48,7 +55,7 @@ export default function UserCaseList()
                     sx={{ mr:1, alignSelf:'flex-end'}}>New Case</Button>
             </Box>
             <CaseGrid cases={caseList} rowClickFn={(caseObj)=>dispatch(addCaseTab(caseObj))} isFetching={caseListQueryResults.isFetching} />
-            { selectedCase && <AddEditCaseDialog caseObj={selectedCase} closeFn={()=>setSelectedCase(undefined)} />}
+            { selectedCase && <AddEditCaseDialog caseObj={selectedCase} closeFn={(caseData)=>addCase(caseData)} />}
         </Box>
     );
 }

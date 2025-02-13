@@ -12,6 +12,8 @@ export const HIDDEN = "HIDDEN";
 export const PASSWORD = "PASSWORD";
 export const CHECKBOX = "CHECKBOX";
 export const SWITCH = "SWITCH";
+export const LAT_LONG = "LAT_LONG";
+export const ADDRESS_US = "ADDRESS_US";
 
 export const typeDescriptionsMap = new Map([  [TEXT,'Text'],
                                             [MULTILINE_TEXT, 'Multi-line Text'],
@@ -27,6 +29,8 @@ export const typeDescriptionsMap = new Map([  [TEXT,'Text'],
                                             [PASSWORD, 'Password'],
                                             [CHECKBOX, 'Checkbox'],
                                             [SWITCH, 'Switch'],
+                                            [LAT_LONG, 'Lat/Long'],
+                                            [ADDRESS_US, 'Address'],
                                         ]);
 
 export const typeDescriptionsObjectArray = [
@@ -40,4 +44,6 @@ export const typeDescriptionsObjectArray = [
     { id: DATE_TIME_RANGE, name: 'Date/Time Range'},
     { id: SELECT, name: 'Select'},
     { id: SELECT_MULTIPLE, name: 'Select Multiple'},
+    { id: LAT_LONG, name: 'Lat/Long'},
+    { id: ADDRESS_US, name: 'Address'},
 ]

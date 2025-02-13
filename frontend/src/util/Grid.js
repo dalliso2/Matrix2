@@ -88,7 +88,7 @@ export default function Grid({header=undefined,
                         <TableRow key={"firstRow"}>
                             {   
                                 columnHeadings.map((heading, index) =>  
-                                    <TableCell key={index} sx={{pt:1, 
+                                    <TableCell key={heading} sx={{pt:1, 
                                                                 pb:1, 
                                                                 verticalAlign:'middle', 
                                                                 backgroundColor:theme.palette.primary.main, 
@@ -126,8 +126,7 @@ export default function Grid({header=undefined,
                                         ))
                                 }
                                 </TableRow>
-                            )
-                        }
+                            )}
                         </TableBody>
                     </Table>
                 </TableContainer>

@@ -12,6 +12,15 @@ import RestorePropertyDialog from "./RestorePropertyDialog";
 import { useNavigate } from "react-router-dom";
 import { useBlocker } from "react-router";
 
+function sortProperties(props)
+{
+    let order = 0;
+    props.map((prop) => ({...prop, propOrder:order++}));
+    props.sort((a,b)=> !a.deleted && b.deleted?-1:0 );
+    order = 0;
+    props.forEach(prop=>prop.propOrder = order++);
+}
+
 export default function EntityDefinition({selectedEntityDefinition})
 {
     const dispatch = useDispatch();
@@ -26,6 +35,13 @@ export default function EntityDefinition({selectedEntityDefinition})
 
     const [storeEntityDefinition, mutationState] = useStoreEntityDefinitionMutation();
     handleMutationResults(mutationState, dispatch, ()=>{setModified(()=>false);});
+
+    useEffect(()=>{
+        if (entityDefinition)
+        {
+            sortProperties(entityDefinition.props);
+         }
+    },[entityDefinition]);
 
     function saveEntityDefinition()
     { 
@@ -45,10 +61,11 @@ export default function EntityDefinition({selectedEntityDefinition})
                 navigate(nextRoute);
         }
     }
-    
+
     // new propps should be a modified copy of the existing properties
     function updateProperties(newProps)
     {
+        sortProperties(newProps);
         setEntityDefinition(old=>({...old, props:newProps}));
         setModified(()=>true);
     }

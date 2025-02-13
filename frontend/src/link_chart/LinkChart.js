@@ -180,10 +180,8 @@ export default function LinkChart({cyRef, linkChartModifiedRef, linkChartTabData
                         );
 
 
-    console.log("LinkChart 1", linkChartData);
     function saveLinkChartFn()
     {
-        console.log("LinkChart 2", linkChartData);
         saveTabChartData(); 
         linkChartModifiedRef.current=false;
         const ld = {
@@ -196,8 +194,7 @@ export default function LinkChart({cyRef, linkChartModifiedRef, linkChartTabData
             entities:cyRef.current.nodes()?.map(node=>[node.data().id, node.position()]), 
             styleSheet:JSON.stringify(cyRef.current.style().json())
         };
-
-        console.log("storeLinkChart", ld);  
+        
         storeLinkChart(ld);
 
     }

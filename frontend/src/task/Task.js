@@ -70,72 +70,76 @@ export default function Task({taskId})
         <>
         <Box sx={{display:'flex', flexDirection:'column', width:'100%', position:'relative', alignItems:'stretch'}}>      
             <Box sx={{flexGrow:1, display:'flex',  width:'100%', flexDirection:'column', overflow:'auto'}}>
-                    <Box sx={{p:0,m:1}}>
-                    <Paper>
-                        <Box sx={{display:'flex',justifyContent:'flex-end',}}>
-                            <Tooltip title="Refresh Task">
-                                <IconButton disabled={getTaskQueryResults.isFetching} onClick={() => refetchTaskData()}><RefreshIcon/></IconButton>
-                            </Tooltip>
-                            <Tooltip title="Edit Task">
-                                <IconButton disabled={getTaskQueryResults.isFetching} onClick={()=>setEditTaskData({...task})}>
-                                    <EditTwoToneIcon/>
-                                </IconButton>
-                            </Tooltip>
-                        </Box>
-                        {getTaskQueryResults.isFetching?(
-                            <Box sx={{height:'320px', width:'100%', display:'flex', justifyContent:'center', alignItems:'center'}}>
-                                <LoadingSkeleton/>
-                            </Box>):
-                        (<>
-                            <Box sx={{display:'flex', gap:'3px', justifyContent:'space-around'}}>
-                                <Box sx={{ width:'100%', display:'flex'}}>
-                                    <Table>
-                                        <TableBody>
-                                            <TableRow>
-                                                <TableCell style={{...tableCellBoldStyle, fontWeight:'bold'}}>Title:</TableCell>
-                                                <TableCell style={{...tableCellStyle, width:'70%'}}>{task.title}</TableCell>
-                                            </TableRow>
-                                            <TableRow>
-                                                <TableCell rowSpan={4} style={{...tableCellBoldStyle, fontWeight:'bold'}}>Description:</TableCell>
-                                                <TableCell rowSpan={4} style={{...tableCellStyle}}>{task.description}</TableCell>
-                                            </TableRow>
-                                        </TableBody>
-                                    </Table>
-                                    <Table>
-                                        <TableBody>
-                                            <TableRow>
-                                                <TableCell style={{...tableCellBoldStyle, whiteSpace:'nowrap',fontWeight:'bold'}}>Assigned To:</TableCell>
-                                                <TableCell  style={{...tableCellStyle, whiteSpace:'nowrap',width:'100%'}}>{assignedToString}</TableCell>
-                                            </TableRow>   
-                                            <TableRow>
-                                                <TableCell style={{...tableCellBoldStyle, whiteSpace:'nowrap',fontWeight:'bold'}}>Assigned Date/Time:</TableCell>
-                                                <TableCell  style={{...tableCellStyle, whiteSpace:'nowrap'}}>{task.assignedDateTime && dayjs(task.assignedDateTime).format(dateFormat)}</TableCell>
-                                            </TableRow>   
-                                            <TableRow>
-                                                <TableCell style={{...tableCellBoldStyle, whiteSpace:'nowrap',fontWeight:'bold'}}>Due Date/Time:</TableCell>
-                                                <TableCell  style={{...tableCellStyle, whiteSpace:'nowrap'}}>{task.dueDateTime && dayjs(task.dueDateTime).format(dateFormat)}</TableCell>
-                                            </TableRow>   
-                                            <TableRow>
-                                                <TableCell style={{...tableCellBoldStyle, whiteSpace:'nowrap',fontWeight:'bold'}}>Status:</TableCell>
-                                                <TableCell  style={{...tableCellStyle, whiteSpace:'nowrap'}}>{task.status && task.status.replaceAll('_',' ')}</TableCell>
-                                            </TableRow>
-                                            <TableRow>
-                                                <TableCell style={{...tableCellBoldStyle, whiteSpace:'nowrap',fontWeight:'bold'}}>Completed Date/Time:</TableCell>
-                                                <TableCell  style={{...tableCellStyle, whiteSpace:'nowrap'}}>{task.completedDateTime && dayjs(task.completedDateTime).format(dateFormat)}</TableCell>
-                                            </TableRow> 
-                                        </TableBody>
-                                    </Table>
-                                </Box>
+                <Box sx={{p:0,m:1, height:'300px'}}>
+                    {
+                        task?
+                        <Paper>
+                            <Box sx={{display:'flex',justifyContent:'flex-end',}}>
+                                <Tooltip title="Refresh Task">
+                                    <IconButton disabled={getTaskQueryResults.isFetching} onClick={() => refetchTaskData()}><RefreshIcon/></IconButton>
+                                </Tooltip>
+                                <Tooltip title="Edit Task">
+                                    <IconButton disabled={getTaskQueryResults.isFetching} onClick={()=>setEditTaskData({...task})}>
+                                        <EditTwoToneIcon/>
+                                    </IconButton>
+                                </Tooltip>
                             </Box>
-                            <Box sx={{p:1}}>
-                                <Box sx={{width:'100%'}}><b>Results:</b></Box>
-                                <Box sx={{minHeight:'100px', border:'1px solid black', borderRadius:'5px', p:1,m:1 }}>
-                                    <Typography>{task.coverageDescription}</Typography>
+                            {getTaskQueryResults.isFetching?(
+                                <Box sx={{height:'320px', width:'100%', display:'flex', justifyContent:'center', alignItems:'center'}}>
+                                    <LoadingSkeleton/>
+                                </Box>):
+                            (<>
+                                <Box sx={{display:'flex', gap:'3px', justifyContent:'space-around'}}>
+                                    <Box sx={{ width:'100%', display:'flex'}}>
+                                        <Table>
+                                            <TableBody>
+                                                <TableRow>
+                                                    <TableCell style={{...tableCellBoldStyle, fontWeight:'bold'}}>Title:</TableCell>
+                                                    <TableCell style={{...tableCellStyle, width:'70%'}}>{task.title}</TableCell>
+                                                </TableRow>
+                                                <TableRow>
+                                                    <TableCell rowSpan={4} style={{...tableCellBoldStyle, fontWeight:'bold'}}>Description:</TableCell>
+                                                    <TableCell rowSpan={4} style={{...tableCellStyle}}>{task.description}</TableCell>
+                                                </TableRow>
+                                            </TableBody>
+                                        </Table>
+                                        <Table>
+                                            <TableBody>
+                                                <TableRow>
+                                                    <TableCell style={{...tableCellBoldStyle, whiteSpace:'nowrap',fontWeight:'bold'}}>Assigned To:</TableCell>
+                                                    <TableCell  style={{...tableCellStyle, whiteSpace:'nowrap',width:'100%'}}>{assignedToString}</TableCell>
+                                                </TableRow>   
+                                                <TableRow>
+                                                    <TableCell style={{...tableCellBoldStyle, whiteSpace:'nowrap',fontWeight:'bold'}}>Assigned Date/Time:</TableCell>
+                                                    <TableCell  style={{...tableCellStyle, whiteSpace:'nowrap'}}>{task.assignedDateTime && dayjs(task.assignedDateTime).format(dateFormat)}</TableCell>
+                                                </TableRow>   
+                                                <TableRow>
+                                                    <TableCell style={{...tableCellBoldStyle, whiteSpace:'nowrap',fontWeight:'bold'}}>Due Date/Time:</TableCell>
+                                                    <TableCell  style={{...tableCellStyle, whiteSpace:'nowrap'}}>{task.dueDateTime && dayjs(task.dueDateTime).format(dateFormat)}</TableCell>
+                                                </TableRow>   
+                                                <TableRow>
+                                                    <TableCell style={{...tableCellBoldStyle, whiteSpace:'nowrap',fontWeight:'bold'}}>Status:</TableCell>
+                                                    <TableCell  style={{...tableCellStyle, whiteSpace:'nowrap'}}>{task.status && task.status.replaceAll('_',' ')}</TableCell>
+                                                </TableRow>
+                                                <TableRow>
+                                                    <TableCell style={{...tableCellBoldStyle, whiteSpace:'nowrap',fontWeight:'bold'}}>Completed Date/Time:</TableCell>
+                                                    <TableCell  style={{...tableCellStyle, whiteSpace:'nowrap'}}>{task.completedDateTime && dayjs(task.completedDateTime).format(dateFormat)}</TableCell>
+                                                </TableRow> 
+                                            </TableBody>
+                                        </Table>
+                                    </Box>
                                 </Box>
-                            </Box>
-                        </>)
+                                <Box sx={{p:1}}>
+                                    <Box sx={{width:'100%'}}><b>Results:</b></Box>
+                                    <Box sx={{minHeight:'100px', border:'1px solid black', borderRadius:'5px', p:1,m:1 }}>
+                                        <Typography>{task.coverageDescription}</Typography>
+                                    </Box>
+                                </Box>
+                            </>)
+                        }
+                        </Paper>
+                        :<LoadingSkeleton/>
                     }
-                    </Paper>
                     <Paper>
                         <Box sx={{ display:'flex', flexDirection:'column', justifyContent:'space-around',m:2, mb:0}}>
                             <TaskEntities taskId={taskId}/>

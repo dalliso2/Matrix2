@@ -1,4 +1,4 @@
-import { DATE_RANGE, DATE, DATE_TIME, DATE_TIME_RANGE, SWITCH } from "../util/PropertyType";
+import { DATE_RANGE, DATE, DATE_TIME, DATE_TIME_RANGE, SWITCH, ADDRESS_US } from "../util/PropertyType";
 import dayjs from "dayjs";
 
 const errorTextSuffix = '-errorText';
@@ -46,6 +46,24 @@ function validate(fields)
                 break;
             case SWITCH:
                 break;
+            case ADDRESS_US:
+                field.error = new Array(5).fill(true);
+                field.helperText = new Array(5).fill("(required)");
+                field.value.forEach((value,index) => 
+                {
+                    if (index === 1 || value.valu)
+                    {
+                        field.error[1] = false;
+                        field.helperText[1] = true;
+                    }
+                    else
+                    {
+                        field.error[index] = results.error;
+                        field.helperText[index] = results.helperText;
+                        valid &&= !field.error[index];
+                    }
+                });
+                break;
             case 'hidden':
                 break;
             default:
@@ -67,10 +85,13 @@ function isEmpty(value)
 function checkDates(field, value)
 {
     const results = {error: false, helperText: ' '};
-    if (!value && field.required)
+    if (!value)
     {
-        results.helperText = "(required)";            
-        results.error = true;
+        if (field.required)
+        {
+            results.helperText = "(required)";            
+            results.error = true;
+        }
     }
     else if (!dayjs(value).isValid())
     {

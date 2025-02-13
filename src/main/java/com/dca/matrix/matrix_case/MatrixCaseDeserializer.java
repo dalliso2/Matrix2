@@ -33,11 +33,6 @@ public class MatrixCaseDeserializer extends StdDeserializer<MatrixCase>
 	@Override
 	public MatrixCase deserialize(JsonParser jp, DeserializationContext ctxt) throws IOException, JacksonException
 	{
-		log.debug("]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]");
-		log.debug("]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]");
-		log.debug("]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]");
-		log.debug("]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]");
-		log.debug("" + jp.getLongValue());
         MatrixCase mcase = new MatrixCase();
         mcase.setId(jp.getLongValue());
         return mcase;

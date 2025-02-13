@@ -3,14 +3,11 @@ package com.dca.matrix.authentication;
 import java.time.Instant;
 
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 
 import com.auth0.jwt.JWT;
 import com.auth0.jwt.JWTVerifier;
 import com.auth0.jwt.algorithms.Algorithm;
-import com.auth0.jwt.exceptions.JWTVerificationException;
-
 import ch.qos.logback.core.util.Duration;
 import lombok.extern.slf4j.Slf4j;
 
@@ -35,7 +32,6 @@ public class JWTTokenService
 							.withIssuer("Matrix2")
 							.withIssuedAt(Instant.now())
 							.withExpiresAt(Instant.now().plusMillis(TOKEN_VALID_DURATION.getMilliseconds()))
-							//.withExpiresAt(Instant.now().plusMillis(5000))
 							.sign(hmac512);
 	}
 	

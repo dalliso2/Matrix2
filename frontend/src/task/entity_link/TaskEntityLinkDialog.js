@@ -53,7 +53,6 @@ export default function TaskEntityLinkDialog({entity, description, saveFn, close
     //
     const { refetch, ...entityDefinitionQueryResults } = useGetAllEntityDefinitionsQuery();
     useEffect(() => {
-        console.log(entityDefinitionQueryResults);
         handleQueryResultsWithWaitMessage(entityDefinitionQueryResults, dispatch,);
     }, [entityDefinitionQueryResults?.isFetching]);
     const entityDefinitions = entityDefinitionQueryResults?.data?.payload;

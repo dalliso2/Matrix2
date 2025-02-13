@@ -93,7 +93,7 @@ public class LinkChartServiceImpl implements LinkChartService
 		this.authService.verifyUserCanView(matrixCase.getId());
 		
 		StringBuilder sql = new StringBuilder("select id, name, description ")
-											.append(" from LINK_CHART ")
+											.append(" from link_chart ")
 											.append(" where matrix_case_id = ").append(caseId)
 											.append(" order by name ");
 		

@@ -57,6 +57,7 @@ export default function TimelineTabs()
 
     function onClickTab(index)
     {
+        console.log(index);
         if (index < 1)
             saveTimelineData();
 

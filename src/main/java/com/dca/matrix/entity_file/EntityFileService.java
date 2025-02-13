@@ -9,6 +9,6 @@ public interface EntityFileService
 {
 	EntityFile save(EntityFile entityFile);
 	Collection<EntityFile> save(Collection<EntityFile> entityFiles);
-	EntityFile remove(EntityFile entityFile);
+	EntityFile remove(Long entityFileId);
 	List<EntityFile> findForEntity(Long entityId);
 }

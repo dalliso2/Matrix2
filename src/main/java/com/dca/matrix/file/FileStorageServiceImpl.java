@@ -47,19 +47,19 @@ public class FileStorageServiceImpl implements InitializingBean, FileStorageServ
 	@Override
 	public void afterPropertiesSet() throws Exception
 	{		
-		log.debug("afterPropertiesSet()");
+		//log.debug("afterPropertiesSet()");
 		try
 		{
 			this.root = Path.of(uploadDirectory);
 			Files.createDirectories(this.root);
-			log.debug("afterPropertiesSet(): " + "successfully created directory " + this.root.toString());
+			////log.debug("afterPropertiesSet(): " + "successfully created directory " + this.root.toString());
 		}
 		catch (IOException ex)
 		{
 			log.error("afterPropertiesSet(): ERROR CREATING DIRECTORY " + root.toString());
 			log.error(ex.getMessage(), ex);
 		}
-		log.debug("afterPropertiesSet(): end");
+		//log.debug("afterPropertiesSet(): end");
 	}
 	
 
@@ -127,13 +127,13 @@ public class FileStorageServiceImpl implements InitializingBean, FileStorageServ
 	@Override
 	public Resource load(Long id)
 	{
-		log.debug("load(id): begin");
+		//log.debug("load(id): begin");
 
 		Resource fileResource = null;
 		
 		try
 		{
-			log.debug("load(id): attempting to load file data from database");
+			//log.debug("load(id): attempting to load file data from database");
 			MFile mFile = this.loadMFile(id);
 			
 			MatrixCase mCase = mFile.getMatrixCase();
@@ -141,7 +141,7 @@ public class FileStorageServiceImpl implements InitializingBean, FileStorageServ
 				this.authService.verifyUserCanView(mFile.getMatrixCase().getId());
 			
 			Path filePath = this.root.resolve(mFile.getServerFileName());
-			log.debug("load(id): file path is " + filePath.toString());
+			//log.debug("load(id): file path is " + filePath.toString());
 			fileResource = new UrlResource(filePath.toUri());
 			
 			if (!fileResource.exists())
@@ -158,7 +158,7 @@ public class FileStorageServiceImpl implements InitializingBean, FileStorageServ
 							+ fileResource.toString() + " cannot be read.");
 			}
 			
-			log.debug("load(id): file exists and is readable");
+			//log.debug("load(id): file exists and is readable");
 		}
 		catch (MalformedURLException ex)
 		{

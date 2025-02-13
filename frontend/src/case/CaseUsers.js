@@ -36,6 +36,11 @@ export default function CaseUsers({caseId})
     const currentUserCanModifyCase = userCanModifyCase(currentUser, caseId);
 
     const [addUsersDialogOpen, setAddUsersDialogOpen] = useState(false);
+    const [snackbarMessage, setSnackbarMessage] = useState(undefined); // {message, variant}
+
+    useEffect(()=> {
+        snackbarMessage && enqueueSnackbar(snackbarMessage.message, {variant:snackbarMessage.variant});
+    },[snackbarMessage]);
 
     const { refetch, ...caseUsersQueryResults } = useGetCaseUsersQuery(caseId);
     handleQueryResultsWithWaitMessage(caseUsersQueryResults, dispatch);
@@ -46,14 +51,14 @@ export default function CaseUsers({caseId})
 
     const [addUserToCase,addUserToCaseState] = useAddUserToCaseMutation();    
     handleMutationResults(addUserToCaseState, dispatch, 
-        ()=>enqueueSnackbar("Updated role of " + addUserToCaseState.originalArgs.username + " to " + addUserToCaseState.data.payload.caseRole, {variant:'success'}), 
-        ()=>enqueueSnackbar("Unable to update role of " + addUserToCaseState.originalArgs.username, {variant:'error'})
+        ()=>setSnackbarMessage({message:"Updated role of " + addUserToCaseState.originalArgs.username + " to " + addUserToCaseState.data.payload.caseRole, variant:'success'}),
+        ()=>setSnackbarMessage({message:"Unable to update role of " + addUserToCaseState.originalArgs.username, variant:'error'}),
     );
 
     const [removeUserFromCase,removeUserFromCaseState] = useRemoveUserFromCaseMutation();
     handleMutationResults(removeUserFromCaseState, dispatch,        
-        ()=>enqueueSnackbar("Removed user " + removeUserFromCaseState.originalArgs.username + " from case.", {variant:'success'}), 
-        ()=>enqueueSnackbar("Unable to remove user "+ removeUserFromCaseState.originalArgs.username + " from case.", {variant:'error'})
+        ()=>setSnackbarMessage({message:"Removed user " + removeUserFromCaseState.originalArgs.username + " from case.", variant:'success'}),
+        ()=>setSnackbarMessage({message:"Unable to remove user "+ removeUserFromCaseState.originalArgs.username + " from case.", variant:'error'}),
     );
 
     async function updateUserAccess(userId, caseId, roleId, username)
@@ -114,15 +119,19 @@ export default function CaseUsers({caseId})
             <Box sx={{display:'flex', flexDirection:'column', height:'100%', flexGrow:1}}>
                 <Box sx={{display:'flex', justifyContent:'space-between'}}>
                     <Tooltip title="Refresh Case Users">
+                        <span>
                         <IconButton disabled={caseUsersQueryResults.isFetching} onClick={() => refetch()}><RefreshIcon /></IconButton>
+                        </span>
                     </Tooltip>
                     <Box>Case Users</Box>
                     <Tooltip title="Add Users to Case">
+                        <span>
                         <IconButton disabled={caseUsersQueryResults.isFetching} 
                                     onClick={()=>setAddUsersDialogOpen(true)}
                                     sx={{visibility:currentUserCanModifyCase?'visible':'hidden'}}>
                             <PersonAddAltTwoToneIcon/>
                         </IconButton>
+                        </span>
                     </Tooltip>
                 </Box>
                 <Grid columnHeadings={['Username','Last Name','First Name','Picture','Role']} 

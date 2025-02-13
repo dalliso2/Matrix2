@@ -62,7 +62,7 @@ public class MFile extends EntityBase
 	// currently appends _id to the file name
 	public String getServerFileName()
 	{
-		log.debug("getServerFileName(): begin");
+		//log.debug("getServerFileName(): begin");
 		String serverFileName = null;
 		
 		if (this.originalName.indexOf(".") > 0)
@@ -73,8 +73,8 @@ public class MFile extends EntityBase
 		else
 			serverFileName = this.originalName + "_" + this.id;
 		
-		log.debug("getServerFileName(): returning " + serverFileName);
-		log.debug("getServerFileName(): end");
+//		log.debug("getServerFileName(): returning " + serverFileName);
+//		log.debug("getServerFileName(): end");
 		
 		return serverFileName;
 	}

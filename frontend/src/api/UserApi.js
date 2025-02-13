@@ -16,10 +16,7 @@ const userApi = api.enhanceEndpoints({addTagTypes:['User']}).injectEndpoints({
         }),   
         searchUsers: builder.query({
             query: (filter) => ({url:`/user/search/${filter}`}),
-            transformResponse: (response, meta, arg) => 
-            {
-                return response || [];
-            },
+            transformResponse: (response, meta, arg) => response || [],
             providesTags: (result, error, arg) => result?.payload?result.payload.map(user => ({type: 'User', id:user.id})):[],
             keepUnusedDataFor: 300,
             async onQueryStarted(filter, { dispatch, queryFulfilled, requestId }) {

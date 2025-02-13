@@ -28,7 +28,6 @@ const columnTypes = [TEXT,TEXT,TEXT,PROFILE_IMAGE, TEXT,TEXT,TEXT,TEXT,TEXT];
 
 export default function UserDataGrid({users, onClickUser}) 
 {
-    console.log("UserDataGrid: users=", users);
     const dispatch = useDispatch();
     const allAgencyQueryResults = useGetAllAgenciesQuery();
     const allAgencies = allAgencyQueryResults?.data?.payload;

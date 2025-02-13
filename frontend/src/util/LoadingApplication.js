@@ -1,59 +1,59 @@
-//  CenteredCircularProgress
-//
-//  This component covers the screen with to prevent user input, fades in a black
-//  background with partial opacity and a circular spinner with a message.  It
-//  is displayed/removed through the application state in MatrixAppSlice
-//
-import React from "react";
-import Box from "@mui/material/Box";
-import CircularProgress from "@mui/material/CircularProgress";
-import './LoadingApplication.css';
-import { createTheme } from "@mui/material/styles";
-import { useGetCurrentUserQuery } from "../api/UserApi";
-import { useEffect } from "react";
-import { handleQueryResultsWithWaitMessage } from "../api/ApiUtils";
-import { useDispatch } from "react-redux";
-import { useNavigate } from 'react-router-dom';
+// //  CenteredCircularProgress
+// //
+// //  This component covers the screen with to prevent user input, fades in a black
+// //  background with partial opacity and a circular spinner with a message.  It
+// //  is displayed/removed through the application state in MatrixAppSlice
+// //
+// import React from "react";
+// import Box from "@mui/material/Box";
+// import CircularProgress from "@mui/material/CircularProgress";
+// import './LoadingApplication.css';
+// import { createTheme } from "@mui/material/styles";
+// import { useGetCurrentUserQuery } from "../api/UserApi";
+// import { useEffect } from "react";
+// import { handleQueryResultsWithWaitMessage } from "../api/ApiUtils";
+// import { useDispatch } from "react-redux";
+// import { useNavigate } from 'react-router-dom';
 
-function LoadingApplication()
-{
-    const theme = createTheme({ palette: { mode: "dark" } });
-    const navigate = useNavigate();
-    const dispatch = useDispatch();
+// function LoadingApplication()
+// {
+//     const theme = createTheme({ palette: { mode: "dark" } });
+//     const navigate = useNavigate();
+//     const dispatch = useDispatch();
 
-    const getCurrentUserQueryResults = useGetCurrentUserQuery();
+//     const getCurrentUserQueryResults = useGetCurrentUserQuery();
 
-    useEffect(() => {
-        handleQueryResultsWithWaitMessage(getCurrentUserQueryResults, dispatch);
-    }, [getCurrentUserQueryResults.isFetching]);
+//     useEffect(() => {
+//         handleQueryResultsWithWaitMessage(getCurrentUserQueryResults, dispatch);
+//     }, [getCurrentUserQueryResults.isFetching]);
 
-    useEffect(() => {
-        if (!getCurrentUserQueryResults.isFetching) 
-        {
-            navigate("/");
-        }
-    }, [getCurrentUserQueryStatus.isFetching]);
+//     useEffect(() => {
+//         if (!getCurrentUserQueryResults.isFetching) 
+//         {
+//             navigate("/");
+//         }
+//     }, [getCurrentUserQueryStatus.isFetching]);
 
-    return ( 
-        <React.Fragment>
-            {
-                theme && 
-                <Box className="FullScreenCover">
-                    <Box className=''> 
-                        <Box className="FadeInBackground" />
-                            <Box className="FadeInProgress">    
-                                    <CircularProgress size={100}/>
-                                    <Box sx={{ padding: '20px', color: theme.palette.common.white }}>
-                                        Loading application
-                                    </Box> 
-                            </Box>
-                    </Box>
-                </Box>
-            }
-        </React.Fragment>
-        ) 
-};
+//     return ( 
+//         <React.Fragment>
+//             {
+//                 theme && 
+//                 <Box className="FullScreenCover">
+//                     <Box className=''> 
+//                         <Box className="FadeInBackground" />
+//                             <Box className="FadeInProgress">    
+//                                     <CircularProgress size={100}/>
+//                                     <Box sx={{ padding: '20px', color: theme.palette.common.white }}>
+//                                         Loading application
+//                                     </Box> 
+//                             </Box>
+//                     </Box>
+//                 </Box>
+//             }
+//         </React.Fragment>
+//         ) 
+// };
 
-export default LoadingApplication;
+// export default LoadingApplication;
 
  

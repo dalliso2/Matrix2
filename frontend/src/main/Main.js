@@ -99,7 +99,9 @@ export default function Main()
 
     React.useEffect(() => {
         if (!currentUser)
+        {
             navigate('/login');
+        }
     }, [currentUser]);
 
     // local state
@@ -112,7 +114,7 @@ export default function Main()
         //if (currentUser.isAdmin)
         if (currentUser)
             links = [
-                { link: 'home', label: 'Home', icon: <HomeTwoToneIcon /> },
+//                { link: 'home', label: 'Home', icon: <HomeTwoToneIcon /> },
                 { link: 'cases', label: 'Cases', icon: <FolderCopyIcon /> },
                 { link: 'entities', label: 'Entities', icon: <GroupsTwoToneIcon /> },
                 { link: 'tasks', label: 'Tasks', icon: <ChecklistRtlTwoToneIcon /> },

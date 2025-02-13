@@ -1,3 +1,20 @@
+/*!
+Embeddable Minimum Strictly-Compliant Promises/A+ 1.1.1 Thenable
+Copyright (c) 2013-2014 Ralf S. Engelschall (http://engelschall.com)
+Licensed under The MIT License (http://opensource.org/licenses/MIT)
+*/
+
+/*! Bezier curve function generator. Copyright Gaetan Renaudeau. MIT License: http://en.wikipedia.org/wiki/MIT_License */
+
+/*! Hammer.JS - v2.0.17-rc - 2019-12-16
+ * http://naver.github.io/egjs
+ *
+ * Forked By Naver egjs
+ * Copyright (c) hammerjs
+ * Licensed under the MIT license */
+
+/*! Runge-Kutta spring physics function generator. Adapted from Framer.js, copyright Koen Bok. MIT License: http://en.wikipedia.org/wiki/MIT_License */
+
 /*! regenerator-runtime -- Copyright (c) 2014-present, Facebook, Inc. -- license (MIT): https://github.com/facebook/regenerator/blob/main/LICENSE */
 
 /**
@@ -110,3 +127,9 @@
  * This source code is licensed under the MIT license found in the
  * LICENSE file in the root directory of this source tree.
  */
+
+//! moment.js
+
+//! moment.js locale configuration
+
+//!timelineRef.current)

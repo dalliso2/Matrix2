@@ -87,14 +87,14 @@ export default function AddEditTaskDialog({successFn, closeFn, taskDataProps})
     const fields = useMemo(() =>
      [  
         {   name: 'id', value: undefined },
-        {   name: 'title',label: 'Title', type: TEXT, required: true, value:'', onChange: (event) => change(event) },
-        {   name: 'description', label: 'Description', type: MULTILINE_TEXT, rows:4, value:'',  required: true, onChange: (event) => change(event) },
-        {   name: 'assignedTo', label: 'Assigned To', type: SELECT, required: false, value: '', onChange: (event) => change(event) },
+        {   name: 'title',label: 'Title', type: TEXT, required: true, value:'', maxLength: 128, onChange: (event) => change(event) },
+        {   name: 'description', label: 'Description', type: MULTILINE_TEXT, maxLength: 4092, rows:11, value:'',  required: true, onChange: (event) => change(event) },
+        {   name: 'assignedTo', label: 'Assigned To', type: SELECT, required: false, value: -1, onChange: (event) => change(event) },
         {   name: 'assignedDateTime', label: 'Assigned Date/Time', type: DATE_TIME, value:'', required: false, onChange: (value) => setTask(old=>({...old, assignedDateTime: value})) },
         {   name: 'dueDateTime', label: 'Due Date/Time', type: DATE_TIME, value:'', required: false, onChange: (value) => setTask(old=>({...old, dueDateTime: value})) },
         {   name: 'status', label: 'Status', type: SELECT, selectData: TaskStatus.map((status,index)=>{return {id:status, name:status.replaceAll('_',' ')}}), required: false, onChange: (event) => change(event) },
-        {   name: 'completedDateTime', label: 'Completed Date/Time', type: DATE_TIME, value:'', required: false, onChange: (value) => setTask(old=>({...old, completedDateTime: value})) },
-        {   name: 'coverageDescription', label: 'Results', type: MULTILINE_TEXT, rows:4, value:'',  required: false, onChange: (event) => change(event) },
+        {   name: 'completedDateTime', label: 'Completed Date/Time', type: DATE_TIME, value:undefined, required: false, onChange: (value) => setTask(old=>({...old, completedDateTime: value})) },
+        {   name: 'coverageDescription', label: 'Results', type: MULTILINE_TEXT, maxLength: 4092, rows:4, value:'',  required: false, onChange: (event) => change(event) },
     ],[]);
 
     async function save()
@@ -114,17 +114,38 @@ export default function AddEditTaskDialog({successFn, closeFn, taskDataProps})
         fields.find(field=>field.name==="assignedTo").selectData = [{id:-1, name:'Unassigned'}].concat(currentCaseUsers.map(user=>{return {id:user.userId,name:user.firstName + ", " + user.lastName}}));
     
     if (task && task.assignedTo === -1)
-        fields.find(field=>field.name === "assignedDateTime").disabled = true;
+    {
+        const assignedDateTimeField = fields.find(field=>field.name === "assignedDateTime");
+        if (assignedDateTimeField)
+        {
+            assignedDateTimeField.disabled = true;
+            assignedDateTimeField.value = '';
+        }
+    }
     else
         fields.find(field=>field.name === "assignedDateTime").disabled = false;
 
     if (task && (task.status === "COMPLETED" || task.status === "CLOSED"))
         fields.find(field=>field.name === "completedDateTime").disabled = false;
     else
-        fields.find(field=>field.name === "completedDateTime").disabled = true;
+    {
+        const completedDateTimeField = fields.find(field=>field.name === "completedDateTime");
+        if (completedDateTimeField)
+        {
+            completedDateTimeField.disabled = true;
+            completedDateTimeField.value = '';
+        }
+    }
 
     //Object.keys(task).forEach(key=>fields.find(field=>field.name === key).value = task[key]);
-    task && fields.forEach(field=>field.value = task[field.name]);
+    if (task)
+    {
+        fields.forEach(field=>{
+            field.value = task[field.name];
+            if (field.name === 'assignedTo' && !task[field.name])
+                field.value = -1;
+        });
+    }
 
     return (
         <Dialog open={true} maxWidth="md" fullWidth={true} onClose={()=>alert("close")}>
@@ -132,7 +153,7 @@ export default function AddEditTaskDialog({successFn, closeFn, taskDataProps})
             <DialogContent sx={{}}> 
                 <Box sx={{display:'flex',flexDirection:'column',mt:2}}>
                     <Box sx={{display:'flex', gap:'30px'}}>
-                        <Box sx={{width:'50%'}}>
+                        <Box sx={{width:'50%', display:'flex', flexDirection:'column'}}>
                         {
                             task && fields.slice(1,3).map((field,index) => getInputComponent(field, index))
                         }

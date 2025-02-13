@@ -2,7 +2,6 @@ import React from 'react';
 import { createBrowserRouter } from 'react-router-dom';
 import { Navigate } from 'react-router-dom';
 import Main from '../main/Main';
-import Home from '../home/Home';
 import SysAdminTabs from '../sys_admin/SysAdminTabs';
 import AgencyManagement from '../sys_admin/agency_management/AgencyManagement';
 import UserManagement from '../sys_admin/user_management/UserManagement';
@@ -24,7 +23,7 @@ const router = createBrowserRouter([
         element: <Main />,
         children: [
             { path: "login", element: <Login/> },
-            { path: "home", element: <Home/> },
+//            { path: "home", element: <Home/> },
             { path: "cases", element: <CaseTabs/> },
             { path: "entities", element: <EntityTabs/> },
             { path: "tasks", element: <TaskTabs/> },    

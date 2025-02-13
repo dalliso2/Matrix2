@@ -39,13 +39,13 @@ public class Task extends EntityBase
 	@Column(name = "case_task_id")
 	private Long caseTaskId;
 	
-	@Column(name = TITLE)
+	@Column(name = TITLE, columnDefinition="VARCHAR(128)")
 	private String title;
 	
-	@Column(name = DESCRIPTION, columnDefinition="VARCHAR(2048)")
+	@Column(name = DESCRIPTION, columnDefinition="VARCHAR(4092)")
 	private String description;
 	
-	@Column(name = COVERAGE_DESCRIPTION, columnDefinition="VARCHAR(2048)")
+	@Column(name = COVERAGE_DESCRIPTION, columnDefinition="VARCHAR(4092)")
 	private String coverageDescription;
 	
 	@ManyToOne(fetch = FetchType.LAZY)

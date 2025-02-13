@@ -18,7 +18,9 @@ import {
     DATE_RANGE,
     DATE_TIME,
     DATE_TIME_RANGE, SELECT,
-    SELECT_MULTIPLE
+    SELECT_MULTIPLE,
+    LAT_LONG,
+    ADDRESS_US
 } from './PropertyType';
 import { getDateString, getDateTimeString } from './utils';
 //import './Entity.css';
@@ -35,7 +37,6 @@ export const tableCellBoldStyle ={...tableCellStyle, fontWeight:'bold'};
 
 export function getFieldDisplay(propertyDefinition, prop, index)
 {
-    console.log("getFieldDisplay: ", propertyDefinition, prop, index);
     let component = undefined;
     
     if (prop)
@@ -58,21 +59,21 @@ export function getFieldDisplay(propertyDefinition, prop, index)
                 component = (
                     <Box key={index} id="profile_image_container">
                         {
-                            prop?.values?.length && prop.values[0]?
-                            (
-                                <Image key={propertyDefinition.id} className={"label-profile-image"} id={prop.values[0]} />
-                            ):
-                            (
-                                <Box className="entity-profile-image-empty">
-                                    <Box className="">No Photo Uploaded</Box>
-                                </Box>
-                            )
+                            // prop?.values?.length && prop.values[0]?
+                            // (
+                            //     <Image key={propertyDefinition.id} className={"label-profile-image"} id={prop.values[0]} />
+                            // ):
+                            // (
+                            //     <Box className="entity-profile-image-empty">
+                            //         <Box className="">No Photo Uploaded</Box>
+                            //     </Box>
+                            // )
+                            <Image key={propertyDefinition.id} className={"label-profile-image"} id={prop.values[0]} />
                         }
                     </Box>
                 );
                 break;
             case MULTILINE_TEXT:
-                console.log("MULTILINE_TEXT: ", prop?.values[0]);
                 component = 
                     (<TableRow key={propertyDefinition.id}>
                         <TableCell  sx={{...tableCellBoldStyle, verticalAlign:'top'}}>{propertyDefinition.name}:</TableCell>
@@ -88,9 +89,10 @@ export function getFieldDisplay(propertyDefinition, prop, index)
                 component = (
                     <div key={propertyDefinition.id} style={{display:'flex', flexDirection:'column', alignItems:'center'}}>
                     {
-                        (prop.values && prop.values.length)?
+                        // (prop.values && prop.values.length)?
+                        // prop.values.map((value,index2) => (<Image key={index + index2} className={"entity-array-image"} id={value} />))
+                        // :(<Box className="entity-array-image-empty"><div>No Photo Uploaded</div></Box>)
                         prop.values.map((value,index2) => (<Image key={index + index2} className={"entity-array-image"} id={value} />))
-                        :(<Box className="entity-array-image-empty"><div>No Photo Uploaded</div></Box>)
                     }
                     </div>
                 )
@@ -132,10 +134,46 @@ export function getFieldDisplay(propertyDefinition, prop, index)
                         </TableCell>
                     </TableRow>);
                 break;
+            case LAT_LONG:
+                component = 
+                    (<TableRow key={propertyDefinition.id}>
+                        <TableCell sx={tableCellBoldStyle}>{propertyDefinition.name}:</TableCell>
+                        <TableCell sx={tableCellStyle}>
+                            <Box>
+                                LAT_LONG
+                            </Box>
+                        </TableCell>
+                    </TableRow>);
+                break;
+            case ADDRESS_US:
+                component = 
+                    (<TableRow key={propertyDefinition.id}>
+                        <TableCell sx={tableCellBoldStyle}>{propertyDefinition.name}:</TableCell>
+                        <TableCell sx={tableCellStyle}>
+                            <Box>
+                                ADDRESS_US
+                            </Box>
+                        </TableCell>
+                    </TableRow>);
+                break;
         }
     else
-        component = (<TableRow key={propertyDefinition.id}><TableCell sx={tableCellBoldStyle} >{propertyDefinition.name}:</TableCell><TableCell sx={tableCellStyle}>&nbsp;</TableCell></TableRow>);
-
+        switch(propertyDefinition.type)
+        {
+            case PROFILE_IMAGE:
+                component = (   <Box className="entity-profile-image-empty">
+                                    <Box>No Photo Uploaded</Box>
+                                </Box> );
+                break;
+            case IMAGE_ARRAY:
+                component = (   <Box className="entity-array-image-empty">
+                                    <Box>No Photos <br/>Uploaded</Box>
+                                </Box> );
+                break;
+            default:
+                component = (<TableRow key={propertyDefinition.id}><TableCell sx={tableCellBoldStyle} >{propertyDefinition.name}:</TableCell><TableCell sx={tableCellStyle}>&nbsp;</TableCell></TableRow>);
+                break;
+        }
     return component;
 }
 
@@ -144,7 +182,7 @@ export function getFieldDisplay(propertyDefinition, prop, index)
  * @param {*} type - type of data, listed in PropertyType.js
  * @param {*} values - array containing values to display.  Some types require two values, such
  *                      as a DATE_RANGE
- * @returns 
+ * @returns React component
  */
 export function getListComponent(type, values)
 {
@@ -198,11 +236,17 @@ export function getListComponent(type, values)
                     );      
                 break;
             case SELECT_MULTIPLE:
-                    returnVal = (<Box key={type}>{values.join(', ')}</Box>);   
-                    break;
+                returnVal = (<Box key={type}>{values.join(', ')}</Box>);   
+                break;
+            case LAT_LONG:
+                returnVal = (<Box key={type}>LAT_LONG</Box>);
+                break;
+            case ADDRESS_US:
+                returnVal = (<Box key={type}>ADDRESS_US</Box>);
+                break;            
             default:
-                    returnVal =  (<Box key={type}>{values[0]}</Box>);
-                    break;    
+                returnVal =  (<Box key={type}>{values[0]}</Box>);
+                break;    
         }
     }   
     return returnVal;

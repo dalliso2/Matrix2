@@ -26,7 +26,6 @@ export default function AddEditLinkChartDialog({linkChartObj, closeFn})
     const dispatch = useDispatch();
     
     const [linkChartData, setLinkChartData] = useState({id:linkChartObj.id, matrixCase:linkChartObj.matrixCase, name:linkChartObj.name, description:linkChartObj.description});
-    console.log(linkChartData);
     const [updateLinkChart, mutationState] = useUpdateLinkChartNameDescriptionMutation();
     handleMutationResults(mutationState, 
                             dispatch, 

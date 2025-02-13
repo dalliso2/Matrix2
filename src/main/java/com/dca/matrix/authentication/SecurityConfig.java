@@ -58,14 +58,8 @@ public class SecurityConfig
                                UserDetailsService userDetailsService,
                                JWTTokenService tokenService) throws Exception
     {
-		// allow frames for h2 console
-		http.headers(h -> h.frameOptions(f -> f.sameOrigin()));
-		
-		http.authorizeHttpRequests(auth->auth.requestMatchers(antMatcher("/h2-console/**"))
-		.permitAll());
-
     	http.cors(Customizer.withDefaults()).csrf(csrf->csrf.disable())
-    									.authorizeHttpRequests(auth->auth.requestMatchers("/","/api/login","/api/file/**").permitAll()
+    									.authorizeHttpRequests(auth->auth.requestMatchers("/*","/api/login","/api/file/**").permitAll()
     									.anyRequest().authenticated())
     									.authenticationProvider(new JWTAuthenticationProvider(userDetailsService, tokenService))
     									.exceptionHandling(exh -> exh.authenticationEntryPoint(

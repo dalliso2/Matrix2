@@ -24,6 +24,7 @@ export const defaultProp = {
 
 export default function PropertyList({properties, setProperties})
 {
+    console.log(properties);
     const [editProperty, setEditProperty] = useState(undefined);
 
     const handleDragEnd = (results) => 
@@ -32,12 +33,11 @@ export default function PropertyList({properties, setProperties})
             return;
         
         const newPropList = [...properties];    
-
+        
         const [movedItem] = newPropList.splice(results.source.index,1);
         newPropList.splice(results.destination.index, 0, movedItem);
-
-        let order = 0;
-        setProperties(newPropList.map((prop) => ({...prop, propOrder:order++})));
+        
+        setProperties(newPropList);
     };
 
     function saveProperty(property)

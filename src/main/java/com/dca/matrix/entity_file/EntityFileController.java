@@ -18,6 +18,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.dca.matrix.api.ApiResponse;
 import com.dca.matrix.api.ApiResponseUtil;
+import com.dca.matrix.message.LongIdMessage;
 
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
@@ -39,9 +40,9 @@ public class EntityFileController
 	}
 
 	@DeleteMapping(path = "/remove")
-	public ResponseEntity<ApiResponse<EntityFile>> remove(@RequestBody EntityFile entityFile, HttpServletRequest request)
+	public ResponseEntity<ApiResponse<EntityFile>> remove(@RequestBody LongIdMessage entityFileIdMessage, HttpServletRequest request)
 	{	
-		return	new ResponseEntity<>(ApiResponseUtil.success(this.entityFileService.remove(entityFile), 
+		return	new ResponseEntity<>(ApiResponseUtil.success(this.entityFileService.remove(entityFileIdMessage.id()), 
 				"Successfully removed entity file(s).", 
 				request), HttpStatus.OK);
 	}

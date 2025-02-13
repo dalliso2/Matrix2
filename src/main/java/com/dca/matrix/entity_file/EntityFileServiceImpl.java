@@ -53,8 +53,11 @@ public class EntityFileServiceImpl implements EntityFileService
 
 	@Override
 	@Transactional
-	public EntityFile remove(EntityFile entityFile)
+	public EntityFile remove(Long entityFileId)
 	{
+		EntityFile entityFile = this.entityFileRepository.findById(entityFileId).orElseThrow(()->
+				new MatrixValidationException("EntityFile with id " + entityFileId + " does not exist.",
+						null, ApiErrorCode.ENTITY_DOES_NOT_EXIST));
 		this.authService.verifyUserCanModify(entityFile.getMatrixEntity().getMatrixCase().getId());
 		EntityFile ef = this.entityFileRepository.findById(entityFile.getId()).orElseThrow(()->
 				new MatrixValidationException("Entity file with id " + entityFile.getId() + " does not exist.",

@@ -17,8 +17,8 @@ export default function Login()
 {   
     const dispatch = useDispatch();
     const navigate = useNavigate();
-    const [username, setUsername] = React.useState('admin');
-    const [password, setPassword] = React.useState('password');
+    const [username, setUsername] = React.useState(undefined);
+    const [password, setPassword] = React.useState(undefined);
     const [error, setError] = React.useState(undefined);
 
     // useEffect below will navigate to the home page when authToken is set
@@ -54,7 +54,8 @@ export default function Login()
 
     useEffect(() => {
         if (authToken) 
-            navigate('/home');
+            navigate('/cases');
+            //navigate('/home');
     }, [authToken]);
 
     return (

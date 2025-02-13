@@ -1,6 +1,5 @@
 import { api } from './BaseApi';
 import { onQueryStartedHandler } from './ApiUtils';
-import { current } from '@reduxjs/toolkit';
 
 const LinkChartApi = api.injectEndpoints({
     entityTypes: ['linkChart'],
@@ -22,7 +21,6 @@ const LinkChartApi = api.injectEndpoints({
             },
             async onQueryStarted(data, { dispatch, queryFulfilled, requestId }) {
                 const patchLinkChartCache = dispatch(api.util.updateQueryData('getLinkChart', data.id, (draft) => {
-                    console.log(current(draft));
                     draft.payload.name = data.name;
                     draft.payload.description = data.description;
                 }));

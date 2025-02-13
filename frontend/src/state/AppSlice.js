@@ -85,6 +85,14 @@ const appSlice = createSlice({
                 //state.darkTheme = action.payload.darkTheme;
             },
         },
+        updateCurrentUserCaseAuthority:
+        {
+            reducer(state,action)
+            {
+                // payload should be an array of strings of the form CASE_X_ADMIN/CASE_X_EDIT/CASE_X_REVIEW
+                state.currentUser.authorities.push(...action.payload)
+            }
+        },
         setSystemInErrorState:
         {
             reducer(state, action)
@@ -161,7 +169,7 @@ const appSlice = createSlice({
             // payload is the case id
             reducer(state, action)
             {
-                const caseDataIndex = state.caseTabData.findIndex(tabData => tabData.id === action.payload.id);
+                const caseDataIndex = state.caseTabData.findIndex(tabData => tabData.id === action.payload);
                 if (caseDataIndex < 0)
                 {
                     state.caseTabData.push(action.payload);

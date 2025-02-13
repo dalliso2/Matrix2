@@ -31,13 +31,16 @@ export default function AddEditCaseDialog({caseObj, closeFn})
 
     const [storeCase, mutationState] = useStoreCaseMutation();
     handleMutationResults(mutationState, dispatch,
-            ()=> setSuccessMsg("Case " + mutationState.data.payload.caseNumber + " saved."));
+            ()=> {
+                setCaseData(()=>mutationState.data.payload);
+                setSuccessMsg(()=>"Case " + mutationState.data.payload.caseNumber + " saved.");
+            });
 
     useEffect(() => {
         if (successMsg)
         {
             enqueueSnackbar(successMsg , {variant:'success'});
-            closeFn();
+            closeFn(caseData);
         }
     }, [successMsg]);
 
@@ -71,7 +74,7 @@ export default function AddEditCaseDialog({caseObj, closeFn})
         </DialogContent>
         <DialogActions> 
             <Button onClick={onSave}>Save</Button>
-            <Button onClick={closeFn}>Cancel</Button>
+            <Button onClick={()=>closeFn(undefined)}>Cancel</Button>
         </DialogActions>
         </Dialog>
         </>

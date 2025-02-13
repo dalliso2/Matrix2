@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { TEXT, MULTILINE_TEXT, DATE, SELECT, SWITCH, DATE_RANGE, DATE_TIME, DATE_TIME_RANGE, typeDescriptionsObjectArray, SELECT_MULTIPLE, PROFILE_IMAGE } from '../../util/PropertyType';
+import { TEXT, MULTILINE_TEXT, DATE, SELECT, SWITCH, DATE_RANGE, DATE_TIME, DATE_TIME_RANGE, typeDescriptionsObjectArray, SELECT_MULTIPLE, PROFILE_IMAGE, ADDRESS_US, LAT_LONG } from '../../util/PropertyType';
 import { getInputComponent } from '../../util/InputComponentFactory';
 import { Dialog, DialogTitle, DialogContent, DialogActions, Button, Box } from '@mui/material';
 import { useTheme } from '@emotion/react';
@@ -86,6 +86,14 @@ const includeInTimeline =
     value: false
 };
 
+const includeOnMap = 
+{ 
+    name: 'includeOnMap', 
+    label: 'Include On Map', 
+    type: SWITCH, 
+    value: false
+};
+
 const fields = 
 [
     {   
@@ -114,6 +122,7 @@ const fields =
     includeInList,   
     includeInTitle,
     includeInTimeline,
+    includeOnMap,
     numLinesProp,
     maxLengthProp,
     maskProp,
@@ -154,6 +163,8 @@ export default function PropertyDialog({property, savePropertyFn, closeFn})
         optionsProp.required = false;
         includeInTimeline.disabled = true;
         includeInTimeline.required = false;
+        includeOnMap.disabled = true;
+        includeOnMap.required = false;
 
         switch (type)
         {
@@ -187,6 +198,10 @@ export default function PropertyDialog({property, savePropertyFn, closeFn})
                 includeInList.disabled = false;
                 includeInTimeline.disabled = false;
                 break; 
+            case ADDRESS_US:
+            case LAT_LONG:
+                includeOnMap.disabled = false;
+                includeOnMap.required = true;
         }
     }
     
@@ -254,16 +269,17 @@ export default function PropertyDialog({property, savePropertyFn, closeFn})
                     <Box sx={{ display:'flex', gap:2, flexDirection:'row', paddingTop:"20px"}}>
                         <Box sx={{flexGrow: 1, display:'flex', flexDirection:'column', justifyContent:'space-between'}}>
                             <Box>{getInputComponent(fields[2])}</Box>
-                            <Box>{getInputComponent(fields[7])}</Box>
                             <Box>{getInputComponent(fields[8])}</Box>
                             <Box>{getInputComponent(fields[9])}</Box>
+                            <Box>{getInputComponent(fields[10])}</Box>
                         </Box>
                         <Box sx={{flexGrow: 1}}>
                             <Box sx={{width:'100%'}}>{getInputComponent(fields[3])}</Box>
                             <Box sx={{width:'100%'}}>{getInputComponent(fields[4])}</Box>
                             <Box sx={{width:'100%'}}>{getInputComponent(fields[5])}</Box> 
-                            <Box sx={{width:'100%'}}>{getInputComponent(fields[6])}</Box>    
-                            <Box sx={{ flexGrow:1}}>{getInputComponent(fields[10])}</Box>
+                            <Box sx={{width:'100%'}}>{getInputComponent(fields[6])}</Box> 
+                            <Box sx={{width:'100%'}}>{getInputComponent(fields[7])}</Box>    
+                            <Box sx={{ flexGrow:1}}>{getInputComponent(fields[11])}</Box>
                         </Box>
                     </Box>
                 </Box>

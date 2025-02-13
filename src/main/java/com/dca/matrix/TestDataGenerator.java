@@ -11,10 +11,13 @@ import java.time.format.DateTimeFormatter;
 import java.time.temporal.TemporalUnit;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Optional;
+import java.util.Random;
+import java.util.Set;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.CommandLineRunner;
@@ -50,10 +53,13 @@ import com.dca.matrix.user.MatrixUserService;
 import com.dca.matrix.user_case_role.CaseRoleEnum;
 import com.dca.matrix.user_case_role.UserCaseRole;
 import com.dca.matrix.user_case_role.UserCaseRoleRepository;
+import com.dca.matrix.user_case_role.UserCaseRoleService;
 
 import jakarta.transaction.Transactional;
+import lombok.extern.slf4j.Slf4j;
 
 @Configuration
+@Slf4j
 public class TestDataGenerator
 {
 	@Value("${test.data.agency.filePath}")
@@ -79,13 +85,13 @@ public class TestDataGenerator
 			MatrixUserRepository userRepository, MatrixCaseRepository caseRepository,
 			EntityDefinitionRepository edRepository, PropertyDefinitionRepository pdRepository,
 			UserCaseRoleRepository ucrRepository, MatrixEntityRepository meRepository,
-			EntityRelationshipRepository erRepository, MatrixEntityService meService,
+			EntityRelationshipRepository erRepository, MatrixEntityService meService, MatrixCaseService caseService,
 			FileStorageService fileStorageService)
 	{
 		return args -> {
 			int caseCount = 100;
-			int userCount = 500;
-			int maxUsersPerCase = 40;
+			int userCount = 100;
+			int maxUsersPerCase = 20;
 			int eventsPerCase = 30;
 
 			ArrayList<Agency> agencies = new ArrayList<>();
@@ -142,6 +148,7 @@ public class TestDataGenerator
 					}
 					catch (Exception ex)
 					{
+						ex.printStackTrace();
 						// catch errors where username may be duplicated due to randomly generated test
 						// data
 					}
@@ -150,6 +157,7 @@ public class TestDataGenerator
 
 			// create cases
 
+			log.debug("About to create cases");
 			ArrayList<MatrixCase> caseList = new ArrayList<>();
 			// create cases
 			for (int c = 0; c < caseCount; c++)
@@ -159,14 +167,30 @@ public class TestDataGenerator
 				mcase.setDescription(li.substring(0, (int) (Math.random() * li.length())));
 				mcase.setTitle("Crime " + c + ";" + "\nVictim" + c + ";\nCity,State");
 				// set case admin
-				
-				for (int cu = 0;cu < (int)(Math.random() * maxUsersPerCase);cu ++)
-				{
-				
-				}
+				log.debug("creating case: " + mcase);
+//				for (int cu = 0;cu < (int)(Math.random() * maxUsersPerCase);cu ++)
+//				{
+//				
+//				}
 				caseList.add(caseRepository.save(mcase));
 			}
 
+			log.debug("About to assign users to cases");
+
+			caseList.forEach(mCase->{
+				Random r = new Random();
+				int caseUsers = (int)(Math.random() * maxUsersPerCase) + 1;
+				final Set<MatrixUser> userSet = new HashSet<>();
+				while (caseUsers-- > 0)
+				{
+					MatrixUser user = users.get(r.nextInt(users.size()));
+					if (!userSet.contains(user))
+						userSet.add(user);
+				}
+				userSet.forEach(u->ucrRepository.save(new UserCaseRole(u, mCase, CaseRoleEnum.values()[r.nextInt(3)])));
+			});
+			
+			
 //			// create entity definitions
 
 			EntityDefinition person = new EntityDefinition();

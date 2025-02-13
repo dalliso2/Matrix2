@@ -21,7 +21,8 @@ import {
     DATE_TIME_RANGE,
     CHECKBOX,
     SELECT,
-    SELECT_MULTIPLE
+    SELECT_MULTIPLE,
+    ADDRESS_US
 } from '../util/PropertyType';
 import dayjs from 'dayjs';
 import { Button, DialogActions } from "@mui/material";
@@ -83,6 +84,9 @@ function getFields(entityDefinition)
                 newField.value = [];
                 newField.selectData = propDef.options.split("\n").map(prop => ({id:prop,name:prop}));
                 break;
+            case ADDRESS_US: 
+                newField.value = new Array(5).fill('');
+                break;
         }
         
         return newField;
@@ -92,6 +96,7 @@ function getFields(entityDefinition)
 function setValue(setEntityProps, entityId, propDefId, valOrder, value)
 {
     setEntityProps(prevData => {
+        console.log(prevData);
         const newData = JSON.parse(JSON.stringify(prevData));
         const prop = newData.find((element) => element.propertyDefinition === propDefId && element.valOrder === valOrder);
         if (prop)
@@ -123,10 +128,11 @@ export default function AddEditEntityDialog({entity, entityDefinitions, closeFn,
                             ()=>{ enqueueSnackbar( (entity?.id?"Updated ":"Created ") + " entity " + getTitle(entityDefinitions,entityMutationState.data), {variant:'success'}); closeFn();});
 
     fields?.forEach(field => {
-        if (field.type === IMAGE_ARRAY || field.type === SELECT_MULTIPLE)
+        if (field.type === IMAGE_ARRAY || field.type === SELECT_MULTIPLE || field.type === ADDRESS_US)
             field.value = [];
     });
 
+    console.log(entityProps);
     // set the field values from the entity object
     entityProps && entityProps.forEach(element => {
         const field = fields.find(e=>e.propDefId===element.propertyDefinition);
@@ -144,6 +150,9 @@ export default function AddEditEntityDialog({entity, entityDefinitions, closeFn,
                     break;
                 case IMAGE_ARRAY:
                 case SELECT_MULTIPLE:
+                    field.value[element.valOrder] = element.value;
+                    break;
+                case ADDRESS_US:
                     field.value[element.valOrder] = element.value;
                     break;
                 default:
@@ -169,8 +178,8 @@ export default function AddEditEntityDialog({entity, entityDefinitions, closeFn,
             case DATE_RANGE:
             case DATE_TIME_RANGE:
                 // val is a dayjs object
-                field.onChangeStartDate = (val) => setValue(setEntityProps, field.id, field.propDefId, 0, val.format());
-                field.onChangeEndDate = (val) => setValue(setEntityProps, field.id, field.propDefId, 1, val.format());
+                field.onChangeStartDate = (val) => setValue(setEntityProps, field.id, field.propDefId, 0, val?.format());
+                field.onChangeEndDate = (val) => setValue(setEntityProps, field.id, field.propDefId, 1, val?.format());
                 break;
             case PROFILE_IMAGE:
                 field.caseId = activeCase.id;
@@ -201,8 +210,15 @@ export default function AddEditEntityDialog({entity, entityDefinitions, closeFn,
                     });
                 }
                 break;
+            case ADDRESS_US:
+                field.onChangeStreet1 = (event) => setValue(setEntityProps, field.id, field.propDefId, 0, event.target.value);
+                field.onChangeStreet2 = (event) => setValue(setEntityProps, field.id, field.propDefId, 1, event.target.value);
+                field.onChangeCity = (event) => setValue(setEntityProps, field.id, field.propDefId, 2, event.target.value);
+                field.onChangeState = (event) => setValue(setEntityProps, field.id, field.propDefId, 3, event.target.value);
+                field.onChangeZip = (event) => setValue(setEntityProps, field.id, field.propDefId, 4, event.target.value);
+                break;
             default:
-                field.onChange = (val) => setValue(setEntityProps, field.propDefId, 0, val);
+                field.onChange = (val) => setValue(setEntityProps, field.id, field.propDefId, 0, val);
                 break;
         }
     });
@@ -231,8 +247,9 @@ export default function AddEditEntityDialog({entity, entityDefinitions, closeFn,
     const imageFields = fields && fields.filter(field => field.type == PROFILE_IMAGE || field.type == IMAGE_ARRAY);
     const nonImageFields = fields && fields.filter(field => field.type != PROFILE_IMAGE && field.type != IMAGE_ARRAY);
 
+    console.log(entityProps);
     return (
-        <Dialog open={true}  maxWidth={'lg'} sx={{height:'100%'}}>
+        <Dialog open={true}  maxWidth={'md'} fullWidth={!!selectedEntityDefId} sx={{height:'100%'}}>
             <DialogTitle sx={{backgroundColor:theme.palette.primary.main,color:theme.palette.primary.contrastText, 
                                 borderColor: theme.palette.background.default, }}>Add/Edit Entity</DialogTitle>
             <DialogContent>

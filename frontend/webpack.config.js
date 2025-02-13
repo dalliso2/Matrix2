@@ -2,6 +2,7 @@ const webpack = require('webpack');
 const path = require('path');
 
 const config = {
+  /*mode: 'development',*/
   mode: 'development',
   entry: [
     'react-hot-loader/patch',

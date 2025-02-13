@@ -36,7 +36,8 @@ public class ApiResponseUtil
 	
 	private static String getNewAuthToken(HttpServletRequest request)
 	{
-		// Authorization token will be set only if the current token expires with a specified timeframe, other wise null	
+		// JWTAuthenticationRequestFilter set the BEARER_TOKEN_KEY to the new token if the current token is
+		// exiring within 10 minutes
 		String newAuthToken = null;
 		Optional<Object> newAuthTokenOpt = Optional.ofNullable(request.getAttribute(JWTAuthenticationRequestFilter.BEARER_TOKEN_KEY));
 		if (newAuthTokenOpt.isPresent())	

@@ -8,6 +8,21 @@ import { PROFILE_IMAGE, IMAGE_ARRAY } from '../util/PropertyType';
 
 const CaseRoles = ['Admin','Participant','Reviewer'];
 
+function shortenString(description, length)
+{
+    if (description.length > length)
+    { 
+        const s = description.substring(0, length);
+        return description.substring(0, length) + "...";
+    }
+    return description;
+}
+
+function stringIsNullOrEmpty(s)
+{
+    return !s || s?.length === 0
+}
+
 function userCanModifyCase(user, caseId)
 {
     if (!caseId || !user)
@@ -179,4 +194,4 @@ function copyFields(fields)
 
 export { userCanModifyCase, getMessageBoxAPIError, getRoleText, CaseRoles, getDateString, getDateTimeString,
     ADMIN, PARTICIPANT, REVIEWER, getUniqueId, trimObjectValues,duplicateObject, getTitle, copyFields, getImageId, 
-    getEntityDefinitionColumnHeadings}
+    getEntityDefinitionColumnHeadings, shortenString, stringIsNullOrEmpty};

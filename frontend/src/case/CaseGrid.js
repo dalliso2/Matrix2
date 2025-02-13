@@ -2,6 +2,7 @@ import React from "react";
 import { TEXT } from "../util/PropertyType";
 import Grid from "../util/Grid";
 import { useTheme } from "@mui/material/styles";
+import { shortenString } from "../util/utils";
 
 const columnHeadings = ["Case Number", "Title", "Description", "Role"];
 const columnTypes = [TEXT, TEXT, TEXT, TEXT];
@@ -16,7 +17,7 @@ export default function CaseGrid({cases, rowClickFn, isFetching})
             sx:{cursor:'pointer', '&:hover':{backgroundColor:theme.palette.action.hover}},
             values:[{value:[record.caseNumber], sx:{whiteSpace:'pre'}, cellProperties:{key:record.id + "caseNumber"}}, 
                     {value:[record.title], sx:{whiteSpace:'pre'}, cellProperties:{key:record.id + "title"}}, 
-                    {value:[record.description], cellProperties:{key:record.id + "description"}}, 
+                    {value:[shortenString(record.description,300)], cellProperties:{key:record.id + "description"}}, 
                     {value:[['Admin','Participant','Reviewer'][record.role]], cellProperties:{key:record.id + "role"}}]}));
 
     return (

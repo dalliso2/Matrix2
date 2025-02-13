@@ -49,7 +49,7 @@ const caseApi = api.enhanceEndpoints({addTagTypes:['matrixCase','caseUserList','
             query: (params) => ({url: '/case/users/add_update', method: 'POST', body: params.ucr}),
             // if filterstring is not provided, the mutation will invalidate all caseUserList tags
             invalidatesTags: (result, error, params) => params?.filterString?[{type:'caseUserList', id:params.ucr.caseId}]:[],
-            async onQueryStarted( params,{queryFulfilled, dispatch, requestId}) {
+            async onQueryStarted( params,{queryFulfilled, dispatch, requestId, getState}) {
                 const newUcr = params.ucr;
                 const patchGetCaseUsersResult = dispatch(api.util.updateQueryData('getCaseUsers', newUcr.caseId, (draft) => {
                     const existingUser = draft.payload.find(ucr => ucr.userId === newUcr.userId);
