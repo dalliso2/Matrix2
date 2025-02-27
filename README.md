@@ -1,3 +1,5 @@
+Matrix2 is a critical incident case management system that allows officers and agents from different agencies to collaborate on fast moving cases.  It provides a user managements system, handles multiple cases, and coordintes taskings.  It also provides analysis tools like link charts and timelines.
+
 ![usermgmt](https://github.com/user-attachments/assets/454c26f8-373c-4949-a083-2f0a0c159f76)
 ![case](https://github.com/user-attachments/assets/11c1e154-c089-4aec-8a25-e1edb6ede7d7)
 ![tasksearch](https://github.com/user-attachments/assets/2f0c3f9b-1af1-4ad3-a18d-ac96a5b15a1b)
